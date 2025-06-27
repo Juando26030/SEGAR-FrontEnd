@@ -1,37 +1,50 @@
-<div class="layout-container">
+<div class="flex h-screen overflow-hidden bg-gray-50">
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h1>TrámitesPro</h1>
+  <aside class="w-64 bg-[#1a3b6d] text-white hidden md:flex flex-col">
+    <div class="h-16 flex items-center justify-center border-b border-[#2a4b7d]">
+      <h1 class="text-xl font-bold">TrámitesPro</h1>
     </div>
-    <nav class="sidebar-nav">
-      <a routerLink="/dashboard" routerLinkActive="active" class="sidebar-item">Panel Principal</a>
-      <a routerLink="/tramites" routerLinkActive="active" class="sidebar-item">Mis Trámites</a>
-      <a routerLink="/nuevo" routerLinkActive="active" class="sidebar-item">Nuevo Trámite</a>
-      <a href="#" class="sidebar-item">Plantillas</a>
-      <a href="#" class="sidebar-item">Configuración</a>
-      <a href="#" class="sidebar-item">Ayuda</a>
+    <nav class="flex-1 px-4 py-6 space-y-2">
+      <a routerLink="/panel" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
+        <span class="ml-2">Panel Principal</span>
+      </a>
+      <a routerLink="/tramites" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
+        <span class="ml-2">Mis Trámites</span>
+      </a>
+      <a routerLink="/nuevo" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
+        <span class="ml-2">Nuevo Trámite</span>
+      </a>
+      <a href="#" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
+        <span class="ml-2">Plantillas</span>
+      </a>
+      <a href="#" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
+        <span class="ml-2">Configuración</span>
+      </a>
+      <a href="#" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
+        <span class="ml-2">Ayuda</span>
+      </a>
     </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="avatar">JD</div>
+    <div class="px-4 py-3 border-t border-[#2a4b7d]">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-full bg-[#2a4b7d] flex items-center justify-center text-sm font-medium">JD</div>
         <div>
-          <p class="username">Juan Díaz</p>
-          <p class="role">Administrador</p>
+          <p class="text-sm font-medium">Juan Díaz</p>
+          <p class="text-xs text-gray-300">Administrador</p>
         </div>
       </div>
     </div>
   </aside>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <header class="topbar">
-      <div class="topbar-left">
-        <span class="app-title">Sistema de Gestión de Trámites</span>
-      </div>
+  <!-- Main -->
+  <div class="flex flex-col flex-1 overflow-hidden">
+    <!-- Topbar -->
+    <header class="h-16 bg-white border-b px-4 flex items-center shadow-sm justify-between">
+      <span class="text-lg font-semibold text-[#1a3b6d]">Sistema de Gestión de Trámites</span>
+      <div class="h-8 w-8 rounded-full bg-[#1a3b6d] flex items-center justify-center text-white font-medium">JD</div>
     </header>
 
-    <main class="content-area">
+    <!-- Router Outlet -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
       <router-outlet></router-outlet>
     </main>
   </div>
