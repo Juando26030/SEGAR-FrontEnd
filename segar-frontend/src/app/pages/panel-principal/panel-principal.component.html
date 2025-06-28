@@ -1,0 +1,60 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Panel Principal</h1>
+  <a
+    routerLink="/nuevo"
+    class="bg-[#1a3b6d] text-white px-4 py-2 rounded hover:bg-[#2a4b7d] transition"
+  >
+    Nuevo Trámite
+  </a>
+</div>
+
+<!-- Tarjetas resumen -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded shadow p-6">
+    <p class="text-sm text-gray-500">Trámites Activos</p>
+    <p class="text-2xl font-bold text-[#1a3b6d]">12</p>
+  </div>
+  <div class="bg-white rounded shadow p-6">
+    <p class="text-sm text-gray-500">Trámites Pendientes</p>
+    <p class="text-2xl font-bold text-[#1a3b6d]">5</p>
+  </div>
+  <div class="bg-white rounded shadow p-6">
+    <p class="text-sm text-gray-500">Vencimientos Próximos</p>
+    <p class="text-2xl font-bold text-[#1a3b6d]">3</p>
+  </div>
+</div>
+
+<!-- Tabla de trámites recientes -->
+<div class="bg-white rounded shadow">
+  <div class="p-4 border-b">
+    <h2 class="text-lg font-semibold text-gray-800">Trámites Recientes</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead>
+      <tr class="bg-[#1a3b6d] text-white text-left">
+        <th class="p-4">Trámite</th>
+        <th class="p-4">Fecha</th>
+        <th class="p-4">Estado</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="border-b hover:bg-gray-50">
+        <td class="p-4">Registro Producto A</td>
+        <td class="p-4">20/06/2025</td>
+        <td class="p-4 text-green-600 font-semibold">Aprobado</td>
+      </tr>
+      <tr class="border-b hover:bg-gray-50">
+        <td class="p-4">Modificación Producto B</td>
+        <td class="p-4">18/06/2025</td>
+        <td class="p-4 text-yellow-600 font-semibold">Pendiente</td>
+      </tr>
+      <tr class="hover:bg-gray-50">
+        <td class="p-4">Renovación Producto C</td>
+        <td class="p-4">15/06/2025</td>
+        <td class="p-4 text-red-600 font-semibold">Rechazado</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
