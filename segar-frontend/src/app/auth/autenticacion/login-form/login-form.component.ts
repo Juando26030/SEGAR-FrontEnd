@@ -43,6 +43,9 @@ export class LoginFormComponent implements OnInit {
         this.isLoading = false;
         // Aquí iría la lógica de autenticación real
         console.log('Login attempt:', this.loginForm.value);
+        
+        // Redireccionar a la página principal después del login exitoso
+        this.router.navigate(['/']);
       }, 2000);
     } else {
       this.markFormGroupTouched();

@@ -12,8 +12,15 @@ import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/auth/login',
-    pathMatch: 'full'
+    component: MenuLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'panel', pathMatch: 'full' },
+      { path: 'panel', component: PanelPrincipalComponent },
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'tramites', component: TramitesComponent },
+      { path: 'calendario', component: CalendarioComponent },
+      { path: 'nuevo', component: NuevoTramiteComponent }
+    ]
   },
   {
     path: 'auth',
@@ -34,20 +41,5 @@ export const routes: Routes = [
       }
     ]
   },
-  {
-    path: 'app',
-    component: MenuLayoutComponent,
-    children: [
-      { path: '', redirectTo: 'panel', pathMatch: 'full' },
-      { path: 'panel', component: PanelPrincipalComponent },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'tramites', component: TramitesComponent },
-      { path: 'calendario', component: CalendarioComponent },
-      { path: 'nuevo', component: NuevoTramiteComponent }
-    ]
-  },
-  {
-    path: '**',
-    redirectTo: '/auth/login'
-  }
+  { path: '**', redirectTo: 'panel' }
 ];
