@@ -1,0 +1,109 @@
+.layout-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #1a3b6d;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-header {
+  padding: 20px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid #2a4b7d;
+  text-align: center;
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-item {
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.sidebar-item:hover,
+.sidebar-item.active,
+.sidebar-item.router-link-active {
+  background-color: #2a4b7d;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #2a4b7d;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #2a4b7d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.username {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.role {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #cccccc;
+}
+
+/* Topbar */
+.topbar {
+  height: 64px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.app-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #1a3b6d;
+}
+
+/* Main Content */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-area {
+  flex-grow: 1;
+  padding: 24px;
+  background-color: #f9fafb;
+}

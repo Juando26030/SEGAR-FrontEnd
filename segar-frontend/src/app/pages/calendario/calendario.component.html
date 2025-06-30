@@ -1,0 +1,31 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Calendario de Trámites</h1>
+  <p class="text-sm text-gray-600">Visualiza trámites por vencer, eventos regulatorios y recordatorios.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-7 border rounded overflow-hidden shadow text-center text-sm font-medium">
+  <div class="bg-gray-100 p-2">Dom</div>
+  <div class="bg-gray-100 p-2">Lun</div>
+  <div class="bg-gray-100 p-2">Mar</div>
+  <div class="bg-gray-100 p-2">Mié</div>
+  <div class="bg-gray-100 p-2">Jue</div>
+  <div class="bg-gray-100 p-2">Vie</div>
+  <div class="bg-gray-100 p-2">Sáb</div>
+
+  <ng-container *ngFor="let day of calendarDays">
+    <div
+      class="relative p-2 h-[100px] border"
+      [ngClass]="{
+        'bg-red-100': day.tipo === 'vencimiento',
+        'bg-yellow-100': day.tipo === 'evento',
+        'bg-green-100': day.tipo === 'recordatorio',
+        'text-gray-400': day.otra
+      }"
+    >
+      <span class="absolute top-1 left-1 text-xs font-semibold">{{ day.dia }}</span>
+      <div *ngIf="day.titulo" class="mt-5 text-[11px] text-gray-800 font-medium px-1 truncate">
+        {{ day.titulo }}
+      </div>
+    </div>
+  </ng-container>
+</div>
