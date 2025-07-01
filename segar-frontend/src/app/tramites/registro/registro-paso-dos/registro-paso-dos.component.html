@@ -261,34 +261,100 @@
     <!-- VERIFICACIÓN -->
     <div class="tab-content" *ngIf="activeTab==='verificacion'">
       <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Verificación de Cuenta</h3>
-        <p class="text-gray-700 mb-4">Adjunte el correo de confirmación o captura de pantalla del panel de usuario que demuestre su cuenta activa.</p>
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Verificación de Registro INVIMA</h3>
+        <p class="text-gray-700 mb-4">
+          Para continuar con el proceso, necesitamos verificar que ha completado correctamente el registro en la plataforma INVIMA. Por favor, adjunte el correo de confirmación que recibió del INVIMA después de activar su cuenta.
+        </p>
 
-        <div *ngIf="!uploading && !success" class="text-center">
-          <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput>
-          <button (click)="fileInput.click()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Seleccionar archivo</button>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-700">
+          Importante: La verificación de este paso es necesaria para continuar con el proceso de trámite. Si tiene problemas para encontrar el correo de confirmación, puede contactar al soporte técnico del INVIMA.
         </div>
 
-        <div *ngIf="uploading" class="mt-4 text-center">
-          <p>Subiendo archivo...</p>
-          <div class="progress-bar mt-2">
-            <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        <div class="verification-box mb-6 p-6 rounded-lg border-2 border-dashed border-blue-500 bg-blue-50">
+          <div *ngIf="!uploading && !success" class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-blue-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <h4 class="text-lg font-medium text-gray-800 mb-2">Adjunte el correo de confirmación del INVIMA</h4>
+            <p class="text-gray-600 mb-4">Formatos aceptados: PDF, JPG, PNG (máx. 5MB)</p>
+
+            <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput>
+            <button (click)="fileInput.click()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              Seleccionar archivo
+            </button>
+          </div>
+
+          <div *ngIf="uploading" class="mt-4 text-center">
+            <p class="text-lg font-medium text-gray-800 mb-2">Subiendo archivo...</p>
+            <div class="progress-bar mt-2">
+              <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+            </div>
+          </div>
+
+          <div *ngIf="success" class="mt-4 text-center">
+            <div class="checkmark-circle show mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h4 class="text-lg font-medium text-green-700 mb-2">¡Verificación completada!</h4>
+            <p class="text-gray-600 mb-4">El correo de confirmación ha sido verificado correctamente.</p>
+
+            <button class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Continuar al siguiente paso</button>
+          </div>
+
+          <div *ngIf="alternativeVerification" class="mt-4 text-center text-yellow-700">
+            <p class="mb-2">Adjunte una captura de pantalla de su panel de usuario en el INVIMA para verificar su cuenta.</p>
+          </div>
+
+          <div class="mt-4 text-center">
+            <button (click)="triggerAlternativeVerification()" class="text-blue-600 hover:underline text-sm">
+              ¿No tiene el correo de confirmación? Verificar mediante captura de pantalla del panel de usuario
+            </button>
           </div>
         </div>
 
-        <div *ngIf="success" class="mt-4 text-center">
-          <p class="text-green-600 font-semibold">¡Archivo subido y verificado correctamente!</p>
+        <div class="step-card bg-white p-6 border border-gray-200 mb-6">
+          <div class="flex items-center mb-4">
+            <div class="bg-blue-100 rounded-full p-3 mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h4 class="text-lg font-medium text-gray-800">¿Cómo encontrar el correo de confirmación?</h4>
+          </div>
+
+          <ol class="space-y-3 text-gray-600">
+            <li class="flex items-start">
+              <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-semibold mr-2">1</span>
+              <div>Revise su bandeja de entrada con el asunto "Confirmación de registro - INVIMA"</div>
+            </li>
+            <li class="flex items-start">
+              <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-semibold mr-2">2</span>
+              <div>Verifique las carpetas de spam o correo no deseado</div>
+            </li>
+            <li class="flex items-start">
+              <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-semibold mr-2">3</span>
+              <div>Busque correos del remitente "notificaciones&#64;invima.gov.co"</div>
+            </li>
+            <li class="flex items-start">
+              <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center font-semibold mr-2">4</span>
+              <div>Si no lo encuentra, puede adjuntar una captura de pantalla de su panel de usuario en la plataforma INVIMA que muestre su cuenta activa</div>
+            </li>
+          </ol>
         </div>
 
-        <div class="mt-4 text-center">
-          <button (click)="triggerAlternativeVerification()" class="text-sm text-blue-600 hover:underline">Verificar mediante captura de pantalla del panel de usuario</button>
-        </div>
-
-        <div *ngIf="alternativeVerification" class="mt-4 text-center text-yellow-700">
-          <p>Adjunte una captura de pantalla de su panel de usuario en el INVIMA para verificar su cuenta.</p>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
+          <h4 class="text-lg font-semibold text-gray-800 mb-2">Próximos Pasos</h4>
+          <ul class="list-disc pl-6 space-y-1 text-gray-700">
+            <li>Radicación de la solicitud: Presentar formalmente la solicitud con toda la documentación requerida.</li>
+            <li>Seguimiento del trámite: Monitorear el estado de la solicitud a través de la plataforma del INVIMA.</li>
+            <li>Respuesta a requerimientos: Atender oportunamente cualquier solicitud de información adicional.</li>
+          </ul>
         </div>
       </div>
     </div>
+
   </div>
 
   <div class="slide-footer">
