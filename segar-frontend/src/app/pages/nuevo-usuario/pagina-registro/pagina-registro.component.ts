@@ -62,9 +62,7 @@ export class PaginaRegistroComponent {
       username: ['', [Validators.required, Validators.minLength(5)]],
       role: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]],
-      securityQuestion: ['', [Validators.required]],
-      securityAnswer: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]]
     });
 
     this.termsForm = this.fb.group({

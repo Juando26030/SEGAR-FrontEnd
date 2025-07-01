@@ -18,10 +18,34 @@ export class RegistroInfoCuentaComponent {
   showConfirmPassword = false;
 
   onNext() {
+    console.log('Account form valid:', this.form.valid);
+    console.log('Account form values:', this.form.value);
+    console.log('Password match:', this.validatePasswordMatch());
+    console.log('Password strength:', this.validatePasswordStrength());
+    console.log('Form errors:', this.form.errors);
+    
+    // Log individual field errors
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control?.errors) {
+        console.log(`${key} errors:`, control.errors);
+      }
+    });
+    
     if (this.form.valid && this.validatePasswordMatch() && this.validatePasswordStrength()) {
       this.nextStep.emit();
     } else {
+      console.log('Form validation failed, marking fields as touched');
       this.markFormGroupTouched();
+      
+      // Show specific error messages
+      if (!this.validatePasswordMatch()) {
+        alert('Las contraseñas no coinciden');
+      } else if (!this.validatePasswordStrength()) {
+        alert('La contraseña no cumple con los requisitos de seguridad');
+      } else if (this.form.invalid) {
+        alert('Por favor complete todos los campos obligatorios');
+      }
     }
   }
 
