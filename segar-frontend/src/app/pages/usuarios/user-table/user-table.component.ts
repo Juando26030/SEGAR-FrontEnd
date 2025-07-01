@@ -47,9 +47,9 @@ export class UserTableComponent {
   getRoleColor(role: string): string {
     switch (role) {
       case 'Administrador':
-        return 'bg-purple-100 text-purple-800';
-      case 'Editor':
         return 'bg-blue-100 text-blue-800';
+      case 'Editor':
+        return 'bg-purple-100 text-purple-800';
       case 'Visualizador':
         return 'bg-gray-100 text-gray-800';
       default:
