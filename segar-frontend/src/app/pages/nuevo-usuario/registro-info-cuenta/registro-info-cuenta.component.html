@@ -1,1 +1,131 @@
-<p>registro-info-cuenta works!</p>
+<div class="space-y-6">
+  <h3 class="text-lg font-medium text-gray-900">Información de la Cuenta</h3>
+  
+  <div [formGroup]="form" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <div>
+      <label for="username" class="block text-sm font-medium text-gray-700">
+        Nombre de usuario <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="username" 
+        formControlName="username"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('username')?.invalid && form.get('username')?.touched">
+      <p class="mt-1 text-xs text-gray-500">El nombre de usuario debe tener entre 5 y 20 caracteres y puede contener letras, números y guiones bajos.</p>
+      <div *ngIf="form.get('username')?.invalid && form.get('username')?.touched" class="mt-1 text-sm text-red-600">
+        El nombre de usuario debe tener al menos 5 caracteres
+      </div>
+    </div>
+
+    <div>
+      <label for="role" class="block text-sm font-medium text-gray-700">
+        Rol asignado <span class="text-red-500">*</span>
+      </label>
+      <select 
+        id="role" 
+        formControlName="role"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('role')?.invalid && form.get('role')?.touched">
+        <option value="">Seleccione un rol</option>
+        <option value="admin">Administrador</option>
+        <option value="quality">Responsable de Calidad</option>
+        <option value="assistant">Asistente de Documentación</option>
+      </select>
+      <div *ngIf="form.get('role')?.invalid && form.get('role')?.touched" class="mt-1 text-sm text-red-600">
+        Seleccione un rol
+      </div>
+    </div>
+
+    <div>
+      <label for="password" class="block text-sm font-medium text-gray-700">
+        Contraseña <span class="text-red-500">*</span>
+      </label>
+      <div class="mt-1 relative rounded-md shadow-sm">
+        <input 
+          [type]="showPassword ? 'text' : 'password'" 
+          id="password" 
+          formControlName="password"
+          class="input-field block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          [class.border-red-500]="form.get('password')?.invalid && form.get('password')?.touched">
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+          <button 
+            type="button" 
+            (click)="togglePasswordVisibility()"
+            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+            <svg *ngIf="!showPassword" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg *ngIf="showPassword" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, un número y un carácter especial.</p>
+      
+      <!-- Password Strength Indicator -->
+      <div *ngIf="form.get('password')?.value" class="mt-2">
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div [class]="getPasswordStrength().color" class="h-2.5 rounded-full transition-all duration-300" [style.width.%]="getPasswordStrength().score"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1 text-right">{{ getPasswordStrength().text }}</p>
+      </div>
+      
+      <div *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="mt-1 text-sm text-red-600">
+        La contraseña no cumple con los requisitos de seguridad
+      </div>
+    </div>
+
+    <div>
+      <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+        Confirmar contraseña <span class="text-red-500">*</span>
+      </label>
+      <div class="mt-1 relative rounded-md shadow-sm">
+        <input 
+          [type]="showConfirmPassword ? 'text' : 'password'" 
+          id="confirmPassword" 
+          formControlName="confirmPassword"
+          class="input-field block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          [class.border-red-500]="(form.get('confirmPassword')?.invalid && form.get('confirmPassword')?.touched) || !passwordsMatch">
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+          <button 
+            type="button" 
+            (click)="toggleConfirmPasswordVisibility()"
+            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+            <svg *ngIf="!showConfirmPassword" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 616 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg *ngIf="showConfirmPassword" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div *ngIf="form.get('confirmPassword')?.invalid && form.get('confirmPassword')?.touched" class="mt-1 text-sm text-red-600">
+        La confirmación de la contraseña es requerida
+      </div>
+      <div *ngIf="!passwordsMatch && form.get('confirmPassword')?.value" class="mt-1 text-sm text-red-600">
+        Las contraseñas no coinciden
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flex justify-between">
+    <button 
+      type="button" 
+      (click)="onPrevious()"
+      class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      Anterior
+    </button>
+    <button 
+      type="button" 
+      (click)="onNext()"
+      class="btn-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-blue-700">
+      Siguiente
+    </button>
+  </div>
+</div>

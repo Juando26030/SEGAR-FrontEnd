@@ -1,1 +1,106 @@
-<p>registro-info-personal works!</p>
+<div class="space-y-6">
+  <h3 class="text-lg font-medium text-gray-900">Información Personal</h3>
+  
+  <div [formGroup]="form" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <div>
+      <label for="firstName" class="block text-sm font-medium text-gray-700">
+        Nombre <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="firstName" 
+        formControlName="firstName"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('firstName')?.invalid && form.get('firstName')?.touched">
+      <div *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" class="mt-1 text-sm text-red-600">
+        El nombre es requerido
+      </div>
+    </div>
+
+    <div>
+      <label for="lastName" class="block text-sm font-medium text-gray-700">
+        Apellido <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="lastName" 
+        formControlName="lastName"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('lastName')?.invalid && form.get('lastName')?.touched">
+      <div *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" class="mt-1 text-sm text-red-600">
+        El apellido es requerido
+      </div>
+    </div>
+
+    <div>
+      <label for="idType" class="block text-sm font-medium text-gray-700">
+        Tipo de Documento <span class="text-red-500">*</span>
+      </label>
+      <select 
+        id="idType" 
+        formControlName="idType"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('idType')?.invalid && form.get('idType')?.touched">
+        <option value="">Seleccione</option>
+        <option value="dni">DNI</option>
+        <option value="passport">Pasaporte</option>
+        <option value="foreign-id">Cédula de Extranjería</option>
+      </select>
+      <div *ngIf="form.get('idType')?.invalid && form.get('idType')?.touched" class="mt-1 text-sm text-red-600">
+        Seleccione un tipo de documento
+      </div>
+    </div>
+
+    <div>
+      <label for="idNumber" class="block text-sm font-medium text-gray-700">
+        Número de Documento <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="idNumber" 
+        formControlName="idNumber"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('idNumber')?.invalid && form.get('idNumber')?.touched">
+      <div *ngIf="form.get('idNumber')?.invalid && form.get('idNumber')?.touched" class="mt-1 text-sm text-red-600">
+        El número de documento es requerido
+      </div>
+    </div>
+
+    <div>
+      <label for="birthDate" class="block text-sm font-medium text-gray-700">
+        Fecha de Nacimiento <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="date" 
+        id="birthDate" 
+        formControlName="birthDate"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched">
+      <div *ngIf="form.get('birthDate')?.invalid && form.get('birthDate')?.touched" class="mt-1 text-sm text-red-600">
+        La fecha de nacimiento es requerida
+      </div>
+    </div>
+
+    <div>
+      <label for="gender" class="block text-sm font-medium text-gray-700">Género</label>
+      <select 
+        id="gender" 
+        formControlName="gender"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        <option value="">Seleccione</option>
+        <option value="male">Masculino</option>
+        <option value="female">Femenino</option>
+        <option value="other">Otro</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="flex justify-end">
+    <button 
+      type="button" 
+      (click)="onNext()"
+      class="btn-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-blue-700">
+      Siguiente
+    </button>
+  </div>
+</div>

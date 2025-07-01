@@ -1,0 +1,51 @@
+.step-indicator {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.step-active {
+  background-color: #2563eb;
+  color: white;
+}
+
+.step-completed {
+  background-color: #10b981;
+  color: white;
+}
+
+.step-inactive {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.step-line {
+  height: 2px;
+  flex-grow: 1;
+  background-color: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.form-container {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.input-field:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}

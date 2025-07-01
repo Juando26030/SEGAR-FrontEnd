@@ -8,6 +8,7 @@ import { CalendarioComponent } from './pages/calendario/calendario.component';
 import { AuthPageComponent } from './auth/autenticacion/auth-page/auth-page.component';
 import { LoginFormComponent } from './auth/autenticacion/login-form/login-form.component';
 import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-form.component';
+import { PaginaRegistroComponent } from './pages/nuevo-usuario/pagina-registro/pagina-registro.component';
 
 export const routes: Routes = [
   {
@@ -24,7 +25,8 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'tramites', component: TramitesComponent },
       { path: 'calendario', component: CalendarioComponent },
-      { path: 'nuevo', component: NuevoTramiteComponent }
+      { path: 'nuevo', component: NuevoTramiteComponent },
+      { path: 'nuevo-usuario', component: PaginaRegistroComponent }
     ]
   },
   {

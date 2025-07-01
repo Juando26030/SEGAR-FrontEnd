@@ -1,1 +1,116 @@
-<p>registro-info-contacto works!</p>
+<div class="space-y-6">
+  <h3 class="text-lg font-medium text-gray-900">Información de Contacto</h3>
+  
+  <div [formGroup]="form" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <div>
+      <label for="email" class="block text-sm font-medium text-gray-700">
+        Correo electrónico <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="email" 
+        id="email" 
+        formControlName="email"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('email')?.invalid && form.get('email')?.touched">
+      <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="mt-1 text-sm text-red-600">
+        Ingrese un correo electrónico válido
+      </div>
+    </div>
+
+    <div>
+      <label for="confirmEmail" class="block text-sm font-medium text-gray-700">
+        Confirmar correo electrónico <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="email" 
+        id="confirmEmail" 
+        formControlName="confirmEmail"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="(form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched) || !emailsMatch">
+      <div *ngIf="form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched" class="mt-1 text-sm text-red-600">
+        La confirmación del correo es requerida
+      </div>
+      <div *ngIf="!emailsMatch && form.get('confirmEmail')?.value" class="mt-1 text-sm text-red-600">
+        Los correos electrónicos no coinciden
+      </div>
+    </div>
+
+    <div>
+      <label for="phone" class="block text-sm font-medium text-gray-700">
+        Teléfono móvil <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="tel" 
+        id="phone" 
+        formControlName="phone"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('phone')?.invalid && form.get('phone')?.touched">
+      <div *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="mt-1 text-sm text-red-600">
+        El teléfono móvil es requerido
+      </div>
+    </div>
+
+    <div>
+      <label for="altPhone" class="block text-sm font-medium text-gray-700">Teléfono alternativo</label>
+      <input 
+        type="tel" 
+        id="altPhone" 
+        formControlName="altPhone"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+    </div>
+
+    <div class="sm:col-span-2">
+      <label for="address" class="block text-sm font-medium text-gray-700">
+        Dirección <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="address" 
+        formControlName="address"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('address')?.invalid && form.get('address')?.touched">
+      <div *ngIf="form.get('address')?.invalid && form.get('address')?.touched" class="mt-1 text-sm text-red-600">
+        La dirección es requerida
+      </div>
+    </div>
+
+    <div>
+      <label for="city" class="block text-sm font-medium text-gray-700">
+        Ciudad <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="city" 
+        formControlName="city"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        [class.border-red-500]="form.get('city')?.invalid && form.get('city')?.touched">
+      <div *ngIf="form.get('city')?.invalid && form.get('city')?.touched" class="mt-1 text-sm text-red-600">
+        La ciudad es requerida
+      </div>
+    </div>
+
+    <div>
+      <label for="postalCode" class="block text-sm font-medium text-gray-700">Código Postal</label>
+      <input 
+        type="text" 
+        id="postalCode" 
+        formControlName="postalCode"
+        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+    </div>
+  </div>
+
+  <div class="flex justify-between">
+    <button 
+      type="button" 
+      (click)="onPrevious()"
+      class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      Anterior
+    </button>
+    <button 
+      type="button" 
+      (click)="onNext()"
+      class="btn-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-blue-700">
+      Siguiente
+    </button>
+  </div>
+</div>

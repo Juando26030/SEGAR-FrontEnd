@@ -1,1 +1,87 @@
-<p>pagina-registro works!</p>
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+  <div class="max-w-4xl mx-auto p-6">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-extrabold text-gray-900">
+        Registro de Nuevo Usuario
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Complete el formulario para crear una nueva cuenta en SEGAR
+      </p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="flex items-center justify-center mb-8">
+      <div class="flex items-center">
+        <div 
+          class="step-indicator {{getStepClass(1)}}" 
+          [class.cursor-pointer]="isStepCompleted(1)"
+          (click)="isStepCompleted(1) ? goToStep(1) : null">
+          1
+        </div>
+        <div class="step-line mx-2 sm:mx-4" [class.bg-blue-200]="currentStep > 1"></div>
+        <div 
+          class="step-indicator {{getStepClass(2)}}"
+          [class.cursor-pointer]="isStepCompleted(2)"
+          (click)="isStepCompleted(2) ? goToStep(2) : null">
+          2
+        </div>
+        <div class="step-line mx-2 sm:mx-4" [class.bg-blue-200]="currentStep > 2"></div>
+        <div 
+          class="step-indicator {{getStepClass(3)}}"
+          [class.cursor-pointer]="isStepCompleted(3)"
+          (click)="isStepCompleted(3) ? goToStep(3) : null">
+          3
+        </div>
+        <div class="step-line mx-2 sm:mx-4" [class.bg-blue-200]="currentStep > 3"></div>
+        <div 
+          class="step-indicator {{getStepClass(4)}}"
+          [class.cursor-pointer]="isStepCompleted(4)"
+          (click)="isStepCompleted(4) ? goToStep(4) : null">
+          4
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white p-8 rounded-lg shadow-lg">
+      
+      <!-- Step 1: Información Personal -->
+      <div *ngIf="currentStep === 1">
+        <app-registro-info-personal 
+          [form]="personalForm"
+          (nextStep)="nextStep()">
+        </app-registro-info-personal>
+      </div>
+
+      <!-- Step 2: Información de Contacto -->
+      <div *ngIf="currentStep === 2">
+        <app-registro-info-contacto 
+          [form]="contactForm"
+          (nextStep)="nextStep()"
+          (previousStep)="previousStep()">
+        </app-registro-info-contacto>
+      </div>
+
+      <!-- Step 3: Información de la Cuenta -->
+      <div *ngIf="currentStep === 3">
+        <app-registro-info-cuenta 
+          [form]="accountForm"
+          (nextStep)="nextStep()"
+          (previousStep)="previousStep()">
+        </app-registro-info-cuenta>
+      </div>
+
+      <!-- Step 4: Términos y Confirmación -->
+      <div *ngIf="currentStep === 4">
+        <app-registro-terminos 
+          [form]="termsForm"
+          [summaryData]="getSummaryData()"
+          (previousStep)="previousStep()"
+          (submitRegistration)="onSubmitRegistration()">
+        </app-registro-terminos>
+      </div>
+
+    </div>
+  </div>
+</div>
