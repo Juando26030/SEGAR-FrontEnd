@@ -7,6 +7,7 @@ import { CalendarioComponent } from './pages/calendario/calendario.component';
 import { AuthPageComponent } from './auth/autenticacion/auth-page/auth-page.component';
 import { LoginFormComponent } from './auth/autenticacion/login-form/login-form.component';
 import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-form.component';
+import {RegistroPasoUnoComponent} from './tramites/registro/registro-paso-uno/registro-paso-uno.component';
 
 export const routes: Routes = [
   {
@@ -17,7 +18,14 @@ export const routes: Routes = [
       { path: 'panel', component: PanelPrincipalComponent },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'calendario', component: CalendarioComponent },
-      { path: 'nuevo', component: NuevoTramiteComponent }
+      { path: 'nuevo', component: NuevoTramiteComponent },
+      {
+        path: 'nuevo/registro',
+        children: [
+          { path: 'paso-1', component: RegistroPasoUnoComponent },
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+        ]
+      }
     ]
   },
   {

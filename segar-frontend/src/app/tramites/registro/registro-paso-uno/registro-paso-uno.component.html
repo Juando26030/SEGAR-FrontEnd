@@ -1,1 +1,96 @@
-<p>registro-paso-uno works!</p>
+<div class="slide-container">
+  <!-- Slide Header -->
+  <div class="slide-header">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
+        <p class="text-sm opacity-80 mt-1">Guía para empresas de alimentos procesados</p>
+      </div>
+      <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="text-xl font-semibold">Sistema de Gestión de Trámites</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide Content -->
+  <div class="slide-content">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 1: Evaluación Inicial y Preparación</h2>
+
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-blue-700">
+              Antes de iniciar cualquier trámite ante el INVIMA, es fundamental realizar una evaluación completa de su producto y preparar toda la documentación necesaria.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <ng-container *ngFor="let card of cards">
+          <div class="step-card bg-white p-6 border border-gray-200">
+            <div class="flex items-center mb-4">
+              <div class="bg-blue-100 rounded-full p-3 mr-4" [innerHTML]="card.icon"></div>
+              <h3 class="text-xl font-semibold text-gray-800">{{ card.title }}</h3>
+            </div>
+            <ul class="space-y-2 text-gray-600">
+              <li *ngFor="let item of card.items" class="flex items-start">
+                <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                {{ item }}
+              </li>
+            </ul>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="mt-10 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Próximos Pasos</h3>
+        <div class="process-step" *ngFor="let step of nextSteps">
+          <h4 class="text-lg font-medium text-gray-800">{{ step.title }}</h4>
+          <p class="text-gray-600 mt-1">{{ step.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide Footer -->
+  <div class="slide-footer">
+    <div class="text-sm text-gray-500">
+      © 2023 Sistema de Gestión de Trámites INVIMA
+    </div>
+    <div class="flex items-center">
+      <button class="text-sm text-blue-600 hover:text-blue-800 mr-4">Descargar como PDF</button>
+      <button class="text-sm text-blue-600 hover:text-blue-800">Compartir</button>
+    </div>
+  </div>
+
+  <!-- Slide Controls -->
+  <div class="slide-controls">
+    <button class="nav-button bg-white rounded-full p-3 shadow-md text-gray-600 hover:text-blue-600 focus:outline-none" disabled>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <button routerLink="/tramites/registro/paso-2" class="nav-button bg-blue-600 rounded-full p-3 shadow-md text-white hover:bg-blue-700 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Slide Number -->
+  <div class="slide-number">
+    1 / 5
+  </div>
+</div>
