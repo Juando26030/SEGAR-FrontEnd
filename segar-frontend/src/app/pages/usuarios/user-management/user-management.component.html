@@ -1,0 +1,43 @@
+<div class="h-full bg-white">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Lista de Usuarios</h1>
+      <p class="text-sm text-gray-600">Administra los usuarios del sistema</p>
+    </div>
+    <button 
+      (click)="onNewUser()"
+      class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Nuevo Usuario
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <app-user-filter
+    (search)="onSearch($event)"
+    (filterRole)="onFilterRole($event)"
+    (filterStatus)="onFilterStatus($event)">
+  </app-user-filter>
+
+  <!-- Tabla de usuarios -->
+  <app-user-table
+    [users]="paginatedUsers"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [totalResults]="filteredUsers.length"
+    (editUser)="onEditUser($event)"
+    (deleteUser)="onDeleteUser($event)"
+    (pageChange)="onPageChange($event)">
+  </app-user-table>
+
+  <!-- Modal de confirmación de eliminación -->
+  <app-user-delete-confirm
+    [isVisible]="showDeleteModal"
+    [user]="userToDelete"
+    (confirm)="onConfirmDelete()"
+    (cancel)="closeDeleteModal()">
+  </app-user-delete-confirm>
+</div>

@@ -1,0 +1,41 @@
+<div class="flex gap-4 mb-6">
+  <!-- Buscador -->
+  <div class="flex-1 relative">
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </div>
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm"
+      (input)="onSearchChange()"
+      placeholder="Buscar usuarios..."
+      class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+  </div>
+
+  <!-- Filtro de Rol -->
+  <div class="min-w-[200px]">
+    <select 
+      [(ngModel)]="selectedRole"
+      (change)="onRoleChange()"
+      class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+      <option value="">Todos los roles</option>
+      <option value="Administrador">Administrador</option>
+      <option value="Editor">Editor</option>
+      <option value="Visualizador">Visualizador</option>
+    </select>
+  </div>
+
+  <!-- Filtro de Estado -->
+  <div class="min-w-[150px]">
+    <select 
+      [(ngModel)]="selectedStatus"
+      (change)="onStatusChange()"
+      class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+      <option value="">Estado</option>
+      <option value="Activo">Activo</option>
+      <option value="Inactivo">Inactivo</option>
+    </select>
+  </div>
+</div>
