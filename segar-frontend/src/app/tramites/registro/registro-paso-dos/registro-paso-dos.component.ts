@@ -2,6 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+type Additive = {
+  name: string;
+  code: string;
+  function: string;
+};
+
 @Component({
   standalone: true,
   selector: 'app-registro-paso-dos',
@@ -12,23 +18,72 @@ import { FormsModule } from '@angular/forms';
 export class RegistroPasoDosComponent {
   activeTab = 'registro';
 
+  fileUploaded = false;
+  uploading = false;
+  uploadProgress = 0;
+  success = false;
+  alternativeVerification = false;
+
+  // Formulario de registro simulado
+  registroForm = {
+    persona: 'Jurídica',
+    tipoDocumento: 'NIT',
+    numeroDocumento: '',
+    razonSocial: '',
+    correo: '',
+    password: '',
+    confirmPassword: ''
+  };
+
+  // Modelo de documento técnico
+  dynamicDocument = {
+    category: 'technical',
+    type: 'ficha-tecnica',
+    productName: '',
+    brand: '',
+    presentation: '',
+    shelfLife: 0,
+    description: '',
+    ingredients: '',
+    additives: [] as Additive[]
+  };
+
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
 
-  // Modelo de documento dinámico (simplificado)
-  dynamicDocument = {
-    category: 'technical',
-    type: 'ficha-tecnica',
-    productName: 'Galletas Integrales',
-    brand: 'NatureBite',
-    presentation: 'Paquete x 250g',
-    shelfLife: 12,
-    shelfLifeUnit: 'months',
-    description: 'Galletas elaboradas con harina integral, avena y miel.',
-    ingredients: 'Harina integral, avena, miel, azúcar, aceite vegetal, sal, bicarbonato.',
-    additives: [
-      { name: 'Lecitina de soya', code: 'E322', function: 'Emulsificante' }
-    ]
-  };
+  addAdditive() {
+    this.dynamicDocument.additives.push({ name: '', code: '', function: '' });
+  }
+
+  simulateUpload(file: File) {
+    if (!file) return;
+    this.uploading = true;
+    this.uploadProgress = 0;
+
+    const interval = setInterval(() => {
+      this.uploadProgress += 5;
+      if (this.uploadProgress >= 100) {
+        clearInterval(interval);
+        this.uploading = false;
+        this.success = true;
+      }
+    }, 150);
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.simulateUpload(file);
+    }
+  }
+
+  triggerAlternativeVerification() {
+    this.alternativeVerification = true;
+  }
+
+  onSubmitRegistro() {
+    console.log('Formulario enviado:', this.registroForm);
+    alert('Registro simulado enviado');
+  }
 }

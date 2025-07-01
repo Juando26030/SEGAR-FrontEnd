@@ -1,4 +1,3 @@
-<p>registro-paso-dos works!</p>
 <div class="slide-container">
   <div class="slide-header">
     <div class="flex justify-between items-center">
@@ -16,98 +15,278 @@
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 2: Registro en Plataforma INVIMA</h2>
 
     <div class="tabs">
-      <div class="tab" [ngClass]="{'tab-active': activeTab === 'registro'}" (click)="setActiveTab('registro')">
-        Registro de Usuario
-      </div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab === 'tarifas'}" (click)="setActiveTab('tarifas')">
-        Consulta de Tarifas
-      </div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab === 'documentos'}" (click)="setActiveTab('documentos')">
-        Documentos
-      </div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab === 'verificacion'}" (click)="setActiveTab('verificacion')">
-        Verificación
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='registro'}" (click)="setActiveTab('registro')">Registro de Usuario</div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='tarifas'}" (click)="setActiveTab('tarifas')">Consulta de Tarifas</div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='documentos'}" (click)="setActiveTab('documentos')">Preparación de Documentos</div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='verificacion'}" (click)="setActiveTab('verificacion')">Verificación</div>
+    </div>
+
+    <!-- REGISTRO DE USUARIO -->
+    <div class="tab-content" *ngIf="activeTab==='registro'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Registro en la Plataforma INVIMA</h3>
+
+        <!-- Paso 1 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-2">
+            <span class="text-lg font-bold text-blue-600 mr-2">1</span>
+            <h4 class="text-lg font-semibold text-gray-800">Acceda al sitio web oficial del INVIMA</h4>
+          </div>
+          <p class="text-gray-700 mb-2">
+            Visite <a href="https://www.invima.gov.co" target="_blank" class="text-blue-600 hover:underline">www.invima.gov.co</a> y busque la sección "Trámites y Servicios".
+          </p>
+          <div class="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600">
+            <strong class="block mb-1">INVIMA - Instituto Nacional de Vigilancia de Medicamentos y Alimentos</strong>
+            <p>Inicio • Institucional • Trámites y Servicios • Normatividad • Sala de Prensa • Buscar...</p>
+            <p class="mt-1">Trámites y Servicios • Registros Sanitarios • Consultas y Verificación</p>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-2">
+            <span class="text-lg font-bold text-blue-600 mr-2">2</span>
+            <h4 class="text-lg font-semibold text-gray-800">Cree una cuenta en el sistema</h4>
+          </div>
+          <p class="text-gray-700 mb-2">
+            Busque la opción "Registrarse" o "Crear cuenta" y complete el formulario con la información de su empresa.
+          </p>
+          <p class="text-gray-700 mb-2 font-medium">Información requerida para el registro:</p>
+          <ul class="list-disc pl-6 space-y-1 text-gray-700 mb-4">
+            <li>NIT de la empresa y razón social</li>
+            <li>Datos del representante legal</li>
+            <li>Dirección de la empresa y datos de contacto</li>
+            <li>Correo electrónico corporativo</li>
+          </ul>
+
+          <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label">Tipo de Persona</label>
+              <select [(ngModel)]="registroForm.persona" name="persona" class="form-input">
+                <option>Jurídica</option>
+                <option>Natural</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Tipo de Documento</label>
+              <select [(ngModel)]="registroForm.tipoDocumento" name="tipoDocumento" class="form-input">
+                <option>NIT</option>
+                <option>Cédula de Ciudadanía</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Número de Documento</label>
+              <input type="text" [(ngModel)]="registroForm.numeroDocumento" name="numeroDocumento" class="form-input">
+            </div>
+            <div>
+              <label class="form-label">Razón Social</label>
+              <input type="text" [(ngModel)]="registroForm.razonSocial" name="razonSocial" class="form-input">
+            </div>
+            <div class="col-span-2">
+              <label class="form-label">Correo Electrónico</label>
+              <input type="email" [(ngModel)]="registroForm.correo" name="correo" class="form-input">
+            </div>
+            <div>
+              <label class="form-label">Contraseña</label>
+              <input type="password" [(ngModel)]="registroForm.password" name="password" class="form-input">
+            </div>
+            <div>
+              <label class="form-label">Confirmar Contraseña</label>
+              <input type="password" [(ngModel)]="registroForm.confirmPassword" name="confirmPassword" class="form-input">
+            </div>
+            <div class="col-span-2 text-center mt-4">
+              <button type="button" (click)="onSubmitRegistro()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Registrarse</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-2">
+            <span class="text-lg font-bold text-blue-600 mr-2">3</span>
+            <h4 class="text-lg font-semibold text-gray-800">Verifique su correo electrónico</h4>
+          </div>
+          <p class="text-gray-700">
+            El INVIMA enviará un correo de verificación para activar su cuenta. Siga las instrucciones del correo para completar el proceso.
+          </p>
+          <p class="text-yellow-700 italic mt-1">
+            Importante: Revise su carpeta de spam si no encuentra el correo de verificación en su bandeja de entrada.
+          </p>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-2">
+            <span class="text-lg font-bold text-blue-600 mr-2">4</span>
+            <h4 class="text-lg font-semibold text-gray-800">Inicie sesión en el sistema</h4>
+          </div>
+          <p class="text-gray-700">
+            Una vez activada su cuenta, inicie sesión con sus credenciales para acceder a los servicios de trámites en línea.
+          </p>
+          <p class="text-green-700 italic mt-1">
+            Consejo: Guarde sus credenciales en un lugar seguro y no las comparta con personas no autorizadas.
+          </p>
+        </div>
+
+        <!-- Próximos pasos -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
+          <h4 class="text-lg font-semibold text-gray-800 mb-2">Próximos Pasos</h4>
+          <ul class="list-disc pl-6 space-y-1 text-gray-700">
+            <li>Radicación de la solicitud: Presentar formalmente la solicitud con toda la documentación requerida.</li>
+            <li>Seguimiento del trámite: Monitorear el estado de la solicitud a través de la plataforma del INVIMA.</li>
+            <li>Respuesta a requerimientos: Atender oportunamente cualquier solicitud de información adicional.</li>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="tab-content" *ngIf="activeTab === 'registro'">
+
+    <!-- CONSULTA DE TARIFAS -->
+    <div class="tab-content" *ngIf="activeTab==='tarifas'">
       <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Guía para Registrarse</h3>
-        <p class="text-gray-700 mb-3">
-          Para registrar su empresa en el portal INVIMA, ingrese a <a href="https://www.invima.gov.co" target="_blank" class="text-blue-600 hover:underline">www.invima.gov.co</a>, seleccione "Trámites y Servicios" y siga las instrucciones para crear su cuenta.
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Consulta de Tarifas INVIMA</h3>
+
+        <p class="text-gray-700 mb-4">¿Cómo consultar las tarifas vigentes? Siga estos pasos:</p>
+
+        <!-- PASOS -->
+        <ol class="list-decimal pl-6 space-y-2 text-gray-700 mb-6">
+          <li>Visite el sitio web oficial del INVIMA: <a href="https://www.invima.gov.co" target="_blank" class="text-blue-600 hover:underline">www.invima.gov.co</a></li>
+          <li>Busque la sección "Trámites y Servicios" o "Tarifas"</li>
+          <li>Descargue el manual tarifario vigente (actualizado anualmente)</li>
+          <li>Identifique el código del trámite que necesita realizar</li>
+        </ol>
+
+        <!-- TABLA DE TARIFAS -->
+        <h4 class="text-lg font-semibold text-gray-800 mb-2">Tarifas comunes para alimentos procesados (2023)</h4>
+
+        <div class="overflow-x-auto mb-4">
+          <table class="min-w-full bg-white border border-gray-300 text-sm text-gray-700">
+            <thead class="bg-blue-100">
+            <tr>
+              <th class="px-4 py-2 border border-gray-300 text-left">Código</th>
+              <th class="px-4 py-2 border border-gray-300 text-left">Descripción del Trámite</th>
+              <th class="px-4 py-2 border border-gray-300 text-left">Valor (COP)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2 border border-gray-300">4002-1</td>
+              <td class="px-4 py-2 border border-gray-300">Registro Sanitario de Alimentos de Riesgo Alto</td>
+              <td class="px-4 py-2 border border-gray-300">$4,850,000</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2 border border-gray-300">4002-2</td>
+              <td class="px-4 py-2 border border-gray-300">Registro Sanitario de Alimentos de Riesgo Medio</td>
+              <td class="px-4 py-2 border border-gray-300">$3,750,000</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2 border border-gray-300">4002-3</td>
+              <td class="px-4 py-2 border border-gray-300">Notificación Sanitaria de Alimentos de Bajo Riesgo</td>
+              <td class="px-4 py-2 border border-gray-300">$2,650,000</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2 border border-gray-300">4002-4</td>
+              <td class="px-4 py-2 border border-gray-300">Renovación de Registro Sanitario</td>
+              <td class="px-4 py-2 border border-gray-300">$3,950,000</td>
+            </tr>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2 border border-gray-300">4002-5</td>
+              <td class="px-4 py-2 border border-gray-300">Modificación de Registro Sanitario</td>
+              <td class="px-4 py-2 border border-gray-300">$2,350,000</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-sm text-gray-600 italic mb-6">
+          * Los valores son aproximados y pueden variar. Consulte siempre el manual tarifario vigente.
         </p>
-        <ul class="list-disc pl-6 text-gray-700 space-y-1">
-          <li>NIT de la empresa y razón social</li>
-          <li>Datos del representante legal</li>
-          <li>Dirección de la empresa y datos de contacto</li>
-          <li>Correo electrónico corporativo</li>
-        </ul>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-6 text-sm text-yellow-800">
+          <p><strong>Recuerde:</strong> El pago de la tarifa es requisito indispensable para iniciar cualquier trámite. Conserve el comprobante de pago para adjuntarlo a su solicitud.</p>
+        </div>
+
+        <!-- PRÓXIMOS PASOS -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
+          <h4 class="text-lg font-semibold text-gray-800 mb-2">Próximos Pasos</h4>
+          <ul class="list-disc pl-6 space-y-1 text-gray-700">
+            <li>Radicación de la solicitud: Presentar formalmente la solicitud con toda la documentación requerida.</li>
+            <li>Seguimiento del trámite: Monitorear el estado de la solicitud a través de la plataforma del INVIMA.</li>
+            <li>Respuesta a requerimientos: Atender oportunamente cualquier solicitud de información adicional.</li>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="tab-content" *ngIf="activeTab === 'tarifas'">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Tarifas INVIMA 2024</h3>
-        <p class="text-gray-700 mb-3">
-          Consulte las tarifas actualizadas en el portal oficial. Las tarifas varían según el riesgo del producto:
-        </p>
-        <ul class="list-disc pl-6 text-gray-700 space-y-1">
-          <li>Registro Sanitario (Riesgo Alto): $5,100,000 COP*</li>
-          <li>Registro Sanitario (Riesgo Medio): $4,000,000 COP*</li>
-          <li>Notificación Sanitaria (Riesgo Bajo): $2,800,000 COP*</li>
-          <li>Renovación o Modificación: consultar manual tarifario</li>
-        </ul>
-        <p class="text-sm text-gray-500 mt-2 italic">* Valores aproximados. Verifique siempre el manual tarifario vigente.</p>
-      </div>
-    </div>
 
-    <div class="tab-content" *ngIf="activeTab === 'documentos'">
+    <!-- PREPARACIÓN DE DOCUMENTOS -->
+    <div class="tab-content" *ngIf="activeTab==='documentos'">
       <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Generador de Documentos Técnicos</h3>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Preparación de Documentos</h3>
+        <p class="text-gray-700 mb-4">Complete cuidadosamente la información para generar la ficha técnica de su producto.</p>
 
         <div class="form-section">
-          <h4>Información General</h4>
           <label class="form-label">Nombre del producto</label>
-          <input [(ngModel)]="dynamicDocument.productName" class="form-input" type="text">
-
+          <input [(ngModel)]="dynamicDocument.productName" name="productName" class="form-input" type="text">
           <label class="form-label mt-3">Marca comercial</label>
-          <input [(ngModel)]="dynamicDocument.brand" class="form-input" type="text">
-
+          <input [(ngModel)]="dynamicDocument.brand" name="brand" class="form-input" type="text">
           <label class="form-label mt-3">Presentación comercial</label>
-          <input [(ngModel)]="dynamicDocument.presentation" class="form-input" type="text">
-
+          <input [(ngModel)]="dynamicDocument.presentation" name="presentation" class="form-input" type="text">
           <label class="form-label mt-3">Vida útil estimada (meses)</label>
-          <input [(ngModel)]="dynamicDocument.shelfLife" class="form-input" type="number">
+          <input [(ngModel)]="dynamicDocument.shelfLife" name="shelfLife" class="form-input" type="number">
         </div>
 
         <div class="form-section">
-          <h4>Descripción del Producto</h4>
-          <textarea [(ngModel)]="dynamicDocument.description" class="form-textarea" rows="3"></textarea>
+          <label class="form-label">Descripción del Producto</label>
+          <textarea [(ngModel)]="dynamicDocument.description" name="description" class="form-textarea"></textarea>
         </div>
 
         <div class="form-section">
-          <h4>Ingredientes</h4>
-          <textarea [(ngModel)]="dynamicDocument.ingredients" class="form-textarea" rows="3"></textarea>
+          <label class="form-label">Ingredientes</label>
+          <textarea [(ngModel)]="dynamicDocument.ingredients" name="ingredients" class="form-textarea"></textarea>
         </div>
 
         <div class="form-section">
-          <h4>Aditivos Alimentarios</h4>
+          <label class="form-label">Aditivos Alimentarios</label>
           <div *ngFor="let aditivo of dynamicDocument.additives" class="flex space-x-2 mb-2">
             <input [(ngModel)]="aditivo.name" placeholder="Nombre" class="form-input">
             <input [(ngModel)]="aditivo.code" placeholder="Código INS" class="form-input">
             <input [(ngModel)]="aditivo.function" placeholder="Función" class="form-input">
           </div>
-          <button class="mt-2 text-sm text-blue-600 hover:underline">Añadir aditivo</button>
+          <button type="button" (click)="addAdditive()" class="mt-2 text-sm text-blue-600 hover:underline">Añadir aditivo</button>
         </div>
       </div>
     </div>
 
-    <div class="tab-content" *ngIf="activeTab === 'verificacion'">
+    <!-- VERIFICACIÓN -->
+    <div class="tab-content" *ngIf="activeTab==='verificacion'">
       <div class="section-card">
         <h3 class="text-xl font-semibold mb-4 text-gray-800">Verificación de Cuenta</h3>
-        <p class="text-gray-700">
-          Tras registrarse, revise su correo para el enlace de activación. Verifique también su carpeta de spam. Una vez activada su cuenta, podrá iniciar sesión en el sistema y gestionar sus trámites en línea.
-        </p>
+        <p class="text-gray-700 mb-4">Adjunte el correo de confirmación o captura de pantalla del panel de usuario que demuestre su cuenta activa.</p>
+
+        <div *ngIf="!uploading && !success" class="text-center">
+          <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput>
+          <button (click)="fileInput.click()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Seleccionar archivo</button>
+        </div>
+
+        <div *ngIf="uploading" class="mt-4 text-center">
+          <p>Subiendo archivo...</p>
+          <div class="progress-bar mt-2">
+            <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+        </div>
+
+        <div *ngIf="success" class="mt-4 text-center">
+          <p class="text-green-600 font-semibold">¡Archivo subido y verificado correctamente!</p>
+        </div>
+
+        <div class="mt-4 text-center">
+          <button (click)="triggerAlternativeVerification()" class="text-sm text-blue-600 hover:underline">Verificar mediante captura de pantalla del panel de usuario</button>
+        </div>
+
+        <div *ngIf="alternativeVerification" class="mt-4 text-center text-yellow-700">
+          <p>Adjunte una captura de pantalla de su panel de usuario en el INVIMA para verificar su cuenta.</p>
+        </div>
       </div>
     </div>
   </div>
