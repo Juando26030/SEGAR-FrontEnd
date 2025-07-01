@@ -1,1 +1,122 @@
 <p>registro-paso-dos works!</p>
+<div class="slide-container">
+  <div class="slide-header">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
+        <p class="text-sm opacity-80 mt-1">Guía para empresas de alimentos procesados</p>
+      </div>
+      <div class="flex items-center">
+        <span class="text-xl font-semibold">Sistema de Gestión de Trámites</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-content max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 2: Registro en Plataforma INVIMA</h2>
+
+    <div class="tabs">
+      <div class="tab" [ngClass]="{'tab-active': activeTab === 'registro'}" (click)="setActiveTab('registro')">
+        Registro de Usuario
+      </div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab === 'tarifas'}" (click)="setActiveTab('tarifas')">
+        Consulta de Tarifas
+      </div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab === 'documentos'}" (click)="setActiveTab('documentos')">
+        Documentos
+      </div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab === 'verificacion'}" (click)="setActiveTab('verificacion')">
+        Verificación
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'registro'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Guía para Registrarse</h3>
+        <p class="text-gray-700 mb-3">
+          Para registrar su empresa en el portal INVIMA, ingrese a <a href="https://www.invima.gov.co" target="_blank" class="text-blue-600 hover:underline">www.invima.gov.co</a>, seleccione "Trámites y Servicios" y siga las instrucciones para crear su cuenta.
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-1">
+          <li>NIT de la empresa y razón social</li>
+          <li>Datos del representante legal</li>
+          <li>Dirección de la empresa y datos de contacto</li>
+          <li>Correo electrónico corporativo</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'tarifas'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Tarifas INVIMA 2024</h3>
+        <p class="text-gray-700 mb-3">
+          Consulte las tarifas actualizadas en el portal oficial. Las tarifas varían según el riesgo del producto:
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-1">
+          <li>Registro Sanitario (Riesgo Alto): $5,100,000 COP*</li>
+          <li>Registro Sanitario (Riesgo Medio): $4,000,000 COP*</li>
+          <li>Notificación Sanitaria (Riesgo Bajo): $2,800,000 COP*</li>
+          <li>Renovación o Modificación: consultar manual tarifario</li>
+        </ul>
+        <p class="text-sm text-gray-500 mt-2 italic">* Valores aproximados. Verifique siempre el manual tarifario vigente.</p>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'documentos'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Generador de Documentos Técnicos</h3>
+
+        <div class="form-section">
+          <h4>Información General</h4>
+          <label class="form-label">Nombre del producto</label>
+          <input [(ngModel)]="dynamicDocument.productName" class="form-input" type="text">
+
+          <label class="form-label mt-3">Marca comercial</label>
+          <input [(ngModel)]="dynamicDocument.brand" class="form-input" type="text">
+
+          <label class="form-label mt-3">Presentación comercial</label>
+          <input [(ngModel)]="dynamicDocument.presentation" class="form-input" type="text">
+
+          <label class="form-label mt-3">Vida útil estimada (meses)</label>
+          <input [(ngModel)]="dynamicDocument.shelfLife" class="form-input" type="number">
+        </div>
+
+        <div class="form-section">
+          <h4>Descripción del Producto</h4>
+          <textarea [(ngModel)]="dynamicDocument.description" class="form-textarea" rows="3"></textarea>
+        </div>
+
+        <div class="form-section">
+          <h4>Ingredientes</h4>
+          <textarea [(ngModel)]="dynamicDocument.ingredients" class="form-textarea" rows="3"></textarea>
+        </div>
+
+        <div class="form-section">
+          <h4>Aditivos Alimentarios</h4>
+          <div *ngFor="let aditivo of dynamicDocument.additives" class="flex space-x-2 mb-2">
+            <input [(ngModel)]="aditivo.name" placeholder="Nombre" class="form-input">
+            <input [(ngModel)]="aditivo.code" placeholder="Código INS" class="form-input">
+            <input [(ngModel)]="aditivo.function" placeholder="Función" class="form-input">
+          </div>
+          <button class="mt-2 text-sm text-blue-600 hover:underline">Añadir aditivo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'verificacion'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Verificación de Cuenta</h3>
+        <p class="text-gray-700">
+          Tras registrarse, revise su correo para el enlace de activación. Verifique también su carpeta de spam. Una vez activada su cuenta, podrá iniciar sesión en el sistema y gestionar sus trámites en línea.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <span class="text-sm text-gray-500">© 2024 Sistema de Gestión de Trámites INVIMA</span>
+    <div class="flex space-x-4">
+      <button class="text-sm text-blue-600 hover:text-blue-800">Descargar como PDF</button>
+      <button class="text-sm text-blue-600 hover:text-blue-800">Compartir</button>
+    </div>
+  </div>
+</div>
