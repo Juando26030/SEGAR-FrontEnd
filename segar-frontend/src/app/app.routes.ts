@@ -12,6 +12,11 @@ import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: 'auth/login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'main',
     component: MenuLayoutComponent,
     children: [
       { path: '', redirectTo: 'panel', pathMatch: 'full' },
@@ -41,5 +46,5 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: 'panel' }
+  { path: '**', redirectTo: 'auth/login' }
 ];

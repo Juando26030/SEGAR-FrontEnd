@@ -45,7 +45,7 @@ export class LoginFormComponent implements OnInit {
         console.log('Login attempt:', this.loginForm.value);
         
         // Redireccionar a la página principal después del login exitoso
-        this.router.navigate(['/']);
+        this.router.navigate(['/main/panel']);
       }, 2000);
     } else {
       this.markFormGroupTouched();
