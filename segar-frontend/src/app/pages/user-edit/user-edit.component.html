@@ -1,1 +1,313 @@
-<p>user-edit works!</p>
+<!-- Modal Overlay -->
+<div *ngIf="isVisible" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 modal-overlay" (click)="onOverlayClick($event)">
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white modal-content max-h-[90vh] overflow-y-auto">
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center pb-3 border-b">
+      <h3 class="text-lg font-semibold">Editar Perfil</h3>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="py-4">
+      <form (ngSubmit)="onSubmit()" #editProfileForm="ngForm">
+        
+        <!-- Personal Information Section -->
+        <div class="mb-8 form-section p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Información Personal</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">
+                Nombre <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="firstName" 
+                name="firstName"
+                [(ngModel)]="editForm.firstName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">
+                Apellido <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="lastName" 
+                name="lastName"
+                [(ngModel)]="editForm.lastName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="idType" class="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Documento <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="idType" 
+                name="idType"
+                [(ngModel)]="editForm.idType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+                <option value="">Seleccione</option>
+                <option value="dni">DNI</option>
+                <option value="passport">Pasaporte</option>
+                <option value="foreign-id">Cédula de Extranjería</option>
+              </select>
+            </div>
+            <div>
+              <label for="idNumber" class="block text-sm font-medium text-gray-700 mb-1">
+                Número de Documento <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="idNumber" 
+                name="idNumber"
+                [(ngModel)]="editForm.idNumber"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="birthDate" class="block text-sm font-medium text-gray-700 mb-1">
+                Fecha de Nacimiento <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="date" 
+                id="birthDate" 
+                name="birthDate"
+                [(ngModel)]="editForm.birthDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Género</label>
+              <select 
+                id="gender" 
+                name="gender"
+                [(ngModel)]="editForm.gender"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Seleccione</option>
+                <option value="male">Masculino</option>
+                <option value="female">Femenino</option>
+                <option value="other">Otro</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="mb-8 form-section p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Información de Contacto</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                Correo Electrónico <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                [(ngModel)]="editForm.email"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="confirmEmail" class="block text-sm font-medium text-gray-700 mb-1">
+                Confirmar Correo Electrónico <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="confirmEmail" 
+                name="confirmEmail"
+                [(ngModel)]="editForm.confirmEmail"
+                [class.border-red-500]="!emailsMatch && editForm.confirmEmail"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+              <div *ngIf="!emailsMatch && editForm.confirmEmail" class="mt-1 text-sm text-red-600">
+                Los correos electrónicos no coinciden
+              </div>
+            </div>
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                Teléfono Móvil <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone"
+                [(ngModel)]="editForm.phone"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="altPhone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono Alternativo</label>
+              <input 
+                type="tel" 
+                id="altPhone" 
+                name="altPhone"
+                [(ngModel)]="editForm.altPhone"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="md:col-span-2">
+              <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
+                Dirección <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="address" 
+                name="address"
+                [(ngModel)]="editForm.address"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="city" class="block text-sm font-medium text-gray-700 mb-1">
+                Ciudad <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="city" 
+                name="city"
+                [(ngModel)]="editForm.city"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+            </div>
+            <div>
+              <label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+              <input 
+                type="text" 
+                id="postalCode" 
+                name="postalCode"
+                [(ngModel)]="editForm.postalCode"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Information Section -->
+        <div class="mb-8 form-section p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Información de la Cuenta</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                Nombre de Usuario <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="username" 
+                name="username"
+                [(ngModel)]="editForm.username"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+              <p class="mt-1 text-xs text-gray-500">El nombre de usuario debe tener entre 5 y 20 caracteres.</p>
+            </div>
+            <div>
+              <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
+                Rol Asignado <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="role" 
+                name="role"
+                [(ngModel)]="editForm.role"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required>
+                <option value="">Seleccione un rol</option>
+                <option value="admin">Administrador</option>
+                <option value="quality">Responsable de Calidad</option>
+                <option value="assistant">Asistente de Documentación</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password Change Section -->
+        <div class="mb-8 form-section p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Cambiar Contraseña</h4>
+          <p class="text-sm text-gray-600 mb-4">Solo complete estos campos si desea cambiar su contraseña.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña</label>
+              <div class="relative">
+                <input 
+                  [type]="showNewPassword ? 'text' : 'password'" 
+                  id="newPassword" 
+                  name="newPassword"
+                  [(ngModel)]="editForm.newPassword"
+                  class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button 
+                  type="button" 
+                  (click)="toggleNewPasswordVisibility()"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500">
+                  <svg *ngIf="!showNewPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showNewPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Password Strength Indicator -->
+              <div *ngIf="editForm.newPassword" class="mt-2">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div [class]="getPasswordStrength().color" class="h-2.5 rounded-full transition-all duration-300" [style.width.%]="getPasswordStrength().score"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1 text-right">{{ getPasswordStrength().text }}</p>
+              </div>
+              
+              <p class="mt-1 text-xs text-gray-500">Al menos 8 caracteres, incluya mayúscula, número y carácter especial.</p>
+            </div>
+            <div>
+              <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nueva Contraseña</label>
+              <div class="relative">
+                <input 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  id="confirmNewPassword" 
+                  name="confirmNewPassword"
+                  [(ngModel)]="editForm.confirmNewPassword"
+                  [class.border-red-500]="!passwordsMatch && editForm.confirmNewPassword"
+                  class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button 
+                  type="button" 
+                  (click)="toggleConfirmPasswordVisibility()"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500">
+                  <svg *ngIf="!showConfirmPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showConfirmPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                </button>
+              </div>
+              <div *ngIf="!passwordsMatch && editForm.confirmNewPassword" class="mt-1 text-sm text-red-600">
+                Las contraseñas no coinciden
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <button 
+            type="button" 
+            (click)="closeModal()"
+            class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button 
+            type="submit"
+            [disabled]="!editProfileForm.valid"
+            class="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

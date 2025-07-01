@@ -10,6 +10,7 @@ import { LoginFormComponent } from './auth/autenticacion/login-form/login-form.c
 import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-form.component';
 import { PaginaRegistroComponent } from './pages/nuevo-usuario/pagina-registro/pagina-registro.component';
 import { UserManagementComponent } from './pages/usuarios/user-management/user-management.component';
+import { UserProfileComponent } from './pages/perfil-usuario/user-profile/user-profile.component';
 
 export const routes: Routes = [
   {
@@ -28,7 +29,8 @@ export const routes: Routes = [
       { path: 'calendario', component: CalendarioComponent },
       { path: 'nuevo', component: NuevoTramiteComponent },
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },
-      { path: 'usuarios', component: UserManagementComponent }
+      { path: 'usuarios', component: UserManagementComponent },
+      { path: 'perfil', component: UserProfileComponent }
     ]
   },
   {

@@ -1,0 +1,27 @@
+/* Modal animations and styling */
+.modal-overlay {
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section {
+  transition: all 0.2s ease-in-out;
+}
+
+.form-section:hover {
+  background-color: rgba(249, 250, 251, 0.5);
+}
