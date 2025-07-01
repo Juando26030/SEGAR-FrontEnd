@@ -9,6 +9,7 @@ import { LoginFormComponent } from './auth/autenticacion/login-form/login-form.c
 import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-form.component';
 import {RegistroPasoUnoComponent} from './tramites/registro/registro-paso-uno/registro-paso-uno.component';
 import {RegistroPasoDosComponent} from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
+import {GeneradorDocumentosComponent} from './tramites/generador-documentos/generador-documentos.component';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'calendario', component: CalendarioComponent },
       { path: 'nuevo', component: NuevoTramiteComponent },
+      { path: 'generador-documentos', component: GeneradorDocumentosComponent },
       {
         path: 'nuevo/registro',
         children: [
