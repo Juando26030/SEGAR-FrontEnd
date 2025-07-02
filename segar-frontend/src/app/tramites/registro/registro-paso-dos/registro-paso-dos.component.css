@@ -24,6 +24,7 @@
   display: flex;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 1rem;
+  overflow-x: auto;
 }
 
 .tab {
@@ -31,6 +32,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .tab:hover {
@@ -54,41 +56,6 @@
   margin-bottom: 2rem;
 }
 
-.form-section {
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 1rem;
-}
-
-.form-section h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #1f2937;
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-  color: #374151;
-}
-
-.form-input, .form-select, .form-textarea {
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-}
-
 .slide-footer {
   background-color: #f9fafb;
   border-top: 1px solid #e5e7eb;
@@ -96,4 +63,137 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #3b82f6, #1e40af);
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+.progress-bar-small {
+  height: 4px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill-small {
+  height: 100%;
+  background: linear-gradient(to right, #3b82f6, #1e40af);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.stat-card {
+  background-color: white;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.document-card {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.document-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.document-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.upload-area {
+  margin-top: 1rem;
+}
+
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.upload-progress {
+  margin-top: 1rem;
+}
+
+.uploaded-file {
+  margin-top: 1rem;
+}
+
+.validation-summary {
+  margin-bottom: 1.5rem;
+}
+
+.checklist {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.help-section {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slide-content {
+    padding: 1rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .document-card {
+    padding: 1rem;
+  }
+
+  .upload-zone {
+    padding: 1rem;
+  }
 }

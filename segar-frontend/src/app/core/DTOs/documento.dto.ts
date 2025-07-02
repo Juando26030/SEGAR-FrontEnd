@@ -1,4 +1,4 @@
-export interface DocumentoDTO {
+export interface DocumentoDto {
   idDocumento: number;
   nombre: string;
   version: string;
@@ -6,25 +6,22 @@ export interface DocumentoDTO {
   urlNube: string;
   idTramite: number;
   aprobado: boolean;
-  comentarios?: string;
+  comentarios: string;
+  // Propiedades adicionales para el frontend
+  archivo?: File;
+  estado?: 'pendiente' | 'completado' | 'error';
+  obligatorio?: boolean;
+  tamano?: string; // Cambié 'tamaño' por 'tamano' para evitar problemas con ñ
+  fechaSubida?: Date;
 }
 
-export interface CreateDocumentoDTO {
+export interface DocumentoRequerido {
+  id: number;
   nombre: string;
-  version: string;
   tipo: string;
-  urlNube: string;
-  idTramite: number;
-  aprobado: boolean;
-  comentarios?: string;
-}
-
-export interface UpdateDocumentoDTO {
-  nombre?: string;
-  version?: string;
-  tipo?: string;
-  urlNube?: string;
-  idTramite?: number;
-  aprobado?: boolean;
-  comentarios?: string;
+  obligatorio: boolean;
+  estado: 'pendiente' | 'completado' | 'error';
+  archivo?: File;
+  tamano?: string;
+  descripcion?: string;
 }

@@ -1,4 +1,6 @@
-export interface TramiteDTO {
+import {DocumentoDto} from './documento.dto';
+
+export interface TramiteDto {
   idTramite: number;
   numeroRadicado: string;
   nombreProducto: string;
@@ -9,29 +11,9 @@ export interface TramiteDTO {
   etapa: string;
   progreso: number;
   prioridad: string;
-  comentarios?: string;
-}
-
-export interface CreateTramiteDTO {
-  numeroRadicado: string;
-  nombreProducto: string;
-  descripcionProducto: string;
-  tipo: string;
-  estado: string;
-  etapa: string;
-  progreso: number;
-  prioridad: string;
-  comentarios?: string;
-}
-
-export interface UpdateTramiteDTO {
-  numeroRadicado?: string;
-  nombreProducto?: string;
-  descripcionProducto?: string;
-  tipo?: string;
-  estado?: string;
-  etapa?: string;
-  progreso?: number;
-  prioridad?: string;
-  comentarios?: string;
+  comentarios: string;
+  // Información adicional para el frontend
+  documentosRequeridos?: DocumentoDto[];
+  empresaInfo?: any;
+  usuarioInfo?: any;
 }
