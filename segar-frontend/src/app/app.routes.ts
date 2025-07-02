@@ -14,6 +14,7 @@ import { RegistroPasoUnoComponent } from './tramites/registro/registro-paso-uno/
 import { RegistroPasoDosComponent } from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
 import { GeneradorDocumentosComponent } from './tramites/generador-documentos/generador-documentos.component';
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
+import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/registro-paso-tres.component';
 
 export const routes: Routes = [
   {
@@ -40,6 +41,7 @@ export const routes: Routes = [
         children: [
           { path: 'paso-1', component: RegistroPasoUnoComponent },
           { path: 'paso-2', component: RegistroPasoDosComponent },
+          { path: 'paso-3', component: RegistroPasoTresComponent },
           { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       }
