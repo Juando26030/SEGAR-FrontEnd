@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { MenuLayoutComponent } from './layout/menu-layout/menu-layout.component';
 import { PanelPrincipalComponent } from './pages/panel-principal/panel-principal.component';
-import { TramitesComponent } from './pages/tramites/tramites.component';
 import { NuevoTramiteComponent } from './pages/nuevo-tramite/nuevo-tramite.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { CalendarioComponent } from './pages/calendario/calendario.component';
@@ -11,6 +10,9 @@ import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-
 import { PaginaRegistroComponent } from './pages/nuevo-usuario/pagina-registro/pagina-registro.component';
 import { UserManagementComponent } from './pages/usuarios/user-management/user-management.component';
 import { UserProfileComponent } from './pages/perfil-usuario/user-profile/user-profile.component';
+import { RegistroPasoUnoComponent } from './tramites/registro/registro-paso-uno/registro-paso-uno.component';
+import { RegistroPasoDosComponent } from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
+import { GeneradorDocumentosComponent } from './tramites/generador-documentos/generador-documentos.component';
 
 export const routes: Routes = [
   {
@@ -25,12 +27,20 @@ export const routes: Routes = [
       { path: '', redirectTo: 'panel', pathMatch: 'full' },
       { path: 'panel', component: PanelPrincipalComponent },
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'tramites', component: TramitesComponent },
       { path: 'calendario', component: CalendarioComponent },
       { path: 'nuevo', component: NuevoTramiteComponent },
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },
       { path: 'usuarios', component: UserManagementComponent },
-      { path: 'perfil', component: UserProfileComponent }
+      { path: 'perfil', component: UserProfileComponent },
+      { path: 'generador-documentos', component: GeneradorDocumentosComponent },
+      {
+        path: 'nuevo/registro',
+        children: [
+          { path: 'paso-1', component: RegistroPasoUnoComponent },
+          { path: 'paso-2', component: RegistroPasoDosComponent },
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+        ]
+      }
     ]
   },
   {

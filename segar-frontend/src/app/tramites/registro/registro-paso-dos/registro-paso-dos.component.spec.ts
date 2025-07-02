@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TramitesComponent } from './tramites.component';
+import { RegistroPasoDosComponent } from './registro-paso-dos.component';
 
-describe('TramitesComponent', () => {
-  let component: TramitesComponent;
-  let fixture: ComponentFixture<TramitesComponent>;
+describe('RegistroPasoDosComponent', () => {
+  let component: RegistroPasoDosComponent;
+  let fixture: ComponentFixture<RegistroPasoDosComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TramitesComponent]
+      imports: [RegistroPasoDosComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TramitesComponent);
+    fixture = TestBed.createComponent(RegistroPasoDosComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

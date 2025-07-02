@@ -1,0 +1,41 @@
+<div class="generador-container">
+  <h2 class="text-2xl font-bold mb-4">Generador de Documentos INVIMA</h2>
+
+  <div class="mb-6">
+    <label class="block font-medium mb-1">Seleccione Categoría</label>
+    <select [(ngModel)]="categoriaSeleccionada" (change)="seleccionarCategoria(categoriaSeleccionada)" class="form-input">
+      <option value="" disabled>-- Elegir --</option>
+      <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="categoriaSeleccionada" class="mb-6">
+    <h3 class="text-lg font-semibold mb-2">Plantillas Disponibles</h3>
+    <div class="space-y-2">
+      <button
+        *ngFor="let plantilla of plantillasFiltradas"
+        (click)="seleccionarPlantilla(plantilla)"
+        class="bg-white border px-4 py-2 rounded hover:bg-indigo-50 w-full text-left"
+        [class.border-indigo-600]="plantillaSeleccionada?.nombre === plantilla.nombre">
+        {{ plantilla.nombre }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="plantillaSeleccionada" class="mb-6">
+    <h3 class="text-lg font-semibold mb-2">Formulario: {{ plantillaSeleccionada.nombre }}</h3>
+    <form class="space-y-4">
+      <div *ngFor="let campo of plantillaSeleccionada.campos">
+        <label class="block font-medium mb-1">{{ campo.etiqueta }}</label>
+        <input *ngIf="campo.tipo==='texto' || campo.tipo==='numero'" [(ngModel)]="campo.valor" class="form-input" [type]="campo.tipo">
+        <textarea *ngIf="campo.tipo==='textarea'" [(ngModel)]="campo.valor" class="form-input"></textarea>
+        <input *ngIf="campo.tipo==='fecha'" [(ngModel)]="campo.valor" type="date" class="form-input">
+        <select *ngIf="campo.tipo==='seleccion'" [(ngModel)]="campo.valor" class="form-input">
+          <option *ngFor="let op of campo.opciones">{{ op }}</option>
+        </select>
+      </div>
+    </form>
+
+    <button (click)="exportar()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mt-4">Generar PDF</button>
+  </div>
+</div>

@@ -1,2 +1,52 @@
-<h1 class="text-2xl font-bold text-gray-800">Nuevo Trámite</h1>
-<p>Formulario para crear nuevo trámite.</p>
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Nuevo Trámite</h1>
+  <p class="text-sm text-gray-600">Seleccione el tipo de trámite que desea registrar ante el INVIMA.</p>
+</div>
+
+<!-- Cards de opciones -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- Registro Sanitario -->
+  <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition p-6 border-t-4 border-blue-700">
+    <div class="flex justify-center mb-4">
+      <svg class="h-12 w-12 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-semibold text-center mb-2">Registro Sanitario</h3>
+    <p class="text-sm text-center text-gray-600 mb-4">Solicite autorización para fabricar, importar o comercializar un producto nuevo.</p>
+    <button class="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-md text-sm font-medium"
+            (click)="seleccionar('registro')">
+      Seleccionar
+    </button>
+  </div>
+
+  <!-- Renovación -->
+  <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition p-6 border-t-4 border-green-600">
+    <div class="flex justify-center mb-4">
+      <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-semibold text-center mb-2">Renovación</h3>
+    <p class="text-sm text-center text-gray-600 mb-4">Extienda la vigencia de un registro sanitario existente.</p>
+    <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-medium"
+            (click)="seleccionar('renovacion')">
+      Seleccionar
+    </button>
+  </div>
+
+  <!-- Modificación -->
+  <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition p-6 border-t-4 border-yellow-500">
+    <div class="flex justify-center mb-4">
+      <svg class="h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-semibold text-center mb-2">Modificación</h3>
+    <p class="text-sm text-center text-gray-600 mb-4">Realice cambios en un registro sanitario aprobado.</p>
+    <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-sm font-medium"
+            (click)="seleccionar('modificacion')">
+      Seleccionar
+    </button>
+  </div>
+</div>
