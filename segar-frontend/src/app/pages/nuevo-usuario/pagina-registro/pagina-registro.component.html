@@ -1,14 +1,29 @@
 <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <div class="text-center mb-8">
-      <h2 class="text-3xl font-extrabold text-gray-900">
-        Registro de Nuevo Usuario
-      </h2>
-      <p class="mt-2 text-sm text-gray-600">
-        Complete el formulario para crear una nueva cuenta en SEGAR
-      </p>
+    <div class="flex items-center justify-between mb-8 px-6 pt-6">
+      <button 
+        (click)="goBack()"
+        class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver a Usuarios
+      </button>
+      
+      <div class="text-center flex-1">
+        <h2 class="text-3xl font-extrabold text-gray-900">
+          Registro de Nuevo Usuario
+        </h2>
+        <p class="mt-2 text-sm text-gray-600">
+          Complete el formulario para crear una nueva cuenta en SEGAR
+        </p>
+      </div>
+      
+      <div class="w-32"></div> <!-- Spacer para centrar el título -->
     </div>
+
+    <div class="px-6">
 
     <!-- Step Indicator -->
     <div class="flex items-center justify-center mb-8">
@@ -82,6 +97,7 @@
         </app-registro-terminos>
       </div>
 
+    </div>
     </div>
   </div>
 </div>

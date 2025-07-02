@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserFilterComponent } from '../user-filter/user-filter.component';
 import { UserTableComponent } from '../user-table/user-table.component';
 import { UserDeleteConfirmComponent } from '../user-delete-confirm/user-delete-confirm.component';
@@ -73,7 +74,7 @@ export class UserManagementComponent {
   itemsPerPage = 12;
   totalPages = 1;
 
-  constructor() {
+  constructor(private router: Router) {
     this.updatePagination();
   }
 
@@ -144,7 +145,6 @@ export class UserManagementComponent {
   }
 
   onNewUser() {
-    console.log('Crear nuevo usuario');
-    // Navegar a registro de usuario o abrir modal
+    this.router.navigate(['/main/nuevo-usuario']);
   }
 }
