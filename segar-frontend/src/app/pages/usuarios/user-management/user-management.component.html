@@ -40,4 +40,13 @@
     (confirm)="onConfirmDelete()"
     (cancel)="closeDeleteModal()">
   </app-user-delete-confirm>
+
+  <!-- Modal de edición de usuario -->
+  <app-user-edit
+    [isVisible]="showEditModal"
+    [userToEdit]="userToEdit"
+    [isAdminMode]="true"
+    (close)="closeEditModal()"
+    (userUpdated)="onUserUpdated($event)">
+  </app-user-edit>
 </div>

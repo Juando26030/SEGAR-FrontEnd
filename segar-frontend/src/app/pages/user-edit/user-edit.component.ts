@@ -1,6 +1,16 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: 'Activo' | 'Inactivo';
+  createdDate: string;
+  initials: string;
+}
 
 @Component({
   selector: 'app-user-edit',
@@ -8,9 +18,12 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './user-edit.component.html',
   styleUrl: './user-edit.component.css'
 })
-export class UserEditComponent {
+export class UserEditComponent implements OnChanges {
   @Input() isVisible = false;
+  @Input() userToEdit: User | null = null;
+  @Input() isAdminMode = false; // Nuevo input para indicar si se está editando desde admin
   @Output() close = new EventEmitter<void>();
+  @Output() userUpdated = new EventEmitter<User>();
 
   editForm = {
     // Información Personal
@@ -33,14 +46,45 @@ export class UserEditComponent {
     // Información de la Cuenta
     username: 'juan.diaz',
     role: 'admin',
+    status: 'Activo' as 'Activo' | 'Inactivo',
     
     // Cambio de Contraseña (opcional)
     newPassword: '',
     confirmNewPassword: ''
   };
 
+  // Permisos del usuario (solo visible para admin)
+  permissions = {
+    gestionUsuarios: true,
+    accesoReportes: true,
+    configuracionSistema: false
+  };
+
   showNewPassword = false;
   showConfirmPassword = false;
+
+  ngOnChanges() {
+    if (this.userToEdit && this.isVisible) {
+      this.loadUserData();
+    }
+  }
+
+  private loadUserData() {
+    if (this.userToEdit) {
+      // Cargar datos básicos del usuario
+      const [firstName, lastName] = this.userToEdit.name.split(' ');
+      this.editForm = {
+        ...this.editForm,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        email: this.userToEdit.email,
+        confirmEmail: this.userToEdit.email,
+        username: this.userToEdit.email.split('@')[0],
+        role: this.userToEdit.role.toLowerCase(),
+        status: this.userToEdit.status
+      };
+    }
+  }
 
   closeModal() {
     this.close.emit();
@@ -91,8 +135,24 @@ export class UserEditComponent {
       }
     }
 
+    // Crear usuario actualizado
+    if (this.userToEdit) {
+      const updatedUser: User = {
+        ...this.userToEdit,
+        name: `${this.editForm.firstName} ${this.editForm.lastName}`,
+        email: this.editForm.email,
+        role: this.editForm.role,
+        status: this.editForm.status
+      };
+      
+      this.userUpdated.emit(updatedUser);
+    }
+
     // Aquí iría la lógica para guardar los cambios
     console.log('Guardando cambios:', this.editForm);
+    if (this.isAdminMode) {
+      console.log('Guardando permisos:', this.permissions);
+    }
     
     // Simulate API call success
     this.showSuccessNotification();

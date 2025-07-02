@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { UserFilterComponent } from '../user-filter/user-filter.component';
 import { UserTableComponent } from '../user-table/user-table.component';
 import { UserDeleteConfirmComponent } from '../user-delete-confirm/user-delete-confirm.component';
+import { UserEditComponent } from '../../user-edit/user-edit.component';
 
 interface User {
   id: string;
@@ -24,7 +25,8 @@ interface User {
     FormsModule,
     UserFilterComponent,
     UserTableComponent,
-    UserDeleteConfirmComponent
+    UserDeleteConfirmComponent,
+    UserEditComponent
   ],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css'
@@ -61,8 +63,11 @@ export class UserManagementComponent {
   ];
 
   filteredUsers: User[] = [...this.users];
+  // Modal states
   showDeleteModal = false;
+  showEditModal = false;
   userToDelete: User | null = null;
+  userToEdit: User | null = null;
 
   // Filtros
   searchTerm = '';
@@ -122,8 +127,23 @@ export class UserManagementComponent {
   }
 
   onEditUser(user: User) {
-    console.log('Editar usuario:', user);
-    // Implementar navegación a edición
+    this.userToEdit = user;
+    this.showEditModal = true;
+  }
+
+  onUserUpdated(updatedUser: User) {
+    // Actualizar el usuario en la lista
+    const index = this.users.findIndex(u => u.id === updatedUser.id);
+    if (index !== -1) {
+      this.users[index] = updatedUser;
+      this.applyFilters();
+    }
+    this.closeEditModal();
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.userToEdit = null;
   }
 
   onDeleteUser(user: User) {
