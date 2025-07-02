@@ -1,1 +1,264 @@
-<p>registro-paso-cuatro works!</p>
+<div class="slide-container">
+  <div class="slide-header">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
+        <p class="text-sm opacity-80 mt-1">Seguimiento y monitoreo de solicitudes</p>
+      </div>
+      <div class="flex items-center">
+        <span class="text-xl font-semibold">Sistema de Gestión de Trámites</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-content max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 4: Seguimiento de la Solicitud</h2>
+
+    <!-- Progress Indicator -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-2">
+        <span class="font-semibold text-gray-700">Progreso del trámite</span>
+        <span class="text-blue-600 font-semibold">80%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 80%"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='estado'}" (click)="setActiveTab('estado')">Estado de Trámites</div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='requerimientos'}" (click)="setActiveTab('requerimientos')">Requerimientos</div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='notificaciones'}" (click)="setActiveTab('notificaciones')">Notificaciones</div>
+      <div class="tab" [ngClass]="{'tab-active': activeTab==='ayuda'}" (click)="setActiveTab('ayuda')">Ayuda y Soporte</div>
+    </div>
+
+    <!-- ESTADO DE TRÁMITES -->
+    <div class="tab-content" *ngIf="activeTab==='estado'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Estado de sus Trámites</h3>
+        <p class="text-gray-700 mb-6">Monitoree el progreso de todas sus solicitudes ante el INVIMA.</p>
+
+        <div class="space-y-4">
+          <div *ngFor="let tramite of tramites" class="tramite-card">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-semibold">{{tramite.nombre}}</span>
+              <span class="status-badge" [ngClass]="getEstadoClass(tramite.estado)">
+                {{getEstadoText(tramite.estado)}}
+              </span>
+            </div>
+            <div class="flex justify-between text-sm text-gray-500 mb-3">
+              <span>Radicado: {{tramite.id}}</span>
+              <span>Fecha: {{tramite.fecha}}</span>
+            </div>
+            <div class="progress-bar-small">
+              <div class="progress-fill-small" [style.width.%]="tramite.progreso"></div>
+            </div>
+            <div class="mt-3 text-sm">
+              <span class="text-blue-600 font-medium">Etapa actual:</span>
+              <span class="text-gray-700"> {{tramite.etapaActual}}</span>
+            </div>
+            <div class="mt-3" *ngIf="tramite.estado === 'requerimiento'">
+              <button (click)="onResponderRequerimiento(tramite.id)"
+                      class="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-md text-sm font-medium hover:bg-yellow-200 transition">
+                Ver requerimiento
+              </button>
+            </div>
+            <div class="mt-3" *ngIf="tramite.estado === 'aprobado'">
+              <button (click)="onDescargarResolucion(tramite.id)"
+                      class="px-4 py-2 bg-green-100 text-green-800 rounded-md text-sm font-medium hover:bg-green-200 transition">
+                Descargar resolución
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-6 text-sm text-blue-700">
+          <strong>Información importante:</strong> Los tiempos de respuesta del INVIMA son de 60 días hábiles para trámites ordinarios y 30 días hábiles para trámites urgentes. Manténgase atento a las notificaciones.
+        </div>
+      </div>
+    </div>
+
+    <!-- REQUERIMIENTOS -->
+    <div class="tab-content" *ngIf="activeTab==='requerimientos'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Respuesta a Requerimientos</h3>
+        <p class="text-gray-700 mb-6">Adjunte la documentación solicitada por el INVIMA para continuar con el proceso.</p>
+
+        <div class="requerimiento-card">
+          <div class="flex items-center mb-4">
+            <div class="bg-yellow-100 rounded-full p-3 mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-lg font-medium text-gray-800">Requerimiento INV-2023-32145</h4>
+              <p class="text-sm text-gray-500">Recibido el 10/05/2023 - Vence el 15/06/2023</p>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h5 class="font-semibold text-gray-800 mb-2">Documentos solicitados:</h5>
+            <ul class="list-disc pl-6 space-y-1 text-gray-700 text-sm">
+              <li>Análisis microbiológico actualizado (máximo 3 meses de antigüedad)</li>
+              <li>Certificado de Buenas Prácticas de Manufactura vigente</li>
+              <li>Descripción detallada del proceso de pasteurización</li>
+              <li>Validación de vida útil con estudios de estabilidad</li>
+            </ul>
+          </div>
+
+          <div class="verification-box mb-6 p-6 rounded-lg border-2 border-dashed border-yellow-500 bg-yellow-50">
+            <div *ngIf="!uploading && !success" class="text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-yellow-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <h4 class="text-lg font-medium text-gray-800 mb-2">Adjunte los documentos solicitados</h4>
+              <p class="text-gray-600 mb-4">Formatos aceptados: PDF, JPG, PNG (máx. 10MB por archivo)</p>
+
+              <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput multiple>
+              <button (click)="fileInput.click()" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700">
+                Seleccionar archivos
+              </button>
+            </div>
+
+            <div *ngIf="uploading" class="mt-4 text-center">
+              <p class="text-lg font-medium text-gray-800 mb-2">Subiendo archivos...</p>
+              <div class="progress-bar mt-2">
+                <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+              </div>
+            </div>
+
+            <div *ngIf="success" class="mt-4 text-center">
+              <div class="checkmark-circle show mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h4 class="text-lg font-medium text-green-700 mb-2">¡Documentos enviados!</h4>
+              <p class="text-gray-600 mb-4">Su respuesta al requerimiento ha sido registrada correctamente.</p>
+            </div>
+          </div>
+
+          <div class="bg-red-50 border-l-4 border-red-400 p-4 text-sm text-red-700">
+            <strong>Recordatorio:</strong> Tiene 30 días hábiles para responder al requerimiento. El incumplimiento de este plazo puede resultar en el archivo de su solicitud.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICACIONES -->
+    <div class="tab-content" *ngIf="activeTab==='notificaciones'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Centro de Notificaciones</h3>
+        <p class="text-gray-700 mb-6">Manténgase informado sobre todas las actualizaciones de sus trámites.</p>
+
+        <div class="space-y-4">
+          <div *ngFor="let notif of notificaciones" class="notification-item">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                   [ngClass]="getNotificationClass(notif.tipo)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path [attr.d]="getNotificationIcon(notif.tipo)" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-800 font-medium">{{notif.mensaje}}</p>
+                <p class="text-xs text-gray-500 mt-1">{{notif.fecha}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-6">
+          <button class="text-blue-600 hover:text-blue-800 font-medium">
+            Ver todas las notificaciones
+          </button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Acciones Rápidas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button (click)="onConsultarEstado()"
+                  class="action-button bg-blue-50 text-blue-700 hover:bg-blue-100">
+            <span class="font-medium">Consultar estado de trámite</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <button (click)="onDescargarCertificados()"
+                  class="action-button bg-green-50 text-green-700 hover:bg-green-100">
+            <span class="font-medium">Descargar certificados</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AYUDA Y SOPORTE -->
+    <div class="tab-content" *ngIf="activeTab==='ayuda'">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Centro de Ayuda y Soporte</h3>
+        <p class="text-gray-700 mb-6">Encuentre respuestas a sus preguntas o contacte a nuestro equipo de soporte.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="help-card">
+            <h4 class="font-semibold text-gray-800 mb-3">Preguntas Frecuentes</h4>
+            <div class="space-y-3 text-sm">
+              <div class="faq-item">
+                <p class="font-medium text-gray-700">¿Cuánto tiempo toma el proceso de evaluación?</p>
+                <p class="text-gray-600">El INVIMA tiene 60 días hábiles para trámites ordinarios y 30 para urgentes.</p>
+              </div>
+              <div class="faq-item">
+                <p class="font-medium text-gray-700">¿Qué hacer si no respondo a tiempo un requerimiento?</p>
+                <p class="text-gray-600">Su solicitud puede archivarse. Debe iniciar un nuevo trámite.</p>
+              </div>
+              <div class="faq-item">
+                <p class="font-medium text-gray-700">¿Puedo modificar mi solicitud después de radicarla?</p>
+                <p class="text-gray-600">No, una vez radicada no se permiten modificaciones voluntarias.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <h4 class="font-semibold text-gray-800 mb-3">Canales de Contacto</h4>
+            <div class="space-y-3 text-sm">
+              <div class="contact-item">
+                <span class="font-medium text-gray-700">Línea de atención:</span>
+                <span class="text-blue-600">01-8000-122-205</span>
+              </div>
+              <div class="contact-item">
+                <span class="font-medium text-gray-700">Email:</span>
+                <span class="text-blue-600">atencionalciudadano&#64;invima.gov.co</span>
+              </div>
+              <div class="contact-item">
+                <span class="font-medium text-gray-700">Horarios:</span>
+                <span class="text-gray-600">Lunes a viernes 7:30 AM - 4:30 PM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100 mt-6">
+          <h4 class="text-lg font-semibold text-gray-800 mb-2">¿Necesita ayuda personalizada?</h4>
+          <p class="text-gray-700 mb-4">Nuestro equipo de soporte está disponible para resolver sus dudas específicas sobre el proceso de seguimiento.</p>
+          <button (click)="onContactarSoporte()"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+            Contactar Soporte Técnico
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <span class="text-sm text-gray-500">© 2024 Sistema de Gestión de Trámites INVIMA</span>
+    <div class="flex space-x-4">
+      <button class="text-sm text-blue-600 hover:text-blue-800">Descargar como PDF</button>
+      <button class="text-sm text-blue-600 hover:text-blue-800">Compartir</button>
+    </div>
+  </div>
+</div>
