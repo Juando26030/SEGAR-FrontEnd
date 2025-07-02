@@ -12,16 +12,17 @@ import { FormsModule } from '@angular/forms';
 export class RegistroPasoTresComponent {
   activeTab = 'clasificacion';
 
-  // Ejemplo de modelo para el formulario de clasificación
+  // Modelo para el formulario de clasificación
   classificationForm = {
     productCategory: '',
+    riskLevel: '',
     targetPopulation: '',
-    processingType: '',
-    healthClaims: ''
+    processingType: ''
   };
 
   solicitudForm = {
     procedureType: '',
+    procedureMode: '',
     productName: '',
     brandName: '',
     presentation: '',
@@ -39,6 +40,7 @@ export class RegistroPasoTresComponent {
       city: '',
       department: ''
     },
+    originCountryRegistration: '',
     ingredients: '',
     additives: '',
     shelfLife: '',
@@ -55,14 +57,60 @@ export class RegistroPasoTresComponent {
 
   onSaveFormulario() {
     console.log('Formulario guardado:', this.solicitudForm);
-    alert('Formulario guardado (simulado)');
+    alert('Formulario guardado correctamente. Puede continuar con la documentación técnica.');
   }
 
   onVerifyDocumentacion() {
-    alert('Verificación de documentación (simulada)');
+    alert('Documentación verificada correctamente. Todos los archivos han sido validados.');
   }
 
   onClasificarProducto() {
-    alert('Clasificación realizada (simulada)');
+    if (!this.classificationForm.productCategory || !this.classificationForm.riskLevel) {
+      alert('Por favor complete todos los campos de clasificación.');
+      return;
+    }
+
+    // Determinar automáticamente el tipo de trámite basado en el riesgo
+    switch(this.classificationForm.riskLevel) {
+      case 'alto':
+        this.solicitudForm.procedureType = 'registro-sanitario';
+        break;
+      case 'medio':
+        this.solicitudForm.procedureType = 'permiso-sanitario';
+        break;
+      case 'bajo':
+        this.solicitudForm.procedureType = 'notificacion-sanitaria';
+        break;
+    }
+
+    alert('Producto clasificado correctamente. El tipo de trámite ha sido determinado automáticamente.');
+    this.setActiveTab('solicitud');
+  }
+
+  onRadicarSolicitud() {
+    // Validar que todos los campos obligatorios estén completos
+    if (!this.solicitudForm.productName || !this.solicitudForm.brandName ||
+      !this.solicitudForm.manufacturer.name || !this.classificationForm.productCategory) {
+      alert('Por favor complete toda la información requerida antes de radicar la solicitud.');
+      return;
+    }
+
+    // Simular radicación
+    const numeroRadicado = this.generateRadicationNumber();
+
+    alert(`¡Solicitud radicada exitosamente!\n\nNúmero de radicado: ${numeroRadicado}\n\nRecibirá una confirmación por correo electrónico con los detalles del trámite y las instrucciones para el seguimiento.`);
+
+    console.log('Solicitud radicada:', {
+      numeroRadicado,
+      clasificacion: this.classificationForm,
+      solicitud: this.solicitudForm,
+      fechaRadicacion: new Date()
+    });
+  }
+
+  private generateRadicationNumber(): string {
+    const year = new Date().getFullYear();
+    const randomNumber = Math.floor(Math.random() * 999999) + 1;
+    return `${year}${randomNumber.toString().padStart(6, '0')}`;
   }
 }

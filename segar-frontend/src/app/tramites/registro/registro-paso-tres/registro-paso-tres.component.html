@@ -31,83 +31,83 @@
           <div class="classification-item">
             <div class="step-indicator">
               <div class="step-number">1</div>
-              <h4 class="text-lg font-semibold text-gray-800">Determine el riesgo de su producto</h4>
+              <h4 class="font-semibold text-gray-800">Categoría del Alimento</h4>
             </div>
-            <p class="text-gray-600 text-sm mb-3">Clasifique su producto según el nivel de riesgo sanitario.</p>
-            <div class="space-y-2">
-              <label class="form-label">Nivel de Riesgo</label>
-              <select class="form-select" [(ngModel)]="classificationForm.productCategory">
-                <option value="">Seleccione una opción</option>
-                <option value="alto">Alto Riesgo - Requiere Registro Sanitario</option>
-                <option value="medio">Medio Riesgo - Requiere Registro Sanitario</option>
-                <option value="bajo">Bajo Riesgo - Notificación Sanitaria</option>
-              </select>
-            </div>
+            <label class="form-label">Seleccione la categoría principal</label>
+            <select [(ngModel)]="classificationForm.productCategory" name="productCategory" class="form-select">
+              <option value="">Seleccione una categoría</option>
+              <option value="bebidas">Bebidas no alcohólicas</option>
+              <option value="lacteos">Productos lácteos</option>
+              <option value="carnicos">Productos cárnicos</option>
+              <option value="panificacion">Productos de panificación</option>
+              <option value="conservas">Conservas alimenticias</option>
+              <option value="condimentos">Condimentos y especias</option>
+              <option value="snacks">Snacks y productos de confitería</option>
+              <option value="cereales">Cereales y derivados</option>
+              <option value="aceites">Aceites y grasas</option>
+              <option value="otros">Otros alimentos procesados</option>
+            </select>
           </div>
 
           <div class="classification-item">
             <div class="step-indicator">
               <div class="step-number">2</div>
-              <h4 class="text-lg font-semibold text-gray-800">Población objetivo</h4>
+              <h4 class="font-semibold text-gray-800">Nivel de Riesgo</h4>
             </div>
-            <p class="text-gray-600 text-sm mb-3">Especifique a quién está dirigido su producto.</p>
-            <div class="space-y-2">
-              <label class="form-label">Población Objetivo</label>
-              <select class="form-select" [(ngModel)]="classificationForm.targetPopulation">
-                <option value="">Seleccione una opción</option>
-                <option value="general">Población General</option>
-                <option value="infantil">Población Infantil</option>
-                <option value="adulto-mayor">Adulto Mayor</option>
-                <option value="especial">Población con Necesidades Especiales</option>
-              </select>
-            </div>
+            <label class="form-label">Determine el riesgo sanitario</label>
+            <select [(ngModel)]="classificationForm.riskLevel" name="riskLevel" class="form-select">
+              <option value="">Seleccione el nivel de riesgo</option>
+              <option value="alto">Alto riesgo - Requiere Registro Sanitario</option>
+              <option value="medio">Medio riesgo - Requiere Permiso Sanitario</option>
+              <option value="bajo">Bajo riesgo - Requiere Notificación Sanitaria</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              El riesgo se determina según la composición y proceso de fabricación
+            </p>
           </div>
 
           <div class="classification-item">
             <div class="step-indicator">
               <div class="step-number">3</div>
-              <h4 class="text-lg font-semibold text-gray-800">Tipo de procesamiento</h4>
+              <h4 class="font-semibold text-gray-800">Población Objetivo</h4>
             </div>
-            <p class="text-gray-600 text-sm mb-3">Indique el tipo de procesamiento del alimento.</p>
-            <div class="space-y-2">
-              <label class="form-label">Procesamiento</label>
-              <select class="form-select" [(ngModel)]="classificationForm.processingType">
-                <option value="">Seleccione una opción</option>
-                <option value="termico">Procesamiento Térmico</option>
-                <option value="congelado">Congelado</option>
-                <option value="deshidratado">Deshidratado</option>
-                <option value="fermentado">Fermentado</option>
-                <option value="minimo">Mínimamente Procesado</option>
-              </select>
-            </div>
+            <label class="form-label">Población destinataria</label>
+            <select [(ngModel)]="classificationForm.targetPopulation" name="targetPopulation" class="form-select">
+              <option value="">Seleccione la población</option>
+              <option value="general">Población general</option>
+              <option value="infantil">Alimentación infantil</option>
+              <option value="deportistas">Nutrición deportiva</option>
+              <option value="tercera-edad">Tercera edad</option>
+              <option value="especial">Población con necesidades especiales</option>
+            </select>
           </div>
 
           <div class="classification-item">
             <div class="step-indicator">
               <div class="step-number">4</div>
-              <h4 class="text-lg font-semibold text-gray-800">Afirmaciones de salud</h4>
+              <h4 class="font-semibold text-gray-800">Tipo de Procesamiento</h4>
             </div>
-            <p class="text-gray-600 text-sm mb-3">¿Su producto incluye afirmaciones de salud?</p>
-            <div class="space-y-2">
-              <label class="form-label">Tipo de Afirmación</label>
-              <select class="form-select" [(ngModel)]="classificationForm.healthClaims">
-                <option value="">Seleccione una opción</option>
-                <option value="ninguna">Sin Afirmaciones</option>
-                <option value="nutricional">Afirmación Nutricional</option>
-                <option value="funcional">Afirmación Funcional</option>
-                <option value="salud">Afirmación de Salud</option>
-              </select>
-            </div>
+            <label class="form-label">Método de conservación principal</label>
+            <select [(ngModel)]="classificationForm.processingType" name="processingType" class="form-select">
+              <option value="">Seleccione el tipo</option>
+              <option value="esterilizado">Esterilizado comercialmente</option>
+              <option value="pasteurizado">Pasteurizado</option>
+              <option value="refrigerado">Refrigerado</option>
+              <option value="congelado">Congelado</option>
+              <option value="deshidratado">Deshidratado</option>
+              <option value="fermentado">Fermentado</option>
+              <option value="otro">Otro método</option>
+            </select>
           </div>
         </div>
 
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-700">
-          <p><strong>Importante:</strong> La clasificación correcta de su producto determinará el tipo de trámite y la documentación requerida.</p>
+          <strong>Nota importante:</strong> La clasificación correcta es fundamental para determinar el tipo de trámite requerido y la documentación necesaria. En caso de dudas, consulte la Resolución 2674 de 2013 y el Decreto 539 de 2014.
         </div>
 
         <div class="text-center">
-          <button type="button" (click)="onClasificarProducto()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
-            Clasificar Producto
+          <button (click)="onClasificarProducto()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+            Confirmar Clasificación
           </button>
         </div>
       </div>
@@ -120,29 +120,53 @@
         <p class="text-gray-700 mb-6">Complete la información requerida para la solicitud de registro sanitario.</p>
 
         <div class="form-section">
-          <h4>Información General del Producto</h4>
+          <h4>Información General del Trámite</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="form-label">Tipo de Trámite</label>
-              <select class="form-select" [(ngModel)]="solicitudForm.procedureType">
-                <option value="">Seleccione el tipo de trámite</option>
-                <option value="registro-nuevo">Registro Sanitario Nuevo</option>
-                <option value="renovacion">Renovación de Registro</option>
-                <option value="modificacion">Modificación de Registro</option>
-                <option value="notificacion">Notificación Sanitaria</option>
+              <select [(ngModel)]="solicitudForm.procedureType" name="procedureType" class="form-select">
+                <option value="">Seleccione el tipo</option>
+                <option value="registro-sanitario">Registro Sanitario</option>
+                <option value="permiso-sanitario">Permiso Sanitario</option>
+                <option value="notificacion-sanitaria">Notificación Sanitaria</option>
               </select>
             </div>
             <div>
+              <label class="form-label">Modalidad de Trámite</label>
+              <select [(ngModel)]="solicitudForm.procedureMode" name="procedureMode" class="form-select">
+                <option value="">Seleccione la modalidad</option>
+                <option value="ordinario">Ordinario (60 días hábiles)</option>
+                <option value="urgente">Urgente (30 días hábiles)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4>Información del Producto</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <label class="form-label">Nombre del Producto</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.productName" placeholder="Ingrese el nombre del producto">
+              <input [(ngModel)]="solicitudForm.productName" name="productName" class="form-input" placeholder="Ej: Yogurt Natural Premium">
             </div>
             <div>
               <label class="form-label">Marca Comercial</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.brandName" placeholder="Ingrese la marca">
+              <input [(ngModel)]="solicitudForm.brandName" name="brandName" class="form-input" placeholder="Ej: LacteosPremium">
             </div>
             <div>
-              <label class="form-label">Presentación</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.presentation" placeholder="Ej: Frasco x 500g">
+              <label class="form-label">Presentación Comercial</label>
+              <input [(ngModel)]="solicitudForm.presentation" name="presentation" class="form-input" placeholder="Ej: Vaso de 150g">
+            </div>
+            <div>
+              <label class="form-label">Vida Útil</label>
+              <div class="flex space-x-2">
+                <input [(ngModel)]="solicitudForm.shelfLife" name="shelfLife" class="form-input" type="number" placeholder="30">
+                <select [(ngModel)]="solicitudForm.shelfLifeUnit" name="shelfLifeUnit" class="form-select">
+                  <option value="days">Días</option>
+                  <option value="months">Meses</option>
+                  <option value="years">Años</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -150,110 +174,103 @@
         <div class="form-section">
           <h4>Información del Fabricante</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="form-label">Nombre o Razón Social</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.manufacturer.name" placeholder="Nombre de la empresa fabricante">
+            <div class="col-span-2">
+              <label class="form-label">Razón Social del Fabricante</label>
+              <input [(ngModel)]="solicitudForm.manufacturer.name" name="manufacturerName" class="form-input" placeholder="Empresa Alimentaria S.A.S.">
             </div>
-            <div>
-              <label class="form-label">Dirección</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.manufacturer.address" placeholder="Dirección completa">
+            <div class="col-span-2">
+              <label class="form-label">Dirección de la Planta de Producción</label>
+              <input [(ngModel)]="solicitudForm.manufacturer.address" name="manufacturerAddress" class="form-input" placeholder="Carrera 15 # 25-30, Zona Industrial">
             </div>
             <div>
               <label class="form-label">Ciudad</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.manufacturer.city" placeholder="Ciudad">
+              <input [(ngModel)]="solicitudForm.manufacturer.city" name="manufacturerCity" class="form-input" placeholder="Bogotá">
             </div>
             <div>
               <label class="form-label">Departamento</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.manufacturer.department" placeholder="Departamento">
-            </div>
-            <div class="md:col-span-2">
-              <label class="form-label">País</label>
-              <input class="form-input" type="text" [(ngModel)]="solicitudForm.manufacturer.country" placeholder="País de fabricación">
+              <select [(ngModel)]="solicitudForm.manufacturer.department" name="manufacturerDepartment" class="form-select">
+                <option value="">Seleccione departamento</option>
+                <option value="Cundinamarca">Cundinamarca</option>
+                <option value="Antioquia">Antioquia</option>
+                <option value="Valle del Cauca">Valle del Cauca</option>
+                <option value="Atlántico">Atlántico</option>
+                <option value="Santander">Santander</option>
+                <!-- Agregar más departamentos según sea necesario -->
+              </select>
             </div>
           </div>
         </div>
 
         <div class="form-section">
+          <h4>Producto Importado</h4>
           <div class="flex items-center mb-4">
-            <input type="checkbox" [(ngModel)]="solicitudForm.isImported" class="form-checkbox">
-            <label class="form-label mb-0">¿El producto es importado?</label>
+            <input [(ngModel)]="solicitudForm.isImported" name="isImported" type="checkbox" class="form-checkbox">
+            <label class="form-label mb-0">¿Es un producto importado?</label>
           </div>
-
-          <div *ngIf="solicitudForm.isImported" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h4 class="text-gray-800 mb-3">Datos del Importador</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label">Nombre o Razón Social</label>
-                <input class="form-input" type="text" [(ngModel)]="solicitudForm.importer.name" placeholder="Nombre del importador">
-              </div>
-              <div>
-                <label class="form-label">Dirección</label>
-                <input class="form-input" type="text" [(ngModel)]="solicitudForm.importer.address" placeholder="Dirección del importador">
-              </div>
-              <div>
-                <label class="form-label">Ciudad</label>
-                <input class="form-input" type="text" [(ngModel)]="solicitudForm.importer.city" placeholder="Ciudad">
-              </div>
-              <div>
-                <label class="form-label">Departamento</label>
-                <input class="form-input" type="text" [(ngModel)]="solicitudForm.importer.department" placeholder="Departamento">
-              </div>
+          <div *ngIf="solicitudForm.isImported" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="col-span-2">
+              <label class="form-label">Empresa Importadora</label>
+              <input [(ngModel)]="solicitudForm.importer.name" name="importerName" class="form-input" placeholder="Importadora de Alimentos S.A.S.">
+            </div>
+            <div>
+              <label class="form-label">País de Origen</label>
+              <select [(ngModel)]="solicitudForm.manufacturer.country" name="countryOrigin" class="form-select">
+                <option value="">Seleccione país</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="México">México</option>
+                <option value="Brasil">Brasil</option>
+                <option value="Argentina">Argentina</option>
+                <option value="España">España</option>
+                <!-- Agregar más países según sea necesario -->
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Registro en País de Origen</label>
+              <input [(ngModel)]="solicitudForm.originCountryRegistration" name="originRegistration" class="form-input" placeholder="Número de registro">
             </div>
           </div>
         </div>
 
         <div class="form-section">
           <h4>Información Técnica del Producto</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-4">
             <div>
-              <label class="form-label">Lista de Ingredientes</label>
-              <textarea class="form-textarea" [(ngModel)]="solicitudForm.ingredients" rows="4" placeholder="Liste todos los ingredientes en orden decreciente de peso"></textarea>
-            </div>
-            <div>
-              <label class="form-label">Aditivos Alimentarios</label>
-              <textarea class="form-textarea" [(ngModel)]="solicitudForm.additives" rows="4" placeholder="Liste los aditivos con sus códigos INS correspondientes"></textarea>
+              <label class="form-label">Lista de Ingredientes (en orden descendente)</label>
+              <textarea [(ngModel)]="solicitudForm.ingredients" name="ingredients" class="form-textarea" rows="3" placeholder="Leche pasteurizada, cultivos lácticos, azúcar..."></textarea>
             </div>
             <div>
-              <label class="form-label">Vida Útil</label>
-              <input class="form-input" type="number" [(ngModel)]="solicitudForm.shelfLife" placeholder="12">
+              <label class="form-label">Aditivos Alimentarios (si aplica)</label>
+              <textarea [(ngModel)]="solicitudForm.additives" name="additives" class="form-textarea" rows="2" placeholder="Ácido cítrico (INS 330), Pectina (INS 440)..."></textarea>
             </div>
             <div>
-              <label class="form-label">Unidad de Tiempo</label>
-              <select class="form-select" [(ngModel)]="solicitudForm.shelfLifeUnit">
-                <option value="months">Meses</option>
-                <option value="years">Años</option>
-                <option value="days">Días</option>
-              </select>
+              <label class="form-label">Condiciones de Almacenamiento</label>
+              <input [(ngModel)]="solicitudForm.storageConditions" name="storageConditions" class="form-input" placeholder="Mantener refrigerado entre 2°C y 6°C">
             </div>
-            <div class="md:col-span-2">
-              <label class="form-label">Condiciones de Almacenamiento y Conservación</label>
-              <textarea class="form-textarea" [(ngModel)]="solicitudForm.storageConditions" rows="3" placeholder="Ej: Conservar en lugar fresco y seco, temperatura ambiente"></textarea>
-            </div>
-            <div class="md:col-span-2">
+            <div>
               <label class="form-label">Descripción de la Población Objetivo</label>
-              <textarea class="form-textarea" [(ngModel)]="solicitudForm.targetPopulationDescription" rows="3" placeholder="Describa detalladamente la población a la que está dirigido el producto"></textarea>
+              <textarea [(ngModel)]="solicitudForm.targetPopulationDescription" name="targetPopulationDescription" class="form-textarea" rows="2" placeholder="Producto dirigido a población general mayor de 3 años..."></textarea>
             </div>
           </div>
         </div>
 
         <div class="form-section">
+          <h4>Declaraciones de Propiedades (Opcional)</h4>
           <div class="flex items-center mb-4">
-            <input type="checkbox" [(ngModel)]="solicitudForm.hasHealthClaims" class="form-checkbox">
-            <label class="form-label mb-0">¿El producto incluye afirmaciones de salud, propiedades nutricionales o funcionales?</label>
+            <input [(ngModel)]="solicitudForm.hasHealthClaims" name="hasHealthClaims" type="checkbox" class="form-checkbox">
+            <label class="form-label mb-0">¿El producto incluye declaraciones de propiedades nutricionales o saludables?</label>
           </div>
-
-          <div *ngIf="solicitudForm.hasHealthClaims" class="bg-orange-50 border border-orange-200 rounded-lg p-4">
-            <label class="form-label">Descripción de las Afirmaciones</label>
-            <textarea class="form-textarea" [(ngModel)]="solicitudForm.healthClaimsDescription" rows="4" placeholder="Describa detalladamente las afirmaciones de salud o propiedades nutricionales que incluye el producto"></textarea>
-            <p class="text-sm text-orange-700 mt-2">
-              <strong>Nota:</strong> Las afirmaciones de salud requieren documentación científica que las respalde.
-            </p>
+          <div *ngIf="solicitudForm.hasHealthClaims">
+            <textarea [(ngModel)]="solicitudForm.healthClaimsDescription" name="healthClaimsDescription" class="form-textarea" rows="3" placeholder="Describa las declaraciones de propiedades que aparecerán en el producto..."></textarea>
           </div>
         </div>
 
         <div class="text-center">
-          <button type="button" (click)="onSaveFormulario()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+          <button (click)="onSaveFormulario()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 mr-4">
             Guardar Formulario
+          </button>
+          <button (click)="setActiveTab('documentacion')" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+            Continuar a Documentación
           </button>
         </div>
       </div>
@@ -267,73 +284,84 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-800 mb-3">Documentos Obligatorios</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                </svg>
-                Formulario único de solicitud
-              </li>
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                </svg>
-                Rótulo o etiqueta
-              </li>
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                </svg>
-                Certificado de existencia y representación legal
-              </li>
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                </svg>
-                Concepto sanitario de la planta
-              </li>
-            </ul>
+            <h4 class="font-semibold text-gray-800 mb-3">Documentos Legales</h4>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Certificado de Existencia y Representación Legal</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Poder (si aplica)</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded" *ngIf="solicitudForm.isImported">
+                <span class="text-sm">Certificado de Venta Libre</span>
+                <input type="file" class="text-xs">
+              </div>
+            </div>
           </div>
 
           <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-800 mb-3">Documentos Adicionales</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                </svg>
-                Estudios de estabilidad (si aplica)
-              </li>
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                </svg>
-                Documentación científica (afirmaciones de salud)
-              </li>
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                </svg>
-                Autorización del país de origen (productos importados)
-              </li>
-              <li class="flex items-center">
-                <svg class="w-4 h-4 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                </svg>
-                Análisis bromatológicos
-              </li>
-            </ul>
+            <h4 class="font-semibold text-gray-800 mb-3">Documentos Técnicos</h4>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Ficha Técnica del Producto</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Composición Cuali-Cuantitativa</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Proceso de Fabricación</span>
+                <input type="file" class="text-xs">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-800 mb-3">Análisis de Laboratorio</h4>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Análisis Fisicoquímico</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Análisis Microbiológico</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Información Nutricional</span>
+                <input type="file" class="text-xs">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-800 mb-3">Etiquetado</h4>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Artes Finales de Etiquetas</span>
+                <input type="file" class="text-xs">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <span class="text-sm">Tabla Nutricional</span>
+                <input type="file" class="text-xs">
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-6 text-sm text-yellow-800">
-          <p><strong>Importante:</strong> Todos los documentos deben estar vigentes y cumplir con los requisitos establecidos en la normativa INVIMA.</p>
+          <strong>Importante:</strong> Todos los documentos deben estar firmados por el representante legal y, cuando aplique, por profesionales idóneos (químico farmacéutico, ingeniero de alimentos, etc.). Los análisis de laboratorio deben provenir de laboratorios acreditados ante el IDEAM.
         </div>
 
         <div class="text-center mt-6">
-          <button type="button" (click)="onVerifyDocumentacion()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+          <button (click)="onVerifyDocumentacion()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 mr-4">
             Verificar Documentación
+          </button>
+          <button (click)="setActiveTab('radicacion')" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+            Continuar a Radicación
           </button>
         </div>
       </div>
@@ -346,66 +374,66 @@
         <p class="text-gray-700 mb-6">Revise toda la información ingresada antes de radicar su solicitud ante el INVIMA.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div class="text-center">
-            <div class="bg-blue-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-3">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+            <div class="checkmark-circle show mx-auto mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h4 class="font-semibold text-gray-800">Información Verificada</h4>
-            <p class="text-sm text-gray-600">Todos los datos del formulario han sido completados</p>
+            <h4 class="font-semibold text-green-700">Clasificación</h4>
+            <p class="text-sm text-green-600">Completada</p>
           </div>
-
-          <div class="text-center">
-            <div class="bg-green-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-3">
-              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+            <div class="checkmark-circle show mx-auto mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h4 class="font-semibold text-gray-800">Documentos Adjuntos</h4>
-            <p class="text-sm text-gray-600">Documentación técnica revisada</p>
+            <h4 class="font-semibold text-green-700">Formulario</h4>
+            <p class="text-sm text-green-600">Completado</p>
           </div>
-
-          <div class="text-center">
-            <div class="bg-purple-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-3">
-              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+            <div class="checkmark-circle show mx-auto mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h4 class="font-semibold text-gray-800">Pago Realizado</h4>
-            <p class="text-sm text-gray-600">Tarifa cancelada correctamente</p>
+            <h4 class="font-semibold text-green-700">Documentación</h4>
+            <p class="text-sm text-green-600">Verificada</p>
           </div>
         </div>
 
         <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200 mb-6">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2">Resumen de la Solicitud</h4>
-          <div class="grid grid-cols-2 gap-4 text-sm">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Resumen de la Solicitud</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span class="font-medium text-gray-600">Tipo de Trámite:</span>
-              <span class="text-gray-800 ml-2">{{ solicitudForm.procedureType || 'No especificado' }}</span>
+              <strong>Producto:</strong> {{solicitudForm.productName || 'Sin especificar'}}
             </div>
             <div>
-              <span class="font-medium text-gray-600">Producto:</span>
-              <span class="text-gray-800 ml-2">{{ solicitudForm.productName || 'No especificado' }}</span>
+              <strong>Marca:</strong> {{solicitudForm.brandName || 'Sin especificar'}}
             </div>
             <div>
-              <span class="font-medium text-gray-600">Marca:</span>
-              <span class="text-gray-800 ml-2">{{ solicitudForm.brandName || 'No especificado' }}</span>
+              <strong>Tipo de Trámite:</strong> {{solicitudForm.procedureType || 'Sin especificar'}}
             </div>
             <div>
-              <span class="font-medium text-gray-600">Fabricante:</span>
-              <span class="text-gray-800 ml-2">{{ solicitudForm.manufacturer.name || 'No especificado' }}</span>
+              <strong>Fabricante:</strong> {{solicitudForm.manufacturer.name || 'Sin especificar'}}
+            </div>
+            <div>
+              <strong>Clasificación:</strong> {{classificationForm.productCategory || 'Sin especificar'}}
+            </div>
+            <div>
+              <strong>Nivel de Riesgo:</strong> {{classificationForm.riskLevel || 'Sin especificar'}}
             </div>
           </div>
         </div>
 
         <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 text-sm text-red-700">
-          <p><strong>Advertencia:</strong> Una vez radicada la solicitud, no podrá modificar la información. Verifique que todos los datos sean correctos.</p>
+          <strong>Importante:</strong> Una vez radicada la solicitud, no podrá realizar modificaciones. Verifique cuidadosamente toda la información antes de continuar. El INVIMA tiene un plazo de 60 días hábiles (ordinario) o 30 días hábiles (urgente) para emitir respuesta.
         </div>
 
         <div class="text-center">
-          <button type="button" class="bg-green-600 text-white px-8 py-3 rounded-md hover:bg-green-700 transition-colors font-medium">
-            Radicar Solicitud en INVIMA
+          <button (click)="onRadicarSolicitud()" class="bg-red-600 text-white px-8 py-3 rounded-md hover:bg-red-700 text-lg font-semibold">
+            Radicar Solicitud ante INVIMA
           </button>
         </div>
       </div>
@@ -417,21 +445,21 @@
             <div class="step-number">1</div>
             <div>
               <h4 class="font-semibold text-gray-800">Seguimiento del Trámite</h4>
-              <p class="text-gray-600 text-sm">Monitoree el estado de su solicitud a través de la plataforma INVIMA.</p>
+              <p class="text-gray-600 text-sm">Monitoree el estado de su solicitud a través de la plataforma INVIMA con el número de radicado que recibirá.</p>
             </div>
           </div>
           <div class="flex items-start">
             <div class="step-number">2</div>
             <div>
               <h4 class="font-semibold text-gray-800">Respuesta a Requerimientos</h4>
-              <p class="text-gray-600 text-sm">Atienda oportunamente cualquier solicitud de información adicional.</p>
+              <p class="text-gray-600 text-sm">Atienda oportunamente cualquier solicitud de información adicional en un plazo máximo de 30 días hábiles.</p>
             </div>
           </div>
           <div class="flex items-start">
             <div class="step-number">3</div>
             <div>
               <h4 class="font-semibold text-gray-800">Resolución</h4>
-              <p class="text-gray-600 text-sm">Reciba la resolución de aprobación o negación del registro sanitario.</p>
+              <p class="text-gray-600 text-sm">Reciba la resolución de aprobación o negación del registro sanitario según el tipo de trámite solicitado.</p>
             </div>
           </div>
         </div>
