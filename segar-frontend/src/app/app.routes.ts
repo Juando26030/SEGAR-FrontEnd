@@ -12,7 +12,7 @@ import { UserManagementComponent } from './pages/usuarios/user-management/user-m
 import { UserProfileComponent } from './pages/perfil-usuario/user-profile/user-profile.component';
 import { RegistroPasoUnoComponent } from './tramites/registro/registro-paso-uno/registro-paso-uno.component';
 import { RegistroPasoDosComponent } from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
-import { GeneradorDocumentosComponent } from './tramites/generador-documentos/generador-documentos.component';
+import { GeneradorDocumentoComponent } from './shared/generador-documento/generador-documento.component';
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
 import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/registro-paso-tres.component';
 import { RegistroPasoCuatroComponent } from './tramites/registro/registro-paso-cuatro/registro-paso-cuatro.component';
@@ -37,7 +37,7 @@ export const routes: Routes = [
       { path: 'usuarios', component: UserManagementComponent },
       { path: 'perfil', component: UserProfileComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
-      { path: 'generador-documentos', component: GeneradorDocumentosComponent },
+      { path: 'generador-documento', component: GeneradorDocumentoComponent },
       {
         path: 'nuevo/registro',
         children: [
