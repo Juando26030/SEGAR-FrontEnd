@@ -87,6 +87,10 @@ export class PaginaRegistroComponent {
     this.currentStep = step;
   }
 
+  goBack() {
+    this.router.navigate(['/main/usuarios']);
+  }
+
   getStepClass(step: number): string {
     if (step < this.currentStep) return 'step-completed';
     if (step === this.currentStep) return 'step-active';

@@ -13,6 +13,7 @@ import { UserProfileComponent } from './pages/perfil-usuario/user-profile/user-p
 import { RegistroPasoUnoComponent } from './tramites/registro/registro-paso-uno/registro-paso-uno.component';
 import { RegistroPasoDosComponent } from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
 import { GeneradorDocumentosComponent } from './tramites/generador-documentos/generador-documentos.component';
+import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
 
 export const routes: Routes = [
   {
@@ -32,6 +33,7 @@ export const routes: Routes = [
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },
       { path: 'usuarios', component: UserManagementComponent },
       { path: 'perfil', component: UserProfileComponent },
+      { path: 'configuracion', component: ConfiguracionComponent },
       { path: 'generador-documentos', component: GeneradorDocumentosComponent },
       {
         path: 'nuevo/registro',
