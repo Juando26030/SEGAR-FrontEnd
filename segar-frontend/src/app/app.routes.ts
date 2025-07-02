@@ -16,6 +16,7 @@ import { GeneradorDocumentosComponent } from './tramites/generador-documentos/ge
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
 import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/registro-paso-tres.component';
 import { RegistroPasoCuatroComponent } from './tramites/registro/registro-paso-cuatro/registro-paso-cuatro.component';
+import { RegistroPasoCincoComponent } from './tramites/registro/registro-paso-cinco/registro-paso-cinco.component';
 
 export const routes: Routes = [
   {
