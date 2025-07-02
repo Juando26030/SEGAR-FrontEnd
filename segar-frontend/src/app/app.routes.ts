@@ -14,6 +14,7 @@ import { RegistroPasoUnoComponent } from './tramites/registro/registro-paso-uno/
 import { RegistroPasoDosComponent } from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
 import { GeneradorDocumentosComponent } from './tramites/generador-documentos/generador-documentos.component';
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
+import { NotificationSettingsComponent } from './components/notification-settings/notification-settings.component';
 
 export const routes: Routes = [
   {
@@ -34,6 +35,7 @@ export const routes: Routes = [
       { path: 'usuarios', component: UserManagementComponent },
       { path: 'perfil', component: UserProfileComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
+      { path: 'notificaciones', component: NotificationSettingsComponent },
       { path: 'generador-documentos', component: GeneradorDocumentosComponent },
       {
         path: 'nuevo/registro',

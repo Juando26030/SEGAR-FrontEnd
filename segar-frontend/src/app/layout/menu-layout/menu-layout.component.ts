@@ -1,13 +1,15 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { NotificationCenterComponent } from '../../components/notification-center/notification-center.component';
+import { NotificationToastComponent } from '../../components/notification-toast/notification-toast.component';
 
 @Component({
   standalone: true,
   selector: 'app-menu-layout',
   templateUrl: './menu-layout.component.html',
   styleUrls: ['./menu-layout.component.css'],
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, NotificationCenterComponent, NotificationToastComponent]
 })
 export class MenuLayoutComponent implements OnInit {
   constructor(private el: ElementRef) {}

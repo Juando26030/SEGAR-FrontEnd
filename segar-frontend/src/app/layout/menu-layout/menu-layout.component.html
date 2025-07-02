@@ -51,7 +51,13 @@
     <!-- Topbar -->
     <header class="h-16 bg-white border-b px-4 flex items-center shadow-sm justify-between">
       <span class="text-lg font-semibold text-[#1a3b6d]">Sistema de Gestión de Trámites</span>
-      <div class="h-8 w-8 rounded-full bg-[#1a3b6d] flex items-center justify-center text-white font-medium">JD</div>
+      <div class="flex items-center space-x-4">
+        <!-- Notification Center -->
+        <app-notification-center></app-notification-center>
+        
+        <!-- User Avatar -->
+        <div class="h-8 w-8 rounded-full bg-[#1a3b6d] flex items-center justify-center text-white font-medium">JD</div>
+      </div>
     </header>
 
     <!-- Router Outlet -->
@@ -59,4 +65,7 @@
       <router-outlet></router-outlet>
     </main>
   </div>
+
+  <!-- Notification Toasts -->
+  <app-notification-toast></app-notification-toast>
 </div>
