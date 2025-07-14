@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
-        <p class="text-sm opacity-80 mt-1">Resolución y gestión de registros sanitarios</p>
+        <p class="text-sm opacity-80 mt-1">Guía para empresas de alimentos procesados</p>
       </div>
       <div class="flex items-center">
         <span class="text-xl font-semibold">Sistema de Gestión de Trámites</span>
@@ -11,368 +11,277 @@
     </div>
   </div>
 
-  <div class="slide-content max-w-6xl mx-auto">
-    <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 5: Resolución del Trámite</h2>
-
-    <!-- Progress Indicator -->
-    <div class="mb-8">
-      <div class="flex justify-between items-center mb-2">
-        <span class="font-semibold text-gray-700">Progreso del trámite</span>
-        <span class="text-green-600 font-semibold">100%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: 100%"></div>
-      </div>
-    </div>
-
-    <!-- Timeline Steps -->
-    <div class="flex items-center justify-between mb-12 overflow-x-auto">
-      <div class="flex flex-col items-center">
-        <div class="step-circle step-completed">1</div>
-        <span class="text-sm mt-2 text-gray-700">Inicio</span>
-      </div>
-      <div class="timeline-connector connector-filled"></div>
-      <div class="flex flex-col items-center">
-        <div class="step-circle step-completed">2</div>
-        <span class="text-sm mt-2 text-gray-700">Documentos</span>
-      </div>
-      <div class="timeline-connector connector-filled"></div>
-      <div class="flex flex-col items-center">
-        <div class="step-circle step-completed">3</div>
-        <span class="text-sm mt-2 text-gray-700">Radicación</span>
-      </div>
-      <div class="timeline-connector connector-filled"></div>
-      <div class="flex flex-col items-center">
-        <div class="step-circle step-completed">4</div>
-        <span class="text-sm mt-2 text-gray-700">Seguimiento</span>
-      </div>
-      <div class="timeline-connector connector-filled"></div>
-      <div class="flex flex-col items-center">
-        <div class="step-circle step-active">5</div>
-        <span class="text-sm mt-2 font-semibold text-green-700">Resolución</span>
-      </div>
-    </div>
+  <div class="slide-content max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 5: Resolución y Cumplimiento</h2>
 
     <div class="tabs">
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='resolucion'}" (click)="setActiveTab('resolucion')">Resolución</div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='certificado'}" (click)="setActiveTab('certificado')">Certificado</div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='renovacion'}" (click)="setActiveTab('renovacion')">Renovación</div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='recursos'}" (click)="setActiveTab('recursos')">Recursos</div>
+      <button
+        *ngFor="let tab of tabs; trackBy: trackByTab"
+        class="tab"
+        [ngClass]="{'tab-active': activeTab === tab.id}"
+        (click)="setActiveTab(tab.id)"
+        [attr.aria-selected]="activeTab === tab.id"
+        role="tab">
+        {{tab.label}}
+      </button>
     </div>
 
-    <!-- RESOLUCIÓN -->
-    <div class="tab-content" *ngIf="activeTab==='resolucion'">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Detalles de la resolución -->
-        <div class="lg:col-span-2">
-          <div class="section-card relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 rounded-bl-lg font-medium text-sm">
-              APROBADO
-            </div>
+    <!-- RESOLUCIÓN FINAL -->
+    <div class="tab-content" *ngIf="activeTab === 'resolucion'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Estado de la Resolución</h3>
 
-            <div class="flex items-center mb-6">
-              <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold text-gray-800">Resolución No. {{resolucion.numero}}</h3>
-                <p class="text-gray-500">Registro Sanitario - Galletas Integrales</p>
-              </div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center mb-4">
+            <div class="checkmark-circle show mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+            <h4 class="text-lg font-semibold text-green-700">¡Registro Sanitario Aprobado!</h4>
+          </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <p class="text-sm text-gray-500">Fecha de expedición</p>
-                <p class="font-semibold">{{resolucion.fechaExpedicion}}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Fecha de vencimiento</p>
-                <p class="font-semibold">{{resolucion.fechaVencimiento}}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Número de radicado</p>
-                <p class="font-semibold">{{resolucion.numeroRadicado}}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Vigencia</p>
-                <p class="font-semibold">{{resolucion.vigencia}}</p>
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>Número de Registro:</strong> {{resolutionData.registrationNumber}}
             </div>
-
-            <div class="bg-gray-50 p-4 rounded-lg mb-6">
-              <h4 class="font-semibold mb-2">Productos autorizados</h4>
-              <ul class="list-disc list-inside text-gray-700 space-y-1">
-                <li *ngFor="let producto of resolucion.productosAutorizados">{{producto}}</li>
-              </ul>
+            <div>
+              <strong>Fecha de Resolución:</strong> {{resolutionData.resolutionDate}}
             </div>
-
-            <div class="flex space-x-3">
-              <button (click)="onDescargarResolucion()"
-                      class="flex-1 bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition font-medium flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Descargar resolución
-              </button>
-              <button (click)="onImprimirCertificado()"
-                      class="flex-1 bg-white border border-green-600 text-green-600 py-3 rounded-md hover:bg-green-50 transition font-medium flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Imprimir certificado
-              </button>
+            <div>
+              <strong>Vigencia:</strong> {{resolutionData.expiryDate}}
+            </div>
+            <div>
+              <strong>Resolución No.:</strong> {{resolutionData.resolutionNumber}}
             </div>
           </div>
         </div>
 
-        <!-- Próximos pasos -->
+        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <h4 class="font-semibold text-gray-800 mb-4">Detalles del Producto Aprobado</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <strong>Producto:</strong> {{resolutionData.productName}}
+            </div>
+            <div>
+              <strong>Marca:</strong> {{resolutionData.brandName}}
+            </div>
+            <div>
+              <strong>Titular:</strong> {{resolutionData.holder}}
+            </div>
+            <div>
+              <strong>Fabricante:</strong> {{resolutionData.manufacturer}}
+            </div>
+            <div class="col-span-2">
+              <strong>Presentaciones Aprobadas:</strong>
+              <ul class="mt-2 space-y-1">
+                <li *ngFor="let presentation of resolutionData.approvedPresentations; trackBy: trackByPresentation"
+                    class="text-gray-600">• {{presentation}}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            (click)="downloadResolution()"
+            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Descargar Resolución
+          </button>
+          <button
+            (click)="downloadCertificate()"
+            class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Descargar Certificado
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OBLIGACIONES -->
+    <div class="tab-content" *ngIf="activeTab === 'obligaciones'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Obligaciones Post-Registro</h3>
+        <p class="text-gray-700 mb-6">Cumplir con estas obligaciones es fundamental para mantener la validez de su registro sanitario.</p>
+
         <div class="space-y-6">
-          <div class="section-card">
-            <h3 class="text-lg font-semibold mb-3 text-gray-800">Próximos pasos</h3>
-            <ul class="space-y-3">
-              <li class="flex items-start space-x-3">
-                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
+          <div *ngFor="let obligation of obligations; trackBy: trackByObligation"
+               class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="flex items-start">
+              <div class="bg-yellow-100 rounded-full p-2 mr-4 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-2">{{obligation.title}}</h4>
+                <p class="text-gray-600 text-sm mb-3">{{obligation.description}}</p>
+                <div class="text-xs text-gray-500">
+                  <strong>Periodicidad:</strong> {{obligation.frequency}} |
+                  <strong>Plazo:</strong> {{obligation.deadline}}
                 </div>
-                <div>
-                  <p class="text-gray-800 font-medium">Descargar resolución oficial</p>
-                  <p class="text-sm text-gray-500">Guarde este documento para sus registros</p>
-                </div>
-              </li>
-              <li class="flex items-start space-x-3">
-                <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-gray-800 font-medium">Actualizar etiquetas</p>
-                  <p class="text-sm text-gray-500">Incluya el número de registro en sus productos</p>
-                </div>
-              </li>
-              <li class="flex items-start space-x-3">
-                <div class="w-6 h-6 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 flex-shrink-0 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-gray-800 font-medium">Programar renovación</p>
-                  <p class="text-sm text-gray-500">Configure alertas para renovar a tiempo</p>
-                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMERCIALIZACIÓN -->
+    <div class="tab-content" *ngIf="activeTab === 'comercializacion'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Requisitos para Comercialización</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div *ngFor="let requirement of commercializationRequirements; trackBy: trackByRequirement"
+               class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <div class="bg-blue-100 rounded-full p-2 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-800">{{requirement.title}}</h4>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li *ngFor="let item of requirement.items; trackBy: trackByString" class="flex items-start">
+                <span class="text-green-500 mr-2 mt-0.5">•</span>
+                <span>{{item}}</span>
               </li>
             </ul>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- CERTIFICADO -->
-    <div class="tab-content" *ngIf="activeTab==='certificado'">
-      <div class="section-card">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">Vista previa del certificado</h3>
-
-        <div class="relative h-96 border-2 border-green-200 rounded-lg p-8 bg-white certificate mb-6">
-          <div class="text-center mb-6">
-            <h4 class="text-xl font-bold text-green-800 mb-1">REPÚBLICA DE COLOMBIA</h4>
-            <h5 class="text-lg font-semibold text-green-700">MINISTERIO DE SALUD Y PROTECCIÓN SOCIAL</h5>
-            <h6 class="text-md font-medium text-green-600">INSTITUTO NACIONAL DE VIGILANCIA DE MEDICAMENTOS Y ALIMENTOS</h6>
-            <h6 class="text-md font-medium text-green-600">INVIMA</h6>
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <h4 class="font-semibold text-red-800">Advertencia Importante</h4>
+              <p class="text-red-700 text-sm mt-1">
+                La comercialización sin registro sanitario vigente constituye una violación a la normativa sanitaria y puede resultar en sanciones administrativas, decomiso del producto y cierre temporal del establecimiento.
+              </p>
+            </div>
           </div>
-
-          <div class="text-center mb-6">
-            <h3 class="text-xl font-bold text-gray-800">CERTIFICADO DE REGISTRO SANITARIO</h3>
-            <p class="text-gray-600">No. {{resolucion.numeroRegistro}}</p>
-          </div>
-
-          <p class="text-gray-700 mb-2 text-sm">El Instituto Nacional de Vigilancia de Medicamentos y Alimentos - INVIMA, en cumplimiento de lo establecido en la normatividad sanitaria vigente, certifica que:</p>
-
-          <p class="text-gray-700 mb-4 text-sm">La empresa <span class="font-semibold">ALIMENTOS PROCESADOS S.A.</span> con NIT 900.123.456-7, ha obtenido el Registro Sanitario para el producto <span class="font-semibold">GALLETAS INTEGRALES</span> bajo la Resolución No. {{resolucion.numero}} del {{resolucion.fechaExpedicion}}.</p>
-
-          <p class="text-gray-700 text-sm">Este registro tiene una vigencia de <span class="font-semibold">{{resolucion.vigencia.toUpperCase()}}</span> contados a partir de la fecha de expedición.</p>
-
-          <div class="seal"></div>
-        </div>
-
-        <div class="text-sm text-gray-500 italic mb-4">
-          * Esta es una vista previa del certificado. El documento oficial contiene elementos de seguridad adicionales.
-        </div>
-
-        <div class="flex space-x-4">
-          <button (click)="onDescargarCertificado()"
-                  class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition font-medium flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Descargar certificado
-          </button>
-          <button (click)="onGenerarQR()"
-                  class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition font-medium flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-            Generar QR
-          </button>
-          <button (click)="onCompartirCertificado()"
-                  class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition font-medium flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-            </svg>
-            Compartir
-          </button>
         </div>
       </div>
     </div>
 
     <!-- RENOVACIÓN -->
-    <div class="tab-content" *ngIf="activeTab==='renovacion'">
+    <div class="tab-content" *ngIf="activeTab === 'renovacion'" role="tabpanel">
       <div class="section-card">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">Gestión de Renovación</h3>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Proceso de Renovación</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Información de renovación -->
-          <div class="bg-white p-5 rounded-lg border border-gray-200">
-            <h4 class="text-lg font-semibold mb-3 text-gray-800">Información de renovación</h4>
-            <div class="mb-4">
-              <div class="flex justify-between items-center mb-2">
-                <span class="text-gray-600">Fecha de vencimiento</span>
-                <span class="font-semibold">{{renovacionInfo.fechaVencimiento}}</span>
-              </div>
-              <div class="flex justify-between items-center mb-2">
-                <span class="text-gray-600">Tiempo restante</span>
-                <span class="font-semibold text-green-600">{{renovacionInfo.tiempoRestante}}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">Renovación recomendada</span>
-                <span class="font-semibold">{{renovacionInfo.fechaRenovacionRecomendada}}</span>
-              </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center mb-4">
+            <div class="bg-yellow-100 rounded-full p-2 mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-
-            <!-- Barra de progreso de vigencia -->
-            <div class="mb-4">
-              <div class="flex justify-between items-center mb-2">
-                <span class="text-sm text-gray-600">Vigencia transcurrida</span>
-                <span class="text-sm font-medium">{{getProgresoVigencia().toFixed(1)}}%</span>
-              </div>
-              <div class="progress-bar-small">
-                <div class="progress-fill-vigencia" [style.width.%]="getProgresoVigencia()"></div>
-              </div>
-            </div>
-
-            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-800" *ngIf="necesitaRenovacionProxima()">
-              <div class="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
-                </svg>
-                <p>Se recomienda iniciar el proceso de renovación 6 meses antes del vencimiento para evitar interrupciones en la comercialización.</p>
-              </div>
-            </div>
+            <h4 class="font-semibold text-yellow-800">Recordatorio de Renovación</h4>
           </div>
-
-          <!-- Acciones de renovación -->
-          <div class="space-y-4">
-            <button (click)="onConfigurarRecordatorios()"
-                    class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition font-medium flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4 19h5V9H4v10zM13 13h7V3h-7v10z" />
-              </svg>
-              Configurar recordatorios
-            </button>
-
-            <button (click)="onProgramarRenovacion()"
-                    class="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition font-medium flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Programar renovación
-            </button>
-
-            <button (click)="onValidarVigencia()"
-                    class="w-full bg-yellow-600 text-white py-3 rounded-md hover:bg-yellow-700 transition font-medium flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Validar vigencia
-            </button>
-
-            <button (click)="onIniciarRenovacion()"
-                    class="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition font-medium flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Iniciar renovación
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RECURSOS -->
-    <div class="tab-content" *ngIf="activeTab==='recursos'">
-      <div class="section-card">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">Recursos Adicionales</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div *ngFor="let recurso of recursosAdicionales"
-               class="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition cursor-pointer"
-               (click)="onAccederRecurso(recurso)">
-            <h4 class="font-semibold text-gray-800 mb-2">{{recurso.titulo}}</h4>
-            <p class="text-sm text-gray-600">{{recurso.descripcion}}</p>
+          <p class="text-yellow-700 text-sm mb-3">
+            Su registro sanitario vence el <strong>{{resolutionData.expiryDate}}</strong>.
+            La renovación debe solicitarse con <strong>6 meses de anticipación</strong> al vencimiento.
+          </p>
+          <div class="text-sm text-yellow-600">
+            <strong>Fecha límite para solicitar renovación:</strong> {{getRenewalDeadline()}}
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-100">
-          <h4 class="text-lg font-semibold text-blue-800 mb-2">¿Necesita ayuda personalizada?</h4>
-          <p class="text-blue-700 mb-4">Nuestro equipo de soporte está disponible para resolver sus dudas específicas sobre registros sanitarios y renovaciones.</p>
-          <button (click)="onContactarSoporte()"
-                  class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition font-medium">
-            Contactar Soporte Técnico
+        <div class="space-y-6">
+          <div *ngFor="let step of renewalSteps; let i = index; trackBy: trackByRenewalStep"
+               class="flex items-start">
+            <div class="flex-shrink-0 mr-4">
+              <div class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center font-semibold">
+                {{i + 1}}
+              </div>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-800 mb-2">{{step.title}}</h4>
+              <p class="text-gray-600 text-sm mb-2">{{step.description}}</p>
+              <div class="text-xs text-gray-500">
+                <strong>Tiempo estimado:</strong> {{step.timeframe}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
+          <h4 class="font-semibold text-blue-800 mb-2">Documentos Requeridos para Renovación</h4>
+          <ul class="text-blue-700 text-sm space-y-1">
+            <li *ngFor="let doc of renewalDocuments; trackBy: trackByString" class="flex items-start">
+              <span class="text-blue-500 mr-2 mt-0.5">•</span>
+              <span>{{doc}}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="text-center mt-6">
+          <button
+            (click)="startRenewalProcess()"
+            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 mr-4">
+            Iniciar Proceso de Renovación
+          </button>
+          <button
+            (click)="setRenewalReminder()"
+            class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700">
+            Configurar Recordatorio
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Mensaje de éxito -->
-    <div class="bg-green-50 border border-green-200 rounded-lg p-6 flex items-start mt-8">
-      <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0 mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div>
-        <h4 class="font-semibold text-green-800">¡Proceso completado con éxito!</h4>
-        <p class="text-green-700 mt-1">Su registro sanitario ha sido aprobado y está listo para ser utilizado. Recuerde mantener actualizados sus datos y cumplir con todas las normativas vigentes.</p>
-      </div>
-    </div>
+    <!-- CONTACTO -->
+    <div class="tab-content" *ngIf="activeTab === 'contacto'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Información de Contacto y Soporte</h3>
 
-    <!-- Botones de navegación -->
-    <div class="flex justify-between mt-12">
-      <button (click)="onVolverAlInicio()"
-              class="px-6 py-3 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-        Volver al inicio
-      </button>
-      <button (click)="onFinalizarProceso()"
-              class="px-8 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center font-semibold">
-        Finalizar proceso
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-      </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div *ngFor="let contact of contactInfo; trackBy: trackByContact"
+               class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="flex items-center mb-4">
+              <div class="bg-green-100 rounded-full p-3 mr-4" [innerHTML]="getContactIcon(contact.type)"></div>
+              <h4 class="font-semibold text-gray-800">{{contact.title}}</h4>
+            </div>
+            <div class="space-y-2 text-sm text-gray-600">
+              <div *ngFor="let detail of contact.details; trackBy: trackByString">
+                {{detail}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Enlaces Útiles</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let link of usefulLinks; trackBy: trackByLink">
+              <a [href]="link.url" target="_blank"
+                 class="flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                {{link.title}}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="slide-footer">
+  <footer class="slide-footer">
     <span class="text-sm text-gray-500">© 2024 Sistema de Gestión de Trámites INVIMA</span>
     <div class="flex space-x-4">
       <button class="text-sm text-blue-600 hover:text-blue-800">Descargar como PDF</button>
       <button class="text-sm text-blue-600 hover:text-blue-800">Compartir</button>
     </div>
-  </div>
+  </footer>
 </div>

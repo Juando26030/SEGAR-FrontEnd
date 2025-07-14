@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
-        <p class="text-sm opacity-80 mt-1">Seguimiento y monitoreo de solicitudes</p>
+        <p class="text-sm opacity-80 mt-1">Guía para empresas de alimentos procesados</p>
       </div>
       <div class="flex items-center">
         <span class="text-xl font-semibold">Sistema de Gestión de Trámites</span>
@@ -12,253 +12,345 @@
   </div>
 
   <div class="slide-content max-w-5xl mx-auto">
-    <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 4: Seguimiento de la Solicitud</h2>
-
-    <!-- Progress Indicator -->
-    <div class="mb-8">
-      <div class="flex justify-between items-center mb-2">
-        <span class="font-semibold text-gray-700">Progreso del trámite</span>
-        <span class="text-blue-600 font-semibold">80%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: 80%"></div>
-      </div>
-    </div>
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 4: Seguimiento y Respuesta a Requerimientos</h2>
 
     <div class="tabs">
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='estado'}" (click)="setActiveTab('estado')">Estado de Trámites</div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='requerimientos'}" (click)="setActiveTab('requerimientos')">Requerimientos</div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='notificaciones'}" (click)="setActiveTab('notificaciones')">Notificaciones</div>
-      <div class="tab" [ngClass]="{'tab-active': activeTab==='ayuda'}" (click)="setActiveTab('ayuda')">Ayuda y Soporte</div>
+      <button
+        *ngFor="let tab of tabs; trackBy: trackByTab"
+        class="tab"
+        [ngClass]="{'tab-active': activeTab === tab.id}"
+        (click)="setActiveTab(tab.id)"
+        [attr.aria-selected]="activeTab === tab.id"
+        role="tab">
+        {{tab.label}}
+      </button>
     </div>
 
-    <!-- ESTADO DE TRÁMITES -->
-    <div class="tab-content" *ngIf="activeTab==='estado'">
+    <!-- SEGUIMIENTO -->
+    <div class="tab-content" *ngIf="activeTab === 'seguimiento'" role="tabpanel">
       <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Estado de sus Trámites</h3>
-        <p class="text-gray-700 mb-6">Monitoree el progreso de todas sus solicitudes ante el INVIMA.</p>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Estado del Trámite</h3>
+        <p class="text-gray-700 mb-6">Consulte el estado actual de su solicitud y reciba notificaciones automáticas.</p>
 
-        <div class="space-y-4">
-          <div *ngFor="let tramite of tramites" class="tramite-card">
-            <div class="flex justify-between items-center mb-3">
-              <span class="font-semibold">{{tramite.nombre}}</span>
-              <span class="status-badge" [ngClass]="getEstadoClass(tramite.estado)">
-                {{getEstadoText(tramite.estado)}}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h4 class="text-lg font-semibold text-blue-800">Información del Trámite</h4>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div><strong>Número de Radicado:</strong> {{trackingInfo.radicadoNumber}}</div>
+            <div><strong>Fecha de Radicación:</strong> {{trackingInfo.submissionDate}}</div>
+            <div><strong>Tipo de Trámite:</strong> {{trackingInfo.procedureType}}</div>
+            <div><strong>Producto:</strong> {{trackingInfo.productName}}</div>
+            <div><strong>Estado Actual:</strong>
+              <span [ngClass]="getStatusClass(trackingInfo.currentStatus)">
+                {{trackingInfo.currentStatus}}
               </span>
             </div>
-            <div class="flex justify-between text-sm text-gray-500 mb-3">
-              <span>Radicado: {{tramite.id}}</span>
-              <span>Fecha: {{tramite.fecha}}</span>
-            </div>
-            <div class="progress-bar-small">
-              <div class="progress-fill-small" [style.width.%]="tramite.progreso"></div>
-            </div>
-            <div class="mt-3 text-sm">
-              <span class="text-blue-600 font-medium">Etapa actual:</span>
-              <span class="text-gray-700"> {{tramite.etapaActual}}</span>
-            </div>
-            <div class="mt-3" *ngIf="tramite.estado === 'requerimiento'">
-              <button (click)="onResponderRequerimiento(tramite.id)"
-                      class="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-md text-sm font-medium hover:bg-yellow-200 transition">
-                Ver requerimiento
-              </button>
-            </div>
-            <div class="mt-3" *ngIf="tramite.estado === 'aprobado'">
-              <button (click)="onDescargarResolucion(tramite.id)"
-                      class="px-4 py-2 bg-green-100 text-green-800 rounded-md text-sm font-medium hover:bg-green-200 transition">
-                Descargar resolución
-              </button>
+            <div><strong>Tiempo Transcurrido:</strong> {{trackingInfo.daysElapsed}} días hábiles</div>
+          </div>
+        </div>
+
+        <!-- Timeline de seguimiento -->
+        <div class="timeline-container mb-6">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Historial del Trámite</h4>
+          <div class="timeline">
+            <div *ngFor="let event of timelineEvents; trackBy: trackByTimeline"
+                 class="timeline-item"
+                 [ngClass]="{'timeline-completed': event.completed, 'timeline-current': event.current}">
+              <div class="timeline-marker">
+                <svg *ngIf="event.completed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+                <div *ngIf="!event.completed" class="w-2 h-2 bg-white rounded-full"></div>
+              </div>
+              <div class="timeline-content">
+                <h5 class="font-semibold">{{event.title}}</h5>
+                <p class="text-sm text-gray-600">{{event.description}}</p>
+                <span class="text-xs text-gray-500">{{event.date}}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-6 text-sm text-blue-700">
-          <strong>Información importante:</strong> Los tiempos de respuesta del INVIMA son de 60 días hábiles para trámites ordinarios y 30 días hábiles para trámites urgentes. Manténgase atento a las notificaciones.
+        <!-- Acciones disponibles -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="text-lg font-semibold text-gray-800 mb-3">Acciones Disponibles</h4>
+          <div class="flex flex-wrap gap-3">
+            <button
+              (click)="refreshStatus()"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar Estado
+            </button>
+            <button
+              (click)="downloadCertificate()"
+              class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm"
+              [disabled]="!canDownloadCertificate()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Descargar Certificado
+            </button>
+            <button
+              (click)="viewDocuments()"
+              class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Ver Documentos
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- REQUERIMIENTOS -->
-    <div class="tab-content" *ngIf="activeTab==='requerimientos'">
+    <div class="tab-content" *ngIf="activeTab === 'requerimientos'" role="tabpanel">
       <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Respuesta a Requerimientos</h3>
-        <p class="text-gray-700 mb-6">Adjunte la documentación solicitada por el INVIMA para continuar con el proceso.</p>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Gestión de Requerimientos</h3>
+        <p class="text-gray-700 mb-6">Responda a los requerimientos del INVIMA dentro de los plazos establecidos.</p>
 
-        <div class="requerimiento-card">
-          <div class="flex items-center mb-4">
-            <div class="bg-yellow-100 rounded-full p-3 mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
+        <div *ngIf="pendingRequirements.length === 0"
+             class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h4 class="text-lg font-semibold text-green-700 mb-2">¡Sin requerimientos pendientes!</h4>
+          <p class="text-green-600">No tiene requerimientos por responder en este momento.</p>
+        </div>
+
+        <div *ngIf="pendingRequirements.length > 0" class="space-y-4">
+          <div *ngFor="let requirement of pendingRequirements; trackBy: trackByRequirement"
+               class="border border-orange-200 rounded-lg p-4 bg-orange-50">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h4 class="font-semibold text-orange-800">{{requirement.title}}</h4>
+                <p class="text-sm text-orange-600">Número: {{requirement.number}}</p>
+              </div>
+              <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">
+                {{requirement.daysRemaining}} días restantes
+              </span>
             </div>
-            <div>
-              <h4 class="text-lg font-medium text-gray-800">Requerimiento INV-2023-32145</h4>
-              <p class="text-sm text-gray-500">Recibido el 10/05/2023 - Vence el 15/06/2023</p>
-            </div>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg mb-4">
-            <h5 class="font-semibold text-gray-800 mb-2">Documentos solicitados:</h5>
-            <ul class="list-disc pl-6 space-y-1 text-gray-700 text-sm">
-              <li>Análisis microbiológico actualizado (máximo 3 meses de antigüedad)</li>
-              <li>Certificado de Buenas Prácticas de Manufactura vigente</li>
-              <li>Descripción detallada del proceso de pasteurización</li>
-              <li>Validación de vida útil con estudios de estabilidad</li>
-            </ul>
-          </div>
-
-          <div class="verification-box mb-6 p-6 rounded-lg border-2 border-dashed border-yellow-500 bg-yellow-50">
-            <div *ngIf="!uploading && !success" class="text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-yellow-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              <h4 class="text-lg font-medium text-gray-800 mb-2">Adjunte los documentos solicitados</h4>
-              <p class="text-gray-600 mb-4">Formatos aceptados: PDF, JPG, PNG (máx. 10MB por archivo)</p>
-
-              <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput multiple>
-              <button (click)="fileInput.click()" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700">
-                Seleccionar archivos
+            <p class="text-gray-700 mb-3">{{requirement.description}}</p>
+            <div class="flex space-x-3">
+              <button
+                (click)="openRequirement(requirement.id)"
+                class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 text-sm">
+                Ver Detalle
+              </button>
+              <button
+                (click)="respondRequirement(requirement.id)"
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+                Responder
               </button>
             </div>
-
-            <div *ngIf="uploading" class="mt-4 text-center">
-              <p class="text-lg font-medium text-gray-800 mb-2">Subiendo archivos...</p>
-              <div class="progress-bar mt-2">
-                <div class="progress-fill" [style.width.%]="uploadProgress"></div>
-              </div>
-            </div>
-
-            <div *ngIf="success" class="mt-4 text-center">
-              <div class="checkmark-circle show mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h4 class="text-lg font-medium text-green-700 mb-2">¡Documentos enviados!</h4>
-              <p class="text-gray-600 mb-4">Su respuesta al requerimiento ha sido registrada correctamente.</p>
-            </div>
           </div>
+        </div>
 
-          <div class="bg-red-50 border-l-4 border-red-400 p-4 text-sm text-red-700">
-            <strong>Recordatorio:</strong> Tiene 30 días hábiles para responder al requerimiento. El incumplimiento de este plazo puede resultar en el archivo de su solicitud.
+        <!-- Historial de requerimientos -->
+        <div class="mt-8">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Historial de Requerimientos</h4>
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-300">
+              <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 border border-gray-300 text-left text-xs font-medium text-gray-500 uppercase">Número</th>
+                <th class="px-4 py-2 border border-gray-300 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                <th class="px-4 py-2 border border-gray-300 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
+                <th class="px-4 py-2 border border-gray-300 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                <th class="px-4 py-2 border border-gray-300 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let req of requirementHistory; trackBy: trackByRequirementHistory" class="hover:bg-gray-50">
+                <td class="px-4 py-2 border border-gray-300 text-sm">{{req.number}}</td>
+                <td class="px-4 py-2 border border-gray-300 text-sm">{{req.date}}</td>
+                <td class="px-4 py-2 border border-gray-300 text-sm">{{req.description}}</td>
+                <td class="px-4 py-2 border border-gray-300 text-sm">
+                  <span [ngClass]="getRequirementStatusClass(req.status)">{{req.status}}</span>
+                </td>
+                <td class="px-4 py-2 border border-gray-300 text-sm">
+                  <button (click)="viewRequirementDetail(req.id)" class="text-blue-600 hover:underline text-xs">
+                    Ver detalle
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
     <!-- NOTIFICACIONES -->
-    <div class="tab-content" *ngIf="activeTab==='notificaciones'">
+    <div class="tab-content" *ngIf="activeTab === 'notificaciones'" role="tabpanel">
       <div class="section-card">
         <h3 class="text-xl font-semibold mb-4 text-gray-800">Centro de Notificaciones</h3>
-        <p class="text-gray-700 mb-6">Manténgase informado sobre todas las actualizaciones de sus trámites.</p>
+        <p class="text-gray-700 mb-6">Configure sus preferencias de notificación y vea las comunicaciones recientes.</p>
 
-        <div class="space-y-4">
-          <div *ngFor="let notif of notificaciones" class="notification-item">
-            <div class="flex items-start space-x-3">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                   [ngClass]="getNotificationClass(notif.tipo)">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path [attr.d]="getNotificationIcon(notif.tipo)" />
-                </svg>
+        <!-- Configuración de notificaciones -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Configuración de Notificaciones</h4>
+          <form #notificationForm="ngForm">
+            <div class="space-y-3">
+              <div class="flex items-center">
+                <input
+                  [(ngModel)]="notificationSettings.email"
+                  name="emailNotifications"
+                  type="checkbox"
+                  class="form-checkbox">
+                <label class="ml-2 text-sm text-gray-700">Recibir notificaciones por correo electrónico</label>
               </div>
-              <div class="flex-1">
-                <p class="text-sm text-gray-800 font-medium">{{notif.mensaje}}</p>
-                <p class="text-xs text-gray-500 mt-1">{{notif.fecha}}</p>
+              <div class="flex items-center">
+                <input
+                  [(ngModel)]="notificationSettings.sms"
+                  name="smsNotifications"
+                  type="checkbox"
+                  class="form-checkbox">
+                <label class="ml-2 text-sm text-gray-700">Recibir notificaciones por SMS</label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  [(ngModel)]="notificationSettings.requirements"
+                  name="requirementNotifications"
+                  type="checkbox"
+                  class="form-checkbox">
+                <label class="ml-2 text-sm text-gray-700">Alertas de requerimientos próximos a vencer</label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  [(ngModel)]="notificationSettings.statusUpdates"
+                  name="statusNotifications"
+                  type="checkbox"
+                  class="form-checkbox">
+                <label class="ml-2 text-sm text-gray-700">Actualizaciones de estado del trámite</label>
               </div>
             </div>
+            <button
+              (click)="saveNotificationSettings()"
+              type="button"
+              class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+              Guardar Configuración
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de notificaciones -->
+        <div class="space-y-3">
+          <h4 class="text-lg font-semibold text-gray-800">Notificaciones Recientes</h4>
+          <div *ngFor="let notification of notifications; trackBy: trackByNotification"
+               class="border rounded-lg p-4"
+               [ngClass]="{'bg-blue-50 border-blue-200': !notification.read, 'bg-white border-gray-200': notification.read}">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center mb-2">
+                  <div [ngClass]="getNotificationIcon(notification.type)" class="mr-2"></div>
+                  <h5 class="font-semibold text-gray-800">{{notification.title}}</h5>
+                  <span *ngIf="!notification.read" class="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Nueva</span>
+                </div>
+                <p class="text-gray-700 text-sm mb-2">{{notification.message}}</p>
+                <span class="text-xs text-gray-500">{{notification.date}}</span>
+              </div>
+              <button
+                *ngIf="!notification.read"
+                (click)="markAsRead(notification.id)"
+                class="text-blue-600 hover:underline text-xs ml-4">
+                Marcar como leída
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div class="text-center mt-6">
-          <button class="text-blue-600 hover:text-blue-800 font-medium">
-            Ver todas las notificaciones
-          </button>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Acciones Rápidas</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button (click)="onConsultarEstado()"
-                  class="action-button bg-blue-50 text-blue-700 hover:bg-blue-100">
-            <span class="font-medium">Consultar estado de trámite</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </button>
-          <button (click)="onDescargarCertificados()"
-                  class="action-button bg-green-50 text-green-700 hover:bg-green-100">
-            <span class="font-medium">Descargar certificados</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-          </button>
         </div>
       </div>
     </div>
 
-    <!-- AYUDA Y SOPORTE -->
-    <div class="tab-content" *ngIf="activeTab==='ayuda'">
+    <!-- AYUDA -->
+    <div class="tab-content" *ngIf="activeTab === 'ayuda'" role="tabpanel">
       <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Centro de Ayuda y Soporte</h3>
-        <p class="text-gray-700 mb-6">Encuentre respuestas a sus preguntas o contacte a nuestro equipo de soporte.</p>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Centro de Ayuda</h3>
+        <p class="text-gray-700 mb-6">Encuentre respuestas a preguntas frecuentes y obtenga soporte técnico.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="help-card">
-            <h4 class="font-semibold text-gray-800 mb-3">Preguntas Frecuentes</h4>
-            <div class="space-y-3 text-sm">
-              <div class="faq-item">
-                <p class="font-medium text-gray-700">¿Cuánto tiempo toma el proceso de evaluación?</p>
-                <p class="text-gray-600">El INVIMA tiene 60 días hábiles para trámites ordinarios y 30 para urgentes.</p>
-              </div>
-              <div class="faq-item">
-                <p class="font-medium text-gray-700">¿Qué hacer si no respondo a tiempo un requerimiento?</p>
-                <p class="text-gray-600">Su solicitud puede archivarse. Debe iniciar un nuevo trámite.</p>
-              </div>
-              <div class="faq-item">
-                <p class="font-medium text-gray-700">¿Puedo modificar mi solicitud después de radicarla?</p>
-                <p class="text-gray-600">No, una vez radicada no se permiten modificaciones voluntarias.</p>
+          <!-- Preguntas frecuentes -->
+          <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4">Preguntas Frecuentes</h4>
+            <div class="space-y-3">
+              <div *ngFor="let faq of faqs; trackBy: trackByFaq" class="border-b border-gray-100 pb-2">
+                <button
+                  (click)="toggleFaq(faq.id)"
+                  class="w-full text-left font-medium text-gray-800 hover:text-blue-600">
+                  {{faq.question}}
+                </button>
+                <div *ngIf="faq.isOpen" class="mt-2 text-sm text-gray-600">
+                  {{faq.answer}}
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="help-card">
-            <h4 class="font-semibold text-gray-800 mb-3">Canales de Contacto</h4>
-            <div class="space-y-3 text-sm">
-              <div class="contact-item">
-                <span class="font-medium text-gray-700">Línea de atención:</span>
-                <span class="text-blue-600">01-8000-122-205</span>
+          <!-- Contacto y soporte -->
+          <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4">Contacto y Soporte</h4>
+            <div class="space-y-4">
+              <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <div>
+                  <p class="font-medium text-gray-800">Línea de Atención</p>
+                  <p class="text-sm text-gray-600">01 8000 122 100</p>
+                  <p class="text-xs text-gray-500">Lunes a viernes: 7:30 AM - 4:30 PM</p>
+                </div>
               </div>
-              <div class="contact-item">
-                <span class="font-medium text-gray-700">Email:</span>
-                <span class="text-blue-600">atencionalciudadano&#64;invima.gov.co</span>
+              <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <p class="font-medium text-gray-800">Correo Electrónico</p>
+                  <p class="text-sm text-gray-600">atencionalciudadano"&#64;invima.gov.co</p>
+                </div>
               </div>
-              <div class="contact-item">
-                <span class="font-medium text-gray-700">Horarios:</span>
-                <span class="text-gray-600">Lunes a viernes 7:30 AM - 4:30 PM</span>
+              <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <div>
+                  <p class="font-medium text-gray-800">Dirección</p>
+                  <p class="text-sm text-gray-600">Carrera 68D No. 17-11/21</p>
+                  <p class="text-sm text-gray-600">Bogotá D.C., Colombia</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100 mt-6">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2">¿Necesita ayuda personalizada?</h4>
-          <p class="text-gray-700 mb-4">Nuestro equipo de soporte está disponible para resolver sus dudas específicas sobre el proceso de seguimiento.</p>
-          <button (click)="onContactarSoporte()"
-                  class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
-            Contactar Soporte Técnico
-          </button>
+        <!-- Documentos útiles -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Documentos Útiles</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let doc of helpDocuments; trackBy: trackByHelpDoc" class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <a href="#" class="text-blue-600 hover:underline text-sm">{{doc.name}}</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
 
-  <div class="slide-footer">
+  <footer class="slide-footer">
     <span class="text-sm text-gray-500">© 2024 Sistema de Gestión de Trámites INVIMA</span>
     <div class="flex space-x-4">
       <button class="text-sm text-blue-600 hover:text-blue-800">Descargar como PDF</button>
       <button class="text-sm text-blue-600 hover:text-blue-800">Compartir</button>
     </div>
-  </div>
+  </footer>
 </div>
