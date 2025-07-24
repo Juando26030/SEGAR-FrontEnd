@@ -1,16 +1,18 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MenuLateralComponent } from '../menu-lateral/menu-lateral.component';
+import { BarraSuperiorComponent } from '../barra-superior/barra-superior.component';
 
 @Component({
   standalone: true,
   selector: 'app-menu-layout',
   templateUrl: './menu-layout.component.html',
   styleUrls: ['./menu-layout.component.css'],
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, MenuLateralComponent, BarraSuperiorComponent]
 })
 export class MenuLayoutComponent implements OnInit {
-  constructor(private el: ElementRef) {}
+  constructor(private readonly el: ElementRef) {}
 
   ngOnInit(): void {
     const button = this.el.nativeElement.querySelector('#mobile-menu-button');
