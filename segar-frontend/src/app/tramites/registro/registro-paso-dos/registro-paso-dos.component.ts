@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 interface RegistroForm {
   persona: 'Jurídica' | 'Natural';
@@ -33,7 +34,7 @@ interface DynamicDocument {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-dos',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './registro-paso-dos.component.html',
   styleUrls: ['./registro-paso-dos.component.css']
 })

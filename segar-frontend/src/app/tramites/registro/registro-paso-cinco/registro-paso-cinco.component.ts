@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 interface Tab {
   id: string;
@@ -50,7 +51,7 @@ interface UsefulLink {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-cinco',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './registro-paso-cinco.component.html',
   styleUrls: ['./registro-paso-cinco.component.css']
 })

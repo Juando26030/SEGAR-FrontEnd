@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 interface Tab {
   id: string;
@@ -66,7 +67,7 @@ interface HelpDocument {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-cuatro',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './registro-paso-cuatro.component.html',
   styleUrls: ['./registro-paso-cuatro.component.css']
 })

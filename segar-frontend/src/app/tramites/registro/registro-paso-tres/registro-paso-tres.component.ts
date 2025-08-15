@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 interface OptionItem {
   value: string;
@@ -80,7 +81,7 @@ interface SolicitudForm {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-tres',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './registro-paso-tres.component.html',
   styleUrls: ['./registro-paso-tres.component.css']
 })

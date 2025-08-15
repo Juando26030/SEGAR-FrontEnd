@@ -3,24 +3,24 @@
   <div class="slide-header">
     <div class="flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
+        <h1 class="text-xl font-bold">Proceso de Trámites Regulatorios - INVIMA</h1>
         <p class="text-sm opacity-80 mt-1">Guía para empresas de alimentos procesados</p>
       </div>
       <div class="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-        <span class="text-xl font-semibold">Sistema de Gestión de Trámites</span>
+        <span class="text-lg font-semibold">Sistema de Gestión de Trámites</span>
       </div>
     </div>
   </div>
 
   <!-- Slide Content -->
   <div class="slide-content">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-3xl font-bold text-gray-800 mb-6">Paso 1: Evaluación Inicial y Preparación</h2>
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Paso 1: Evaluación Inicial y Preparación</h2>
 
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-6">
         <div class="flex">
           <div class="flex-shrink-0">
             <svg class="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -35,15 +35,15 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div *ngFor="let card of cards; trackBy: cardTrackBy" class="step-card bg-white p-6 border border-gray-200">
-          <div class="flex items-center mb-4">
-            <div class="bg-blue-100 rounded-full p-3 mr-4" [innerHTML]="getIconSvg(card.icon)"></div>
-            <h3 class="text-xl font-semibold text-gray-800">{{ card.title }}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div *ngFor="let card of cards; trackBy: cardTrackBy" class="step-card bg-white p-4 border border-gray-200">
+          <div class="flex items-center mb-3">
+            <div class="bg-blue-100 rounded-full p-2 mr-3" [innerHTML]="getIconSvg(card.icon)"></div>
+            <h3 class="text-lg font-semibold text-gray-800">{{ card.title }}</h3>
           </div>
-          <ul class="space-y-2 text-gray-600">
+          <ul class="space-y-1 text-gray-600 text-sm">
             <li *ngFor="let item of card.items; trackBy: itemTrackBy" class="flex items-start">
-              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg class="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
               <span>{{ item }}</span>
@@ -52,13 +52,34 @@
         </div>
       </div>
 
-      <div class="mt-10 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-        <h3 class="text-xl font-semibold text-gray-800 mb-4">Próximos Pasos</h3>
-        <div *ngFor="let step of nextSteps; trackBy: stepTrackBy" class="process-step mb-4 last:mb-0">
-          <h4 class="text-lg font-medium text-gray-800">{{ step.title }}</h4>
-          <p class="text-gray-600 mt-1">{{ step.desc }}</p>
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Próximos Pasos</h3>
+        <div *ngFor="let step of nextSteps; trackBy: stepTrackBy" class="process-step mb-3 last:mb-0">
+          <h4 class="text-base font-medium text-gray-800">{{ step.title }}</h4>
+          <p class="text-gray-600 mt-1 text-sm">{{ step.desc }}</p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="step-navigation">
+    <div class="step-indicator">
+      Paso <span class="current-step">1</span> de 5
+    </div>
+    <div class="flex gap-3">
+      <button class="nav-btn nav-btn-secondary" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Anterior
+      </button>
+      <a routerLink="/main/nuevo/registro/paso-2" class="nav-btn nav-btn-primary">
+        Siguiente
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
     </div>
   </div>
 
@@ -71,30 +92,5 @@
       <button class="text-sm text-blue-600 hover:text-blue-800 mr-4" type="button">Descargar como PDF</button>
       <button class="text-sm text-blue-600 hover:text-blue-800" type="button">Compartir</button>
     </div>
-  </div>
-
-  <!-- Slide Controls -->
-  <div class="slide-controls">
-    <button class="nav-button bg-white rounded-full p-3 shadow-md text-gray-600 hover:text-blue-600 focus:outline-none"
-            type="button"
-            disabled
-            aria-label="Paso anterior">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    <button routerLink="/nuevo/registro/paso-2"
-            class="nav-button bg-blue-600 rounded-full p-3 shadow-md text-white hover:bg-blue-700 focus:outline-none"
-            type="button"
-            aria-label="Siguiente paso">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
-    </button>
-  </div>
-
-  <!-- Slide Number -->
-  <div class="slide-number">
-    1 / 5
   </div>
 </div>
