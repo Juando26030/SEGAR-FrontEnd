@@ -1,39 +1,4 @@
-.slide-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 80vh;
-  max-height: 90vh;
-  background-color: #f3f4f6;
-  font-family: 'Inter', sans-serif;
-  border-radius: 12px;
-  margin: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.slide-header {
-  background: linear-gradient(to right, #1e40af, #3b82f6);
-  color: white;
-  padding: 1rem 2rem;
-  border-bottom: 4px solid #1e3a8a;
-  border-radius: 12px 12px 0 0;
-}
-
-.slide-content {
-  flex: 1;
-  padding: 1.5rem;
-  overflow-y: auto;
-  background-color: white;
-}
-
-.slide-footer {
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-  padding: 0.75rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 0 0 12px 12px;
-}
+/* Eliminado slide-container para integración completa */
 
 .process-step {
   border-left: 4px solid #3b82f6;
