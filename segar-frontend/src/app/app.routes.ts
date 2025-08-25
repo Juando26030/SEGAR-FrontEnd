@@ -39,14 +39,19 @@ export const routes: Routes = [
       { path: 'configuracion', component: ConfiguracionComponent },
       { path: 'generador-documento', component: GeneradorDocumentoComponent },
       {
+        path: 'nuevo/info',
+        children: [
+          { path: 'evaluacion', component: RegistroPasoUnoComponent },
+          { path: 'plataforma', component: RegistroPasoDosComponent }
+        ]
+      },
+      {
         path: 'nuevo/registro',
         children: [
-          { path: 'paso-1', component: RegistroPasoUnoComponent },
-          { path: 'paso-2', component: RegistroPasoDosComponent },
           { path: 'paso-3', component: RegistroPasoTresComponent },
           { path: 'paso-4', component: RegistroPasoCuatroComponent },
           { path: 'paso-5', component: RegistroPasoCincoComponent },
-          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+          { path: '', redirectTo: 'paso-3', pathMatch: 'full' }
         ]
       }
     ]
