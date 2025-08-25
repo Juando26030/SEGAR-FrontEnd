@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { RegistroPasoCuatroService } from './registro-paso-cuatro.service';
+import { HttpClientModule } from '@angular/common/http';
+
 
 interface Tab {
   id: string;
@@ -67,12 +70,20 @@ interface HelpDocument {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-cuatro',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    HttpClientModule
+  ],
   templateUrl: './registro-paso-cuatro.component.html',
   styleUrls: ['./registro-paso-cuatro.component.css']
 })
 export class RegistroPasoCuatroComponent implements OnInit {
   activeTab = 'seguimiento';
+  private tramiteId = 1; // TODO: obtener desde ruta o contexto
+
+  constructor(private paso4: RegistroPasoCuatroService) {}
 
   readonly tabs: Tab[] = [
     { id: 'seguimiento', label: 'Seguimiento' },
@@ -220,7 +231,93 @@ export class RegistroPasoCuatroComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    // Inicialización del componente
+    // Cargar datos reales desde el backend
+    this.cargarDatosIniciales();
+  }
+
+  private cargarDatosIniciales(): void {
+    // Tracking
+    this.paso4.getTracking(this.tramiteId).subscribe({
+      next: (t) => {
+        this.trackingInfo = {
+          radicadoNumber: t.radicadoNumber,
+          submissionDate: t.submissionDate,
+          procedureType: t.procedureType,
+          productName: t.productName,
+          currentStatus: t.currentStatus,
+          daysElapsed: t.daysElapsed
+        };
+      },
+      error: (e) => console.error('Error cargando tracking', e)
+    });
+
+    // Timeline
+    this.paso4.getTimeline(this.tramiteId).subscribe({
+      next: (events) => {
+        this.timelineEvents = events.map(e => ({
+          id: String(e.id),
+          title: e.title,
+          description: e.description,
+          date: e.date,
+          completed: e.completed,
+          current: e.current
+        }));
+      },
+      error: (e) => console.error('Error cargando timeline', e)
+    });
+
+    // Requerimientos pendientes
+    this.paso4.getRequirements(this.tramiteId, 'PENDIENTE').subscribe({
+      next: (reqs) => {
+        this.pendingRequirements = reqs.map(r => ({
+          id: String(r.id),
+          number: r.number,
+          title: r.title,
+          description: r.description,
+          daysRemaining: r.daysRemaining,
+          status: r.status,
+          date: r.date
+        }));
+      },
+      error: (e) => console.error('Error cargando requerimientos pendientes', e)
+    });
+
+    // Historial de requerimientos respondidos
+    this.paso4.getRequirements(this.tramiteId, 'RESPONDIDO').subscribe({
+      next: (reqs) => {
+        this.requirementHistory = reqs.map(r => ({
+          id: String(r.id),
+          number: r.number,
+          title: r.title,
+          description: r.description,
+          daysRemaining: r.daysRemaining,
+          status: r.status,
+          date: r.date
+        }));
+      },
+      error: (e) => console.error('Error cargando historial de requerimientos', e)
+    });
+
+    // Notificaciones
+    this.paso4.getNotifications(this.tramiteId).subscribe({
+      next: (notifs) => {
+        this.notifications = notifs.map(n => ({
+          id: String(n.id),
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          date: n.date,
+          read: n.read
+        }));
+      },
+      error: (e) => console.error('Error cargando notificaciones', e)
+    });
+
+    // Settings de notificaciones
+    this.paso4.getNotifSettings(this.tramiteId).subscribe({
+      next: (s) => { this.notificationSettings = { ...s }; },
+      error: (e) => console.error('Error cargando configuración de notificaciones', e)
+    });
   }
 
   setActiveTab(tab: string): void {
@@ -258,9 +355,33 @@ export class RegistroPasoCuatroComponent implements OnInit {
   }
 
   refreshStatus(): void {
-    console.log('Actualizando estado del trámite...');
-    // Simular actualización
-    alert('Estado actualizado correctamente');
+    this.paso4.refreshStatus(this.tramiteId).subscribe({
+      next: (t) => {
+        this.trackingInfo = {
+          radicadoNumber: t.radicadoNumber,
+          submissionDate: t.submissionDate,
+          procedureType: t.procedureType,
+          productName: t.productName,
+          currentStatus: t.currentStatus,
+          daysElapsed: t.daysElapsed
+        };
+        // refrescar timeline para reflejar cambios de estado
+        this.paso4.getTimeline(this.tramiteId).subscribe({
+          next: (events) => {
+            this.timelineEvents = events.map(e => ({
+              id: String(e.id),
+              title: e.title,
+              description: e.description,
+              date: e.date,
+              completed: e.completed,
+              current: e.current
+            }));
+          },
+          error: (e) => console.error('Error recargando timeline', e)
+        });
+      },
+      error: (e) => console.error('Error actualizando estado', e)
+    });
   }
 
   canDownloadCertificate(): boolean {
@@ -269,8 +390,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
 
   downloadCertificate(): void {
     if (this.canDownloadCertificate()) {
-      console.log('Descargando certificado...');
-      alert('Descarga del certificado iniciada');
+      this.paso4.downloadCertificate(this.tramiteId);
     }
   }
 
@@ -295,15 +415,24 @@ export class RegistroPasoCuatroComponent implements OnInit {
   }
 
   saveNotificationSettings(): void {
-    console.log('Guardando configuración de notificaciones:', this.notificationSettings);
-    alert('Configuración de notificaciones guardada correctamente');
+    this.paso4.updateNotifSettings(this.tramiteId, this.notificationSettings).subscribe({
+      next: () => {
+        // Opcional: feedback visual
+        console.log('Configuración de notificaciones guardada');
+      },
+      error: (e) => console.error('Error guardando configuración de notificaciones', e)
+    });
   }
 
   markAsRead(notificationId: string): void {
-    const notification = this.notifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
-    }
+    const notifNum = Number(notificationId);
+    this.paso4.markAsRead(this.tramiteId, notifNum).subscribe({
+      next: () => {
+        const notification = this.notifications.find(n => n.id === notificationId);
+        if (notification) notification.read = true;
+      },
+      error: (e) => console.error('Error marcando notificación como leída', e)
+    });
   }
 
   toggleFaq(faqId: string): void {
