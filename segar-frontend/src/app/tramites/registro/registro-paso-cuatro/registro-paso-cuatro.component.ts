@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { RegistroPasoCuatroService } from './registro-paso-cuatro.service';
+
 
 interface Tab {
   id: string;
@@ -67,12 +69,19 @@ interface HelpDocument {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-cuatro',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule
+  ],
   templateUrl: './registro-paso-cuatro.component.html',
   styleUrls: ['./registro-paso-cuatro.component.css']
 })
 export class RegistroPasoCuatroComponent implements OnInit {
   activeTab = 'seguimiento';
+  private tramiteId = 1; // TODO: obtener desde ruta o contexto
+
+  constructor(private paso4: RegistroPasoCuatroService) {}
 
   readonly tabs: Tab[] = [
     { id: 'seguimiento', label: 'Seguimiento' },
@@ -82,145 +91,121 @@ export class RegistroPasoCuatroComponent implements OnInit {
   ];
 
   trackingInfo: TrackingInfo = {
-    radicadoNumber: '2024-001234-56789',
-    submissionDate: '15 de marzo de 2024',
-    procedureType: 'Registro Sanitario - Alimento de Riesgo Medio',
-    productName: 'Yogurt Natural Premium',
-    currentStatus: 'En evaluación técnica',
-    daysElapsed: 28
+    radicadoNumber: '',
+    submissionDate: '',
+    procedureType: '',
+    productName: '',
+    currentStatus: '',
+    daysElapsed: 0
   };
 
-  timelineEvents: TimelineEvent[] = [
-    {
-      id: '1',
-      title: 'Solicitud Radicada',
-      description: 'Documentos recibidos y radicado asignado',
-      date: '15 de marzo de 2024',
-      completed: true,
-      current: false
-    },
-    {
-      id: '2',
-      title: 'Verificación Documental',
-      description: 'Revisión inicial de documentos completada',
-      date: '20 de marzo de 2024',
-      completed: true,
-      current: false
-    },
-    {
-      id: '3',
-      title: 'Evaluación Técnica',
-      description: 'Análisis técnico del producto en curso',
-      date: '25 de marzo de 2024',
-      completed: false,
-      current: true
-    },
-    {
-      id: '4',
-      title: 'Concepto Técnico',
-      description: 'Emisión del concepto técnico final',
-      date: 'Pendiente',
-      completed: false,
-      current: false
-    },
-    {
-      id: '5',
-      title: 'Expedición del Registro',
-      description: 'Emisión del registro sanitario',
-      date: 'Pendiente',
-      completed: false,
-      current: false
-    }
-  ];
+  timelineEvents: TimelineEvent[] = [];
 
-  pendingRequirements: Requirement[] = [
-    {
-      id: 'req-001',
-      number: 'REQ-2024-001234-01',
-      title: 'Información nutricional complementaria',
-      description: 'Se requiere información adicional sobre el contenido nutricional del producto y metodología de análisis utilizada.',
-      daysRemaining: 12,
-      status: 'Pendiente',
-      date: '2 de abril de 2024'
-    }
-  ];
+  pendingRequirements: Requirement[] = [];
 
-  requirementHistory: Requirement[] = [
-    {
-      id: 'req-002',
-      number: 'REQ-2024-001234-02',
-      title: 'Clarificación proceso de fabricación',
-      description: 'Descripción detallada del proceso de pasteurización',
-      daysRemaining: 0,
-      status: 'Respondido',
-      date: '28 de marzo de 2024'
-    }
-  ];
+  requirementHistory: Requirement[] = [];
 
-  notifications: Notification[] = [
-    {
-      id: 'not-001',
-      type: 'requirement',
-      title: 'Nuevo requerimiento recibido',
-      message: 'Se ha generado un nuevo requerimiento para su trámite. Tiene 15 días hábiles para responder.',
-      date: '2 de abril de 2024',
-      read: false
-    },
-    {
-      id: 'not-002',
-      type: 'status',
-      title: 'Cambio de estado del trámite',
-      message: 'Su trámite ha pasado a evaluación técnica.',
-      date: '25 de marzo de 2024',
-      read: true
-    }
-  ];
+  notifications: Notification[] = [];
 
   notificationSettings: NotificationSettings = {
-    email: true,
+    email: false,
     sms: false,
-    requirements: true,
-    statusUpdates: true
+    requirements: false,
+    statusUpdates: false
   };
 
-  faqs: FAQ[] = [
-    {
-      id: 'faq-001',
-      question: '¿Cuánto tiempo demora la evaluación de mi trámite?',
-      answer: 'El tiempo de evaluación varía según el tipo de trámite: 60 días hábiles para trámite ordinario y 30 días hábiles para trámite urgente.',
-      isOpen: false
-    },
-    {
-      id: 'faq-002',
-      question: '¿Qué pasa si no respondo un requerimiento a tiempo?',
-      answer: 'Si no responde dentro del plazo establecido (15 días hábiles), su trámite será rechazado y deberá iniciar un nuevo proceso.',
-      isOpen: false
-    },
-    {
-      id: 'faq-003',
-      question: '¿Puedo modificar mi solicitud después de radicarla?',
-      answer: 'No es posible modificar la solicitud una vez radicada. Solo puede proporcionar información adicional en respuesta a requerimientos.',
-      isOpen: false
-    },
-    {
-      id: 'faq-004',
-      question: '¿Cómo puedo acelerar el proceso de evaluación?',
-      answer: 'Puede optar por el trámite urgente pagando la tarifa correspondiente, siempre que cumpla con los requisitos establecidos.',
-      isOpen: false
-    }
-  ];
+  faqs: FAQ[] = [];
 
-  helpDocuments: HelpDocument[] = [
-    { name: 'Manual de Usuario del Sistema', url: '#' },
-    { name: 'Guía de Trámites INVIMA', url: '#' },
-    { name: 'Resolución 2674 de 2013', url: '#' },
-    { name: 'Decreto 539 de 2014', url: '#' },
-    { name: 'Manual Tarifario Vigente', url: '#' },
-    { name: 'Formato de Respuesta a Requerimientos', url: '#' }
-  ];
+  helpDocuments: HelpDocument[] = [];
 
   ngOnInit(): void {
-    // Inicialización del componente
+    // Cargar datos reales desde el backend
+    this.cargarDatosIniciales();
+  }
+
+  private cargarDatosIniciales(): void {
+    // Tracking
+    this.paso4.getTracking(this.tramiteId).subscribe({
+      next: (t) => {
+        this.trackingInfo = {
+          radicadoNumber: t.radicadoNumber,
+          submissionDate: t.submissionDate,
+          procedureType: t.procedureType,
+          productName: t.productName,
+          currentStatus: t.currentStatus,
+          daysElapsed: t.daysElapsed
+        };
+      },
+      error: (e) => console.error('Error cargando tracking', e)
+    });
+
+    // Timeline
+    this.paso4.getTimeline(this.tramiteId).subscribe({
+      next: (events) => {
+        this.timelineEvents = events.map(e => ({
+          id: String(e.id),
+          title: e.title,
+          description: e.description,
+          date: e.date,
+          completed: e.completed,
+          current: e.current
+        }));
+      },
+      error: (e) => console.error('Error cargando timeline', e)
+    });
+
+    // Requerimientos pendientes
+    this.paso4.getRequirements(this.tramiteId, 'PENDIENTE').subscribe({
+      next: (reqs) => {
+        this.pendingRequirements = reqs.map(r => ({
+          id: String(r.id),
+          number: r.number,
+          title: r.title,
+          description: r.description,
+          daysRemaining: r.daysRemaining,
+          status: r.status,
+          date: r.date
+        }));
+      },
+      error: (e) => console.error('Error cargando requerimientos pendientes', e)
+    });
+
+    // Historial de requerimientos respondidos
+    this.paso4.getRequirements(this.tramiteId, 'RESPONDIDO').subscribe({
+      next: (reqs) => {
+        this.requirementHistory = reqs.map(r => ({
+          id: String(r.id),
+          number: r.number,
+          title: r.title,
+          description: r.description,
+          daysRemaining: r.daysRemaining,
+          status: r.status,
+          date: r.date
+        }));
+      },
+      error: (e) => console.error('Error cargando historial de requerimientos', e)
+    });
+
+    // Notificaciones
+    this.paso4.getNotifications(this.tramiteId).subscribe({
+      next: (notifs) => {
+        this.notifications = notifs.map(n => ({
+          id: String(n.id),
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          date: n.date,
+          read: n.read
+        }));
+      },
+      error: (e) => console.error('Error cargando notificaciones', e)
+    });
+
+    // Settings de notificaciones
+    this.paso4.getNotifSettings(this.tramiteId).subscribe({
+      next: (s) => { this.notificationSettings = { ...s }; },
+      error: (e) => console.error('Error cargando configuración de notificaciones', e)
+    });
   }
 
   setActiveTab(tab: string): void {
@@ -258,9 +243,33 @@ export class RegistroPasoCuatroComponent implements OnInit {
   }
 
   refreshStatus(): void {
-    console.log('Actualizando estado del trámite...');
-    // Simular actualización
-    alert('Estado actualizado correctamente');
+    this.paso4.refreshStatus(this.tramiteId).subscribe({
+      next: (t) => {
+        this.trackingInfo = {
+          radicadoNumber: t.radicadoNumber,
+          submissionDate: t.submissionDate,
+          procedureType: t.procedureType,
+          productName: t.productName,
+          currentStatus: t.currentStatus,
+          daysElapsed: t.daysElapsed
+        };
+        // refrescar timeline para reflejar cambios de estado
+        this.paso4.getTimeline(this.tramiteId).subscribe({
+          next: (events) => {
+            this.timelineEvents = events.map(e => ({
+              id: String(e.id),
+              title: e.title,
+              description: e.description,
+              date: e.date,
+              completed: e.completed,
+              current: e.current
+            }));
+          },
+          error: (e) => console.error('Error recargando timeline', e)
+        });
+      },
+      error: (e) => console.error('Error actualizando estado', e)
+    });
   }
 
   canDownloadCertificate(): boolean {
@@ -269,8 +278,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
 
   downloadCertificate(): void {
     if (this.canDownloadCertificate()) {
-      console.log('Descargando certificado...');
-      alert('Descarga del certificado iniciada');
+      this.paso4.downloadCertificate(this.tramiteId);
     }
   }
 
@@ -295,15 +303,24 @@ export class RegistroPasoCuatroComponent implements OnInit {
   }
 
   saveNotificationSettings(): void {
-    console.log('Guardando configuración de notificaciones:', this.notificationSettings);
-    alert('Configuración de notificaciones guardada correctamente');
+    this.paso4.updateNotifSettings(this.tramiteId, this.notificationSettings).subscribe({
+      next: () => {
+        // Opcional: feedback visual
+        console.log('Configuración de notificaciones guardada');
+      },
+      error: (e) => console.error('Error guardando configuración de notificaciones', e)
+    });
   }
 
   markAsRead(notificationId: string): void {
-    const notification = this.notifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
-    }
+    const notifNum = Number(notificationId);
+    this.paso4.markAsRead(this.tramiteId, notifNum).subscribe({
+      next: () => {
+        const notification = this.notifications.find(n => n.id === notificationId);
+        if (notification) notification.read = true;
+      },
+      error: (e) => console.error('Error marcando notificación como leída', e)
+    });
   }
 
   toggleFaq(faqId: string): void {

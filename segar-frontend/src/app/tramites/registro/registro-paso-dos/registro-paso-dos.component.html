@@ -1,5 +1,5 @@
 <div class="max-w-4xl mx-auto">
-  <h2 class="text-2xl font-bold text-gray-800 mb-4">Paso 2: Registro en Plataforma INVIMA</h2>
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Información Preparatoria: Registro en Plataforma INVIMA</h2>
 
     <nav class="tabs" role="tablist">
       <button
@@ -50,11 +50,6 @@
           <p class="text-gray-700 mb-2">
             Visite <a href="https://www.invima.gov.co" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">www.invima.gov.co</a> y busque la sección "Trámites y Servicios".
           </p>
-          <div class="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-600">
-            <strong class="block mb-1">INVIMA - Instituto Nacional de Vigilancia de Medicamentos y Alimentos</strong>
-            <p>Inicio • Institucional • Trámites y Servicios • Normatividad • Sala de Prensa • Buscar...</p>
-            <p class="mt-1">Trámites y Servicios • Registros Sanitarios • Consultas y Verificación</p>
-          </div>
         </section>
 
         <!-- Paso 2 -->
@@ -73,92 +68,6 @@
             <li>Dirección de la empresa y datos de contacto</li>
             <li>Correo electrónico corporativo</li>
           </ul>
-
-          <form class="grid grid-cols-1 md:grid-cols-2 gap-4" (ngSubmit)="onSubmitRegistro()" #registroFormRef="ngForm">
-            <div>
-              <label for="persona" class="form-label">Tipo de Persona</label>
-              <select
-                id="persona"
-                [(ngModel)]="registroForm.persona"
-                name="persona"
-                class="form-input"
-                required>
-                <option value="Jurídica">Jurídica</option>
-                <option value="Natural">Natural</option>
-              </select>
-            </div>
-            <div>
-              <label for="tipoDocumento" class="form-label">Tipo de Documento</label>
-              <select
-                id="tipoDocumento"
-                [(ngModel)]="registroForm.tipoDocumento"
-                name="tipoDocumento"
-                class="form-input"
-                required>
-                <option value="NIT">NIT</option>
-                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
-              </select>
-            </div>
-            <div>
-              <label for="numeroDocumento" class="form-label">Número de Documento</label>
-              <input
-                type="text"
-                id="numeroDocumento"
-                [(ngModel)]="registroForm.numeroDocumento"
-                name="numeroDocumento"
-                class="form-input"
-                required>
-            </div>
-            <div>
-              <label for="razonSocial" class="form-label">Razón Social</label>
-              <input
-                type="text"
-                id="razonSocial"
-                [(ngModel)]="registroForm.razonSocial"
-                name="razonSocial"
-                class="form-input"
-                required>
-            </div>
-            <div class="col-span-2">
-              <label for="correo" class="form-label">Correo Electrónico</label>
-              <input
-                type="email"
-                id="correo"
-                [(ngModel)]="registroForm.correo"
-                name="correo"
-                class="form-input"
-                required>
-            </div>
-            <div>
-              <label for="password" class="form-label">Contraseña</label>
-              <input
-                type="password"
-                id="password"
-                [(ngModel)]="registroForm.password"
-                name="password"
-                class="form-input"
-                minlength="8"
-                required>
-            </div>
-            <div>
-              <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                [(ngModel)]="registroForm.confirmPassword"
-                name="confirmPassword"
-                class="form-input"
-                required>
-            </div>
-            <div class="col-span-2 text-center mt-4">
-              <button
-                type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                [disabled]="!registroFormRef.form.valid">
-                Registrarse
-              </button>
-            </div>
-          </form>
         </section>
 
         <!-- Paso 3 -->
@@ -170,9 +79,14 @@
           <p class="text-gray-700">
             El INVIMA enviará un correo de verificación para activar su cuenta. Siga las instrucciones del correo para completar el proceso.
           </p>
-          <p class="text-yellow-700 italic mt-1">
-            Importante: Revise su carpeta de spam si no encuentra el correo de verificación en su bandeja de entrada.
-          </p>
+          <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-2 text-sm text-yellow-800">
+            <div class="flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <p><strong>Importante:</strong> Revise su carpeta de spam si no encuentra el correo de verificación en su bandeja de entrada.</p>
+            </div>
+          </div>
         </section>
 
         <!-- Paso 4 -->
@@ -184,20 +98,15 @@
           <p class="text-gray-700">
             Una vez activada su cuenta, inicie sesión con sus credenciales para acceder a los servicios de trámites en línea.
           </p>
-          <p class="text-green-700 italic mt-1">
-            Consejo: Guarde sus credenciales en un lugar seguro y no las comparta con personas no autorizadas.
-          </p>
+          <div class="bg-green-50 border-l-4 border-green-400 p-4 mt-2 text-sm text-green-800">
+            <div class="flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p><strong>Consejo:</strong> Guarde sus credenciales en un lugar seguro y no las comparta con personas no autorizadas.</p>
+            </div>
+          </div>
         </section>
-
-        <!-- Próximos pasos -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2">Próximos Pasos</h4>
-          <ul class="list-disc pl-6 space-y-1 text-gray-700">
-            <li>Radicación de la solicitud: Presentar formalmente la solicitud con toda la documentación requerida.</li>
-            <li>Seguimiento del trámite: Monitorear el estado de la solicitud a través de la plataforma del INVIMA.</li>
-            <li>Respuesta a requerimientos: Atender oportunamente cualquier solicitud de información adicional.</li>
-          </ul>
-        </div>
       </div>
     </div>
 
@@ -215,45 +124,8 @@
           <li>Identifique el código del trámite que necesita realizar</li>
         </ol>
 
-        <h4 class="text-lg font-semibold text-gray-800 mb-2">Tarifas comunes para alimentos procesados (2023)</h4>
-
-        <div class="overflow-x-auto mb-4">
-          <table class="min-w-full bg-white border border-gray-300 text-sm text-gray-700">
-            <thead class="bg-blue-100">
-            <tr>
-              <th scope="col" class="px-4 py-2 border border-gray-300 text-left">Código</th>
-              <th scope="col" class="px-4 py-2 border border-gray-300 text-left">Descripción del Trámite</th>
-              <th scope="col" class="px-4 py-2 border border-gray-300 text-left">Valor (COP)</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr
-              *ngFor="let tarifa of tarifas; trackBy: trackByTarifa"
-              class="hover:bg-gray-50">
-              <td class="px-4 py-2 border border-gray-300">{{ tarifa.codigo }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ tarifa.descripcion }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ tarifa.valor }}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="text-sm text-gray-600 italic mb-6">
-          * Los valores son aproximados y pueden variar. Consulte siempre el manual tarifario vigente.
-        </p>
-
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-6 text-sm text-yellow-800">
           <p><strong>Recuerde:</strong> El pago de la tarifa es requisito indispensable para iniciar cualquier trámite. Conserve el comprobante de pago para adjuntarlo a su solicitud.</p>
-        </div>
-
-        <!-- PRÓXIMOS PASOS -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2">Próximos Pasos</h4>
-          <ul class="list-disc pl-6 space-y-1 text-gray-700">
-            <li>Radicación de la solicitud: Presentar formalmente la solicitud con toda la documentación requerida.</li>
-            <li>Seguimiento del trámite: Monitorear el estado de la solicitud a través de la plataforma del INVIMA.</li>
-            <li>Respuesta a requerimientos: Atender oportunamente cualquier solicitud de información adicional.</li>
-          </ul>
         </div>
       </div>
     </div>
@@ -262,113 +134,170 @@
     <div class="tab-content" *ngIf="activeTab === 'documentos'" role="tabpanel">
       <div class="section-card">
         <h3 class="text-xl font-semibold mb-4 text-gray-800">Preparación de Documentos</h3>
-        <p class="text-gray-700 mb-4">Complete cuidadosamente la información para generar la ficha técnica de su producto.</p>
-
-        <form (ngSubmit)="onSaveDocument()" #documentForm="ngForm">
-          <div class="form-section">
-            <label for="productName" class="form-label">Nombre del producto</label>
-            <input
-              id="productName"
-              [(ngModel)]="dynamicDocument.productName"
-              name="productName"
-              class="form-input"
-              type="text"
-              required>
-
-            <label for="brand" class="form-label mt-3">Marca comercial</label>
-            <input
-              id="brand"
-              [(ngModel)]="dynamicDocument.brand"
-              name="brand"
-              class="form-input"
-              type="text"
-              required>
-
-            <label for="presentation" class="form-label mt-3">Presentación comercial</label>
-            <input
-              id="presentation"
-              [(ngModel)]="dynamicDocument.presentation"
-              name="presentation"
-              class="form-input"
-              type="text"
-              required>
-
-            <label for="shelfLife" class="form-label mt-3">Vida útil estimada (meses)</label>
-            <input
-              id="shelfLife"
-              [(ngModel)]="dynamicDocument.shelfLife"
-              name="shelfLife"
-              class="form-input"
-              type="number"
-              min="1"
-              required>
-          </div>
-
-          <div class="form-section">
-            <label for="description" class="form-label">Descripción del Producto</label>
-            <textarea
-              id="description"
-              [(ngModel)]="dynamicDocument.description"
-              name="description"
-              class="form-textarea"
-              required></textarea>
-          </div>
-
-          <div class="form-section">
-            <label for="ingredients" class="form-label">Ingredientes</label>
-            <textarea
-              id="ingredients"
-              [(ngModel)]="dynamicDocument.ingredients"
-              name="ingredients"
-              class="form-textarea"
-              required></textarea>
-          </div>
-
-          <div class="form-section">
-            <label class="form-label">Aditivos Alimentarios</label>
-            <div
-              *ngFor="let aditivo of dynamicDocument.additives; let i = index; trackBy: trackByAdditive"
-              class="flex space-x-2 mb-2">
-              <input
-                [(ngModel)]="aditivo.name"
-                [name]="'additive_name_' + i"
-                placeholder="Nombre"
-                class="form-input">
-              <input
-                [(ngModel)]="aditivo.code"
-                [name]="'additive_code_' + i"
-                placeholder="Código INS"
-                class="form-input">
-              <input
-                [(ngModel)]="aditivo.function"
-                [name]="'additive_function_' + i"
-                placeholder="Función"
-                class="form-input">
-              <button
-                type="button"
-                (click)="removeAdditive(i)"
-                class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                [attr.aria-label]="'Eliminar aditivo ' + (i + 1)">
-                ✕
-              </button>
+        
+        <!-- Información importante -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 text-sm text-blue-700">
+          <div class="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="font-medium mb-1">La correcta preparación de los documentos es fundamental para evitar rechazos y agilizar el proceso de aprobación.</p>
+              <p>Todos los documentos deben estar en formatos PDF y debidamente firmados cuando corresponda.</p>
             </div>
-            <button
-              type="button"
-              (click)="addAdditive()"
-              class="mt-2 text-sm text-blue-600 hover:underline">
-              Añadir aditivo
-            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- Documentos Legales -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div class="flex items-center mb-4">
+              <div class="bg-blue-100 rounded-full p-2 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-800">Documentos Legales</h4>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Certificado de existencia y representación legal</p>
+                  <p class="text-sm text-gray-600">(vigencia máxima de 3 meses)</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Poder debidamente otorgado</p>
+                  <p class="text-sm text-gray-600">(si acta mediante apoderado)</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Certificado de venta libre</p>
+                  <p class="text-sm text-gray-600">(para productos importados)</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Comprobante de pago de la tarifa correspondiente</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="text-center mt-6">
-            <button
-              type="submit"
-              class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
-              [disabled]="!documentForm.form.valid">
-              Guardar Ficha Técnica
-            </button>
+          <!-- Documentos Técnicos -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div class="flex items-center mb-4">
+              <div class="bg-blue-100 rounded-full p-2 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-800">Documentos Técnicos</h4>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Ficha técnica completa del producto</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Composición cualitativa y cuantitativa</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Descripción del proceso de fabricación</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Especificaciones fisicoquímicas y microbiológicas</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <p class="font-medium text-gray-800">Certificado de análisis del producto terminado</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
+
+        <!-- Información de Etiquetado -->
+        <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-8">
+          <div class="flex items-center mb-4">
+            <div class="bg-blue-100 rounded-full p-2 mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold text-gray-800">Información de Etiquetado</h4>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="font-medium text-gray-800">Proyecto de etiquetas o rótulos en español</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3">
+              <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="font-medium text-gray-800">Información nutricional según Resolución 333 de 2011</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3">
+              <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="font-medium text-gray-800">Etiquetas originales para productos importados</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3">
+              <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="font-medium text-gray-800">Declaraciones de propiedades nutricionales o de salud (si aplica)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consejo importante -->
+        <div class="bg-green-50 border-l-4 border-green-400 p-4 text-sm text-green-800">
+          <div class="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="font-medium mb-1"><strong>Consejo:</strong> Organice todos los documentos en carpetas digitales separadas</p>
+              <p>Verifique que todos los archivos PDF sean legibles y estén correctamente identificados antes de subirlos a la plataforma.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -380,8 +309,13 @@
           Para continuar con el proceso, necesitamos verificar que ha completado correctamente el registro en la plataforma INVIMA. Por favor, adjunte el correo de confirmación que recibió del INVIMA después de activar su cuenta.
         </p>
 
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-700">
-          Importante: La verificación de este paso es necesaria para continuar con el proceso de trámite. Si tiene problemas para encontrar el correo de confirmación, puede contactar al soporte técnico del INVIMA.
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 text-sm text-yellow-800">
+          <div class="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <p><strong>Importante:</strong> La verificación de este paso es necesaria para continuar con el proceso de trámite. Si tiene problemas para encontrar el correo de confirmación, puede contactar al soporte técnico del INVIMA.</p>
+          </div>
         </div>
 
         <div class="verification-box mb-6 p-6 rounded-lg border-2 border-dashed border-blue-500 bg-blue-50">
@@ -472,15 +406,6 @@
             </li>
           </ol>
         </div>
-
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-          <h4 class="text-lg font-semibold text-gray-800 mb-2">Próximos Pasos</h4>
-          <ul class="list-disc pl-6 space-y-1 text-gray-700">
-            <li>Radicación de la solicitud: Presentar formalmente la solicitud con toda la documentación requerida.</li>
-            <li>Seguimiento del trámite: Monitorear el estado de la solicitud a través de la plataforma del INVIMA.</li>
-            <li>Respuesta a requerimientos: Atender oportunamente cualquier solicitud de información adicional.</li>
-          </ul>
-        </div>
       </div>
     </div>
   </div>
@@ -488,19 +413,19 @@
   <!-- Navigation -->
   <div class="step-navigation">
     <div class="step-indicator">
-      Paso <span class="current-step">2</span> de 5
+      Información Preparatoria
     </div>
     <div class="flex gap-3">
-      <a routerLink="/main/nuevo/registro/paso-1" class="nav-btn nav-btn-secondary">
+      <a routerLink="/main/nuevo/info/evaluacion" class="nav-btn nav-btn-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        Anterior
+        Ver: Evaluación Inicial
       </a>
-      <a routerLink="/main/nuevo/registro/paso-3" class="nav-btn nav-btn-primary">
-        Siguiente
+      <a routerLink="/main/nuevo" class="nav-btn nav-btn-primary">
+        Volver a Nuevo Trámite
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </a>
     </div>
