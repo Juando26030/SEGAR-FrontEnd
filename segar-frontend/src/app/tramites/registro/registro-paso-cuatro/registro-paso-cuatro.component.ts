@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { RegistroPasoCuatroService } from './registro-paso-cuatro.service';
-import { HttpClientModule } from '@angular/common/http';
 
 
 interface Tab {
@@ -73,8 +72,7 @@ interface HelpDocument {
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule,
-    HttpClientModule
+    RouterModule
   ],
   templateUrl: './registro-paso-cuatro.component.html',
   styleUrls: ['./registro-paso-cuatro.component.css']
@@ -93,142 +91,32 @@ export class RegistroPasoCuatroComponent implements OnInit {
   ];
 
   trackingInfo: TrackingInfo = {
-    radicadoNumber: '2024-001234-56789',
-    submissionDate: '15 de marzo de 2024',
-    procedureType: 'Registro Sanitario - Alimento de Riesgo Medio',
-    productName: 'Yogurt Natural Premium',
-    currentStatus: 'En evaluación técnica',
-    daysElapsed: 28
+    radicadoNumber: '',
+    submissionDate: '',
+    procedureType: '',
+    productName: '',
+    currentStatus: '',
+    daysElapsed: 0
   };
 
-  timelineEvents: TimelineEvent[] = [
-    {
-      id: '1',
-      title: 'Solicitud Radicada',
-      description: 'Documentos recibidos y radicado asignado',
-      date: '15 de marzo de 2024',
-      completed: true,
-      current: false
-    },
-    {
-      id: '2',
-      title: 'Verificación Documental',
-      description: 'Revisión inicial de documentos completada',
-      date: '20 de marzo de 2024',
-      completed: true,
-      current: false
-    },
-    {
-      id: '3',
-      title: 'Evaluación Técnica',
-      description: 'Análisis técnico del producto en curso',
-      date: '25 de marzo de 2024',
-      completed: false,
-      current: true
-    },
-    {
-      id: '4',
-      title: 'Concepto Técnico',
-      description: 'Emisión del concepto técnico final',
-      date: 'Pendiente',
-      completed: false,
-      current: false
-    },
-    {
-      id: '5',
-      title: 'Expedición del Registro',
-      description: 'Emisión del registro sanitario',
-      date: 'Pendiente',
-      completed: false,
-      current: false
-    }
-  ];
+  timelineEvents: TimelineEvent[] = [];
 
-  pendingRequirements: Requirement[] = [
-    {
-      id: 'req-001',
-      number: 'REQ-2024-001234-01',
-      title: 'Información nutricional complementaria',
-      description: 'Se requiere información adicional sobre el contenido nutricional del producto y metodología de análisis utilizada.',
-      daysRemaining: 12,
-      status: 'Pendiente',
-      date: '2 de abril de 2024'
-    }
-  ];
+  pendingRequirements: Requirement[] = [];
 
-  requirementHistory: Requirement[] = [
-    {
-      id: 'req-002',
-      number: 'REQ-2024-001234-02',
-      title: 'Clarificación proceso de fabricación',
-      description: 'Descripción detallada del proceso de pasteurización',
-      daysRemaining: 0,
-      status: 'Respondido',
-      date: '28 de marzo de 2024'
-    }
-  ];
+  requirementHistory: Requirement[] = [];
 
-  notifications: Notification[] = [
-    {
-      id: 'not-001',
-      type: 'requirement',
-      title: 'Nuevo requerimiento recibido',
-      message: 'Se ha generado un nuevo requerimiento para su trámite. Tiene 15 días hábiles para responder.',
-      date: '2 de abril de 2024',
-      read: false
-    },
-    {
-      id: 'not-002',
-      type: 'status',
-      title: 'Cambio de estado del trámite',
-      message: 'Su trámite ha pasado a evaluación técnica.',
-      date: '25 de marzo de 2024',
-      read: true
-    }
-  ];
+  notifications: Notification[] = [];
 
   notificationSettings: NotificationSettings = {
-    email: true,
+    email: false,
     sms: false,
-    requirements: true,
-    statusUpdates: true
+    requirements: false,
+    statusUpdates: false
   };
 
-  faqs: FAQ[] = [
-    {
-      id: 'faq-001',
-      question: '¿Cuánto tiempo demora la evaluación de mi trámite?',
-      answer: 'El tiempo de evaluación varía según el tipo de trámite: 60 días hábiles para trámite ordinario y 30 días hábiles para trámite urgente.',
-      isOpen: false
-    },
-    {
-      id: 'faq-002',
-      question: '¿Qué pasa si no respondo un requerimiento a tiempo?',
-      answer: 'Si no responde dentro del plazo establecido (15 días hábiles), su trámite será rechazado y deberá iniciar un nuevo proceso.',
-      isOpen: false
-    },
-    {
-      id: 'faq-003',
-      question: '¿Puedo modificar mi solicitud después de radicarla?',
-      answer: 'No es posible modificar la solicitud una vez radicada. Solo puede proporcionar información adicional en respuesta a requerimientos.',
-      isOpen: false
-    },
-    {
-      id: 'faq-004',
-      question: '¿Cómo puedo acelerar el proceso de evaluación?',
-      answer: 'Puede optar por el trámite urgente pagando la tarifa correspondiente, siempre que cumpla con los requisitos establecidos.',
-      isOpen: false
-    }
-  ];
+  faqs: FAQ[] = [];
 
-  helpDocuments: HelpDocument[] = [
-    { name: 'Manual de Usuario del Sistema', url: '#' },
-    { name: 'Guía de Trámites INVIMA', url: '#' },
-    { name: 'Resolución 2674 de 2013', url: '#' },
-    { name: 'Decreto 539 de 2014', url: '#' },
-    { name: 'Manual Tarifario Vigente', url: '#' },
-    { name: 'Formato de Respuesta a Requerimientos', url: '#' }
-  ];
+  helpDocuments: HelpDocument[] = [];
 
   ngOnInit(): void {
     // Cargar datos reales desde el backend
