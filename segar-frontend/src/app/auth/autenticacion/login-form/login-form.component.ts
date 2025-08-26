@@ -23,6 +23,7 @@ export class LoginFormComponent implements OnInit {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
+      userType: ['administrador', [Validators.required]], // Campo nuevo con valor por defecto
       rememberMe: [false]
     });
   }
@@ -42,9 +43,12 @@ export class LoginFormComponent implements OnInit {
       setTimeout(() => {
         this.isLoading = false;
         // Aquí iría la lógica de autenticación real
-        console.log('Login attempt:', this.loginForm.value);
+        const formValue = this.loginForm.value;
+        console.log('Login attempt:', formValue);
+        console.log('Tipo de usuario seleccionado:', formValue.userType);
         
         // Redireccionar a la página principal después del login exitoso
+        // Aquí podrías implementar diferentes rutas según el tipo de usuario
         this.router.navigate(['/main/panel']);
       }, 2000);
     } else {
