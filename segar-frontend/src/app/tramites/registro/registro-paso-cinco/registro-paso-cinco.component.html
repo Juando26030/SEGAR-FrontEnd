@@ -1,286 +1,271 @@
-<div class="max-w-4xl mx-auto">
-  <h2 class="text-2xl font-bold text-gray-800 mb-4">Paso 3: Resolución y Cumplimiento</h2>
+<div class="max-w-6xl mx-auto p-6">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Paso 5: Radicación de la Solicitud</h1>
+    <p class="text-gray-600">Validación final y radicación oficial de su trámite de registro sanitario</p>
+  </div>
 
-    <div class="tabs">
+  <!-- RESUMEN DEL TRÁMITE -->
+  <div *ngIf="mostrarResumen && tramiteActual && !solicitudRadicada" class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">📋 Resumen del Trámite</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Empresa -->
+      <div class="bg-blue-50 rounded-lg p-4">
+        <h3 class="font-semibold text-blue-900 mb-2">🏢 Empresa</h3>
+        <p class="text-sm text-blue-800">{{tramiteActual.empresa?.razonSocial}}</p>
+        <p class="text-xs text-blue-600">NIT: {{tramiteActual.empresa?.nit}}</p>
+      </div>
+
+      <!-- Producto -->
+      <div class="bg-green-50 rounded-lg p-4">
+        <h3 class="font-semibold text-green-900 mb-2">📦 Producto</h3>
+        <p class="text-sm text-green-800">{{tramiteActual.producto?.nombre}}</p>
+        <p class="text-xs text-green-600">Ref: {{tramiteActual.producto?.referencia}}</p>
+      </div>
+
+      <!-- Tipo de Trámite -->
+      <div class="bg-purple-50 rounded-lg p-4">
+        <h3 class="font-semibold text-purple-900 mb-2">📝 Tipo de Trámite</h3>
+        <p class="text-sm text-purple-800">{{tipoTramiteLabels[tramiteActual.tipoTramite!]}}</p>
+      </div>
+
+      <!-- Documentos -->
+      <div class="bg-yellow-50 rounded-lg p-4">
+        <h3 class="font-semibold text-yellow-900 mb-2">📄 Documentos</h3>
+        <p class="text-sm text-yellow-800">{{tramiteActual.documentosCargados.length}} documentos cargados</p>
+      </div>
+
+      <!-- Pago -->
+      <div class="bg-indigo-50 rounded-lg p-4 md:col-span-2">
+        <h3 class="font-semibold text-indigo-900 mb-2">💳 Pago</h3>
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm text-indigo-800">{{tramiteActual.pago?.numeroTransaccion}}</p>
+            <p class="text-xs text-indigo-600">{{tramiteActual.pago?.metodoPago}} - {{tramiteActual.pago?.estado}}</p>
+          </div>
+          <p class="text-lg font-bold text-indigo-900">
+            ${{(tramiteActual.pago?.monto || 0).toLocaleString('es-CO')}} COP
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALIDACIONES PREVIAS -->
+  <div *ngIf="!solicitudRadicada" class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">🔍 Validaciones Previas</h2>
+
+    <!-- Estado de validaciones -->
+    <div class="space-y-4 mb-6">
+      <div
+        *ngFor="let validacion of estadoValidaciones"
+        class="flex items-center p-4 border rounded-lg"
+        [class.border-gray-200]="validacion.estado === 'pendiente'"
+        [class.border-blue-300]="validacion.estado === 'validando'"
+        [class.border-green-300]="validacion.estado === 'exitoso'"
+        [class.border-red-300]="validacion.estado === 'error'"
+        [class.bg-gray-50]="validacion.estado === 'pendiente'"
+        [class.bg-blue-50]="validacion.estado === 'validando'"
+        [class.bg-green-50]="validacion.estado === 'exitoso'"
+        [class.bg-red-50]="validacion.estado === 'error'">
+
+        <div class="flex-shrink-0 mr-4">
+          <i [class]="validacion.icono" [style.color]="validacion.color" class="text-xl"></i>
+        </div>
+
+        <div class="flex-1">
+          <h3 class="font-medium text-gray-900">{{validacion.titulo}}</h3>
+          <p class="text-sm" [style.color]="validacion.color">{{validacion.mensaje}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensajes de estado -->
+    <div *ngIf="mensajeExito" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      {{mensajeExito}}
+    </div>
+
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{errorMessage}}
       <button
-        *ngFor="let tab of tabs; trackBy: trackByTab"
-        class="tab"
-        [ngClass]="{'tab-active': activeTab === tab.id}"
-        (click)="setActiveTab(tab.id)"
-        [attr.aria-selected]="activeTab === tab.id"
-        role="tab">
-        {{tab.label}}
+        (click)="reiniciarValidaciones()"
+        class="ml-3 text-sm underline hover:no-underline">
+        Reintentar validaciones
       </button>
     </div>
 
-    <!-- RESOLUCIÓN FINAL -->
-    <div class="tab-content" *ngIf="activeTab === 'resolucion'" role="tabpanel">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Estado de la Resolución</h3>
+    <!-- Observaciones adicionales -->
+    <form [formGroup]="observacionesForm" class="mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones Adicionales (Opcional)</label>
+      <textarea
+        formControlName="observaciones"
+        rows="3"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Ingrese observaciones adicionales sobre el trámite..."></textarea>
+    </form>
 
-        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-          <div class="flex items-center mb-4">
-            <div class="checkmark-circle show mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h4 class="text-lg font-semibold text-green-700">¡Registro Sanitario Aprobado!</h4>
+    <!-- Botones de acción -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <button
+        type="button"
+        (click)="volver()"
+        class="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Volver al Paso Anterior
+      </button>
+
+      <div class="flex gap-3">
+        <button
+          type="button"
+          (click)="ejecutarValidacionesPrevias()"
+          [disabled]="cargando"
+          class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+          <i *ngIf="cargando" class="fas fa-spinner fa-spin mr-2"></i>
+          <i *ngIf="!cargando" class="fas fa-sync-alt mr-2"></i>
+          {{cargando ? 'Validando...' : 'Ejecutar Validaciones'}}
+        </button>
+
+        <button
+          type="button"
+          (click)="radicarSolicitud()"
+          [disabled]="!validacionesCompletas || cargando"
+          class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i *ngIf="cargando" class="fas fa-spinner fa-spin mr-2"></i>
+          <i *ngIf="!cargando" class="fas fa-file-signature mr-2"></i>
+          {{cargando ? 'Radicando...' : 'RADICAR SOLICITUD'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRMACIÓN DE RADICACIÓN EXITOSA -->
+  <div *ngIf="solicitudRadicada && solicitudRadicadaData" class="bg-white rounded-lg shadow-lg p-8 success-result">
+    <div class="text-center">
+      <!-- Ícono de éxito -->
+      <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6 success-icon">
+        <i class="fas fa-check-circle text-4xl text-green-600"></i>
+      </div>
+
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">¡Solicitud Radicada Exitosamente!</h2>
+      <p class="text-gray-600 mb-8">Su trámite ha sido oficialmente iniciado y está listo para la evaluación técnica</p>
+
+      <!-- Datos principales de la radicación -->
+      <div class="bg-green-50 rounded-lg p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div>
+            <h3 class="text-sm font-medium text-green-800 mb-2">Número de Radicado</h3>
+            <p class="text-2xl font-bold text-green-900 font-mono">{{solicitudRadicadaData.numeroRadicado}}</p>
           </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <strong>Número de Registro:</strong> {{resolutionData.registrationNumber}}
-            </div>
-            <div>
-              <strong>Fecha de Resolución:</strong> {{resolutionData.resolutionDate}}
-            </div>
-            <div>
-              <strong>Vigencia:</strong> {{resolutionData.expiryDate}}
-            </div>
-            <div>
-              <strong>Resolución No.:</strong> {{resolutionData.resolutionNumber}}
-            </div>
+          <div>
+            <h3 class="text-sm font-medium text-green-800 mb-2">Estado</h3>
+            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-200 text-green-800">
+              {{solicitudRadicadaData.estado}}
+            </span>
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-green-800 mb-2">Fecha y Hora</h3>
+            <p class="text-lg font-semibold text-green-900">
+              {{solicitudRadicadaData.fechaRadicacion | date:'dd/MM/yyyy'}}
+            </p>
+            <p class="text-sm text-green-700">
+              {{solicitudRadicadaData.fechaRadicacion | date:'HH:mm:ss'}}
+            </p>
           </div>
         </div>
+      </div>
 
-        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-          <h4 class="font-semibold text-gray-800 mb-4">Detalles del Producto Aprobado</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <strong>Producto:</strong> {{resolutionData.productName}}
-            </div>
-            <div>
-              <strong>Marca:</strong> {{resolutionData.brandName}}
-            </div>
-            <div>
-              <strong>Titular:</strong> {{resolutionData.holder}}
-            </div>
-            <div>
-              <strong>Fabricante:</strong> {{resolutionData.manufacturer}}
-            </div>
-            <div class="col-span-2">
-              <strong>Presentaciones Aprobadas:</strong>
-              <ul class="mt-2 space-y-1">
-                <li *ngFor="let presentation of resolutionData.approvedPresentations; trackBy: trackByPresentation"
-                    class="text-gray-600">• {{presentation}}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
+      <!-- Detalles completos de la solicitud -->
+      <div class="bg-gray-50 rounded-lg p-6 mb-8 text-left">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Detalles de la Solicitud Radicada</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            (click)="downloadResolution()"
-            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Descargar Resolución
-          </button>
-          <button
-            (click)="downloadCertificate()"
-            class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Descargar Certificado
-          </button>
+          <div>
+            <p class="text-sm text-gray-600">Empresa</p>
+            <p class="font-medium">{{tramiteActual?.empresa?.razonSocial}}</p>
+            <p class="text-xs text-gray-500">NIT: {{tramiteActual?.empresa?.nit}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Producto</p>
+            <p class="font-medium">{{solicitudRadicadaData.nombreProducto}}</p>
+            <p class="text-xs text-gray-500">Ref: {{tramiteActual?.producto?.referencia}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Tipo de Trámite</p>
+            <p class="font-medium">{{tipoTramiteLabels[solicitudRadicadaData.tipoTramite]}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Documentos Adjuntos</p>
+            <p class="font-medium">{{(tramiteActual?.documentosCargados?.length || 0)}} documentos</p>
+          </div>
+        </div>
+
+        <div *ngIf="solicitudRadicadaData.observaciones" class="mt-4 p-4 bg-blue-50 rounded-lg">
+          <p class="text-sm text-gray-600 mb-1">Observaciones</p>
+          <p class="text-gray-800">{{solicitudRadicadaData.observaciones}}</p>
+        </div>
+
+        <div class="mt-4 p-4 bg-green-50 rounded-lg">
+          <p class="text-sm text-gray-600 mb-1">Mensaje del Sistema</p>
+          <p class="text-green-800 font-medium">{{solicitudRadicadaData.mensaje}}</p>
         </div>
       </div>
-    </div>
 
-    <!-- OBLIGACIONES -->
-    <div class="tab-content" *ngIf="activeTab === 'obligaciones'" role="tabpanel">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Obligaciones Post-Registro</h3>
-        <p class="text-gray-700 mb-6">Cumplir con estas obligaciones es fundamental para mantener la validez de su registro sanitario.</p>
-
-        <div class="space-y-6">
-          <div *ngFor="let obligation of obligations; trackBy: trackByObligation"
-               class="bg-white border border-gray-200 rounded-lg p-6">
-            <div class="flex items-start">
-              <div class="bg-yellow-100 rounded-full p-2 mr-4 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h4 class="font-semibold text-gray-800 mb-2">{{obligation.title}}</h4>
-                <p class="text-gray-600 text-sm mb-3">{{obligation.description}}</p>
-                <div class="text-xs text-gray-500">
-                  <strong>Periodicidad:</strong> {{obligation.frequency}} |
-                  <strong>Plazo:</strong> {{obligation.deadline}}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Instrucciones importantes -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 text-left">
+        <h4 class="font-semibold text-yellow-800 mb-2">📌 Instrucciones Importantes</h4>
+        <ul class="text-sm text-yellow-700 space-y-1">
+          <li>• Conserve el número de radicado <strong>{{solicitudRadicadaData.numeroRadicado}}</strong> para futuras consultas</li>
+          <li>• El proceso de evaluación técnica puede tardar entre 15 a 30 días hábiles</li>
+          <li>• Recibirá notificaciones por email sobre el estado de su trámite</li>
+          <li>• Puede consultar el estado en cualquier momento usando el número de radicado</li>
+        </ul>
       </div>
-    </div>
 
-    <!-- COMERCIALIZACIÓN -->
-    <div class="tab-content" *ngIf="activeTab === 'comercializacion'" role="tabpanel">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Requisitos para Comercialización</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div *ngFor="let requirement of commercializationRequirements; trackBy: trackByRequirement"
-               class="bg-white border border-gray-200 rounded-lg p-4">
-            <div class="flex items-center mb-3">
-              <div class="bg-blue-100 rounded-full p-2 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h4 class="font-semibold text-gray-800">{{requirement.title}}</h4>
-            </div>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li *ngFor="let item of requirement.items; trackBy: trackByString" class="flex items-start">
-                <span class="text-green-500 mr-2 mt-0.5">•</span>
-                <span>{{item}}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-          <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <div>
-              <h4 class="font-semibold text-red-800">Advertencia Importante</h4>
-              <p class="text-red-700 text-sm mt-1">
-                La comercialización sin registro sanitario vigente constituye una violación a la normativa sanitaria y puede resultar en sanciones administrativas, decomiso del producto y cierre temporal del establecimiento.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RENOVACIÓN -->
-    <div class="tab-content" *ngIf="activeTab === 'renovacion'" role="tabpanel">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Proceso de Renovación</h3>
-
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
-          <div class="flex items-center mb-4">
-            <div class="bg-yellow-100 rounded-full p-2 mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h4 class="font-semibold text-yellow-800">Recordatorio de Renovación</h4>
-          </div>
-          <p class="text-yellow-700 text-sm mb-3">
-            Su registro sanitario vence el <strong>{{resolutionData.expiryDate}}</strong>.
-            La renovación debe solicitarse con <strong>6 meses de anticipación</strong> al vencimiento.
-          </p>
-          <div class="text-sm text-yellow-600">
-            <strong>Fecha límite para solicitar renovación:</strong> {{getRenewalDeadline()}}
-          </div>
-        </div>
-
-        <div class="space-y-6">
-          <div *ngFor="let step of renewalSteps; let i = index; trackBy: trackByRenewalStep"
-               class="flex items-start">
-            <div class="flex-shrink-0 mr-4">
-              <div class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center font-semibold">
-                {{i + 1}}
-              </div>
-            </div>
-            <div class="flex-1">
-              <h4 class="font-semibold text-gray-800 mb-2">{{step.title}}</h4>
-              <p class="text-gray-600 text-sm mb-2">{{step.description}}</p>
-              <div class="text-xs text-gray-500">
-                <strong>Tiempo estimado:</strong> {{step.timeframe}}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
-          <h4 class="font-semibold text-blue-800 mb-2">Documentos Requeridos para Renovación</h4>
-          <ul class="text-blue-700 text-sm space-y-1">
-            <li *ngFor="let doc of renewalDocuments; trackBy: trackByString" class="flex items-start">
-              <span class="text-blue-500 mr-2 mt-0.5">•</span>
-              <span>{{doc}}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="text-center mt-6">
-          <button
-            (click)="startRenewalProcess()"
-            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 mr-4">
-            Iniciar Proceso de Renovación
-          </button>
-          <button
-            (click)="setRenewalReminder()"
-            class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700">
-            Configurar Recordatorio
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONTACTO -->
-    <div class="tab-content" *ngIf="activeTab === 'contacto'" role="tabpanel">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Información de Contacto y Soporte</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div *ngFor="let contact of contactInfo; trackBy: trackByContact"
-               class="bg-white border border-gray-200 rounded-lg p-6">
-            <div class="flex items-center mb-4">
-              <div class="bg-green-100 rounded-full p-3 mr-4" [innerHTML]="getContactIcon(contact.type)"></div>
-              <h4 class="font-semibold text-gray-800">{{contact.title}}</h4>
-            </div>
-            <div class="space-y-2 text-sm text-gray-600">
-              <div *ngFor="let detail of contact.details; trackBy: trackByString">
-                {{detail}}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
-          <h4 class="text-lg font-semibold text-gray-800 mb-4">Enlaces Útiles</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div *ngFor="let link of usefulLinks; trackBy: trackByLink">
-              <a [href]="link.url" target="_blank"
-                 class="flex items-center text-blue-600 hover:text-blue-800 text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                {{link.title}}
-              </a>
-            </div>
-          </div>
-        </div>
+      <!-- Botones de acción -->
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <button
+          (click)="descargarComprobante()"
+          class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 btn-download">
+          <i class="fas fa-download mr-2"></i>
+          Descargar Comprobante
+        </button>
+        <button
+          (click)="irAConsultas()"
+          class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 btn-secondary">
+          <i class="fas fa-search mr-2"></i>
+          Consultar Estado
+        </button>
+        <button
+          (click)="nuevaSolicitud()"
+          class="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 btn-primary">
+          <i class="fas fa-plus mr-2"></i>
+          Nueva Solicitud
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Navigation -->
-  <div class="step-navigation">
-    <div class="step-indicator-nav">
-      Paso <span class="current-step">3</span> de 3
-    </div>
-    <div class="flex gap-3">
-      <a routerLink="/main/nuevo/registro/paso-4" class="nav-btn nav-btn-secondary">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Paso Anterior
-      </a>
-      <a routerLink="/main/panel" class="nav-btn nav-btn-primary">
-        Finalizar Trámite
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-      </a>
+  <!-- ERROR AL CARGAR TRÁMITE -->
+  <div *ngIf="!tramiteActual && errorMessage" class="bg-white rounded-lg shadow-lg p-8">
+    <div class="text-center">
+      <i class="fas fa-exclamation-triangle text-6xl text-yellow-500 mb-4"></i>
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Trámite No Encontrado</h2>
+      <p class="text-gray-600 mb-6">{{errorMessage}}</p>
+
+      <div class="flex justify-center gap-4">
+        <button
+          (click)="volverAPasos()"
+          class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Volver a los Pasos
+        </button>
+        <button
+          (click)="nuevaSolicitud()"
+          class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">
+          <i class="fas fa-plus mr-2"></i>
+          Iniciar Nuevo Trámite
+        </button>
+      </div>
     </div>
   </div>
+</div>

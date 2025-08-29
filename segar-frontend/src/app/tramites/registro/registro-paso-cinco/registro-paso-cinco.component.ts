@@ -1,341 +1,394 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
-interface Tab {
-  id: string;
-  label: string;
-}
+import { SolicitudService } from '../../../core/services/solicitud.service';
+import { ValidacionService, ValidacionCompletaResponse } from '../../../core/services/validacion.service';
+import { TramiteEstadoService, TramiteEnProceso } from '../../../core/services/tramite-estado.service';
+import {
+  RadicacionSolicitudDTO,
+  RadicacionResponse,
+  TIPO_TRAMITE_LABELS
+} from '../../../core/DTOs/solicitud.dto';
 
-interface ResolutionData {
-  registrationNumber: string;
-  resolutionDate: string;
-  expiryDate: string;
-  resolutionNumber: string;
-  productName: string;
-  brandName: string;
-  holder: string;
-  manufacturer: string;
-  approvedPresentations: string[];
-}
-
-interface Obligation {
-  title: string;
-  description: string;
-  frequency: string;
-  deadline: string;
-}
-
-interface CommercializationRequirement {
-  title: string;
-  items: string[];
-}
-
-interface RenewalStep {
-  title: string;
-  description: string;
-  timeframe: string;
-}
-
-interface ContactInfo {
-  type: string;
-  title: string;
-  details: string[];
-}
-
-interface UsefulLink {
-  title: string;
-  url: string;
+interface EstadoValidacion {
+  tipo: 'empresa' | 'documentos' | 'pago';
+  titulo: string;
+  mensaje: string;
+  estado: 'pendiente' | 'validando' | 'exitoso' | 'error';
+  icono: string;
+  color: string;
 }
 
 @Component({
   standalone: true,
   selector: 'app-registro-paso-cinco',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './registro-paso-cinco.component.html',
   styleUrls: ['./registro-paso-cinco.component.css']
 })
-export class RegistroPasoCincoComponent {
-  activeTab = 'resolucion';
+export class RegistroPasoCincoComponent implements OnInit {
+  observacionesForm: FormGroup;
 
-  readonly tabs: Tab[] = [
-    { id: 'resolucion', label: 'Resolución Final' },
-    { id: 'obligaciones', label: 'Obligaciones Post-Registro' },
-    { id: 'comercializacion', label: 'Comercialización' },
-    { id: 'renovacion', label: 'Renovación' },
-    { id: 'contacto', label: 'Contacto y Soporte' }
-  ];
+  // Estados del componente
+  cargando = false;
+  validacionesCompletas = false;
+  solicitudRadicada = false;
+  mostrarResumen = true;
 
-  readonly resolutionData: ResolutionData = {
-    registrationNumber: 'RSAA21M-20240015',
-    resolutionDate: '15 de marzo de 2024',
-    expiryDate: '15 de marzo de 2029',
-    resolutionNumber: '2024005678',
-    productName: 'Yogurt Natural Premium',
-    brandName: 'LacteosPremium',
-    holder: 'Empresa Alimentaria S.A.S.',
-    manufacturer: 'Planta de Producción Bogotá - Empresa Alimentaria S.A.S.',
-    approvedPresentations: [
-      'Vaso de 150g',
-      'Vaso de 250g',
-      'Botella de 500ml',
-      'Presentación familiar de 1000g'
-    ]
-  };
+  // Datos del trámite
+  tramiteActual: TramiteEnProceso | null = null;
+  solicitudRadicadaData: RadicacionResponse | null = null;
+  numeroRadicado = '';
+  fechaRadicacion = '';
 
-  readonly obligations: Obligation[] = [
+  // Estado de validaciones
+  estadoValidaciones: EstadoValidacion[] = [
     {
-      title: 'Mantenimiento de Buenas Prácticas de Manufactura (BPM)',
-      description: 'Garantizar el cumplimiento continuo de las BPM en todas las etapas de producción, almacenamiento y distribución.',
-      frequency: 'Permanente',
-      deadline: 'Durante toda la vigencia del registro'
+      tipo: 'empresa',
+      titulo: 'Validación de Empresa',
+      mensaje: 'Verificando registro y estado de la empresa...',
+      estado: 'pendiente',
+      icono: 'fas fa-building',
+      color: '#6c757d'
     },
     {
-      title: 'Reporte de Cambios Significativos',
-      description: 'Informar al INVIMA sobre modificaciones en la formulación, proceso de fabricación, instalaciones o titularidad.',
-      frequency: 'Cuando aplique',
-      deadline: '30 días calendario previos al cambio'
+      tipo: 'documentos',
+      titulo: 'Validación de Documentos',
+      mensaje: 'Verificando documentos obligatorios...',
+      estado: 'pendiente',
+      icono: 'fas fa-file-alt',
+      color: '#6c757d'
     },
     {
-      title: 'Reporte de Eventos Adversos',
-      description: 'Notificar eventos adversos asociados al consumo del producto y medidas correctivas implementadas.',
-      frequency: 'Cuando aplique',
-      deadline: '24 horas para eventos graves, 15 días para eventos menores'
-    },
-    {
-      title: 'Actualización de Información de Contacto',
-      description: 'Mantener actualizada la información de contacto del titular y representante legal ante el INVIMA.',
-      frequency: 'Cuando aplique',
-      deadline: '10 días calendario posteriores al cambio'
+      tipo: 'pago',
+      titulo: 'Validación de Pago',
+      mensaje: 'Verificando pago aprobado...',
+      estado: 'pendiente',
+      icono: 'fas fa-credit-card',
+      color: '#6c757d'
     }
   ];
 
-  readonly commercializationRequirements: CommercializationRequirement[] = [
-    {
-      title: 'Etiquetado Obligatorio',
-      items: [
-        'Número de registro sanitario visible en el empaque',
-        'Información nutricional completa y actualizada',
-        'Lista de ingredientes en orden descendente',
-        'Fecha de vencimiento y condiciones de almacenamiento',
-        'Información del titular del registro'
-      ]
-    },
-    {
-      title: 'Control de Calidad',
-      items: [
-        'Análisis fisicoquímicos periódicos',
-        'Análisis microbiológicos de rutina',
-        'Verificación de vida útil declarada',
-        'Control de proveedores de materias primas'
-      ]
-    },
-    {
-      title: 'Distribución y Comercialización',
-      items: [
-        'Mantener cadena de frío cuando aplique',
-        'Registro de lotes y trazabilidad',
-        'Capacitación al personal de ventas',
-        'Atención a quejas y reclamos de consumidores'
-      ]
-    },
-    {
-      title: 'Documentación de Respaldo',
-      items: [
-        'Conservar registros de producción por 5 años',
-        'Mantener evidencia de análisis de laboratorio',
-        'Documentar procedimientos operativos estándar',
-        'Archivo de certificaciones de proveedores'
-      ]
-    }
-  ];
+  // Mensaje de estado
+  errorMessage = '';
+  mensajeExito = '';
 
-  readonly renewalSteps: RenewalStep[] = [
-    {
-      title: 'Evaluación de Requisitos',
-      description: 'Verificar cambios normativos y nuevos requisitos aplicables desde la última renovación.',
-      timeframe: '2-3 semanas'
-    },
-    {
-      title: 'Actualización de Documentación',
-      description: 'Preparar y actualizar toda la documentación técnica y legal requerida.',
-      timeframe: '4-6 semanas'
-    },
-    {
-      title: 'Solicitud de Renovación',
-      description: 'Radicar la solicitud de renovación con toda la documentación en la plataforma INVIMA.',
-      timeframe: '1 semana'
-    },
-    {
-      title: 'Seguimiento y Respuesta',
-      description: 'Atender requerimientos del INVIMA y realizar seguimiento hasta obtener la resolución.',
-      timeframe: '8-12 semanas'
-    }
-  ];
+  // Labels para la UI
+  tipoTramiteLabels = TIPO_TRAMITE_LABELS;
 
-  readonly renewalDocuments: string[] = [
-    'Formulario de solicitud de renovación debidamente diligenciado',
-    'Certificado de existencia y representación legal actualizado',
-    'Ficha técnica del producto actualizada',
-    'Análisis fisicoquímicos y microbiológicos recientes',
-    'Certificación de Buenas Prácticas de Manufactura vigente',
-    'Declaración de no modificación del producto (si aplica)',
-    'Comprobante de pago de las tarifas correspondientes'
-  ];
-
-  readonly contactInfo: ContactInfo[] = [
-    {
-      type: 'phone',
-      title: 'Línea de Atención',
-      details: [
-        'Teléfono: (601) 242 50 00',
-        'Línea gratuita: 018000 122 100',
-        'Horario: Lunes a viernes 8:00 AM - 5:00 PM'
-      ]
-    },
-    {
-      type: 'email',
-      title: 'Correo Electrónico',
-      details: [
-        'atencionalciudadano@invima.gov.co',
-        'Respuesta en 5 días hábiles',
-        'Incluir número de registro en el asunto'
-      ]
-    },
-    {
-      type: 'office',
-      title: 'Oficina Principal',
-      details: [
-        'Carrera 68D No. 17-11/21',
-        'Bogotá D.C., Colombia',
-        'Atención presencial con cita previa'
-      ]
-    },
-    {
-      type: 'online',
-      title: 'Servicios en Línea',
-      details: [
-        'Portal web: www.invima.gov.co',
-        'Consulta de trámites 24/7',
-        'Chat en línea: Lunes a viernes 8:00 AM - 5:00 PM'
-      ]
-    }
-  ];
-
-  readonly usefulLinks: UsefulLink[] = [
-    {
-      title: 'Portal INVIMA',
-      url: 'https://www.invima.gov.co'
-    },
-    {
-      title: 'Consulta de Registros Sanitarios',
-      url: 'https://www.invima.gov.co/consultas-publicas'
-    },
-    {
-      title: 'Normatividad Vigente',
-      url: 'https://www.invima.gov.co/normatividad'
-    },
-    {
-      title: 'Guías y Documentos Técnicos',
-      url: 'https://www.invima.gov.co/documentos-tecnicos'
-    },
-    {
-      title: 'Estado de Trámites',
-      url: 'https://tramiteslinea.invima.gov.co'
-    },
-    {
-      title: 'Formularios y Formatos',
-      url: 'https://www.invima.gov.co/formularios'
-    }
-  ];
-
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
-  }
-
-  downloadResolution(): void {
-    // Simular descarga de resolución
-    alert('Descargando resolución No. ' + this.resolutionData.resolutionNumber);
-    console.log('Descargando resolución:', this.resolutionData.resolutionNumber);
-  }
-
-  downloadCertificate(): void {
-    // Simular descarga de certificado
-    alert('Descargando certificado de registro sanitario');
-    console.log('Descargando certificado para registro:', this.resolutionData.registrationNumber);
-  }
-
-  startRenewalProcess(): void {
-    alert('Redirigiendo al proceso de renovación de registro sanitario');
-    console.log('Iniciando renovación para registro:', this.resolutionData.registrationNumber);
-  }
-
-  setRenewalReminder(): void {
-    alert('Recordatorio configurado para 6 meses antes del vencimiento');
-    console.log('Recordatorio configurado para registro:', this.resolutionData.registrationNumber);
-  }
-
-  getRenewalDeadline(): string {
-    // Calcular fecha límite de renovación (6 meses antes del vencimiento)
-    const expiryDate = new Date('2029-03-15');
-    const renewalDeadline = new Date(expiryDate);
-    renewalDeadline.setMonth(renewalDeadline.getMonth() - 6);
-
-    return renewalDeadline.toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private solicitudService: SolicitudService,
+    private validacionService: ValidacionService,
+    private tramiteEstadoService: TramiteEstadoService
+  ) {
+    this.observacionesForm = this.fb.group({
+      observaciones: ['']
     });
   }
 
-  getContactIcon(iconType: string): string {
-    const icons: Record<string, string> = {
-      phone: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>`,
-      email: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>`,
-      office: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>`,
-      online: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9m0 9c4.97 0 9-4.03 9-9s-4.03-9-9-9m0 18c-4.97 0-9-4.03-9-9s4.03-9 9-9m9 9a9 9 0 01-9 9" />
-      </svg>`
-    };
-    return icons[iconType] || '';
+  async ngOnInit(): Promise<void> {
+    await this.cargarTramiteEnProceso();
+    if (this.tramiteActual) {
+      await this.ejecutarValidacionesPrevias();
+    }
   }
 
-  // TrackBy functions para optimización
-  trackByTab(index: number, tab: Tab): string {
-    return tab.id;
+  private async cargarTramiteEnProceso(): Promise<void> {
+    // Obtener el trámite que se viene trabajando desde los pasos anteriores
+    this.tramiteActual = this.tramiteEstadoService.getTramiteActual();
+
+    // Verificar que el trámite esté completo
+    if (!this.tramiteEstadoService.esTramiteCompleto()) {
+      this.errorMessage = 'El trámite no está completo. Por favor complete todos los pasos anteriores.';
+      return;
+    }
+
+    // Cargar observaciones previas si existen
+    if (this.tramiteActual?.observaciones) {
+      this.observacionesForm.patchValue({
+        observaciones: this.tramiteActual.observaciones
+      });
+    }
+
+    console.log('Trámite cargado para radicación:', this.tramiteActual);
   }
 
-  trackByPresentation(index: number, presentation: string): string {
-    return presentation;
+  async ejecutarValidacionesPrevias(): Promise<void> {
+    if (!this.tramiteActual) return;
+
+    this.cargando = true;
+    this.errorMessage = '';
+    this.mensajeExito = '';
+
+    try {
+      // 1. Validación de Empresa
+      await this.validarEmpresa();
+
+      // 2. Validación de Documentos
+      await this.validarDocumentos();
+
+      // 3. Validación de Pago
+      await this.validarPago();
+
+      // 4. Validación Completa
+      await this.validacionCompleta();
+
+    } catch (error: any) {
+      console.error('Error en validaciones previas:', error);
+      this.errorMessage = error.message || 'Error en las validaciones previas';
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  trackByObligation(index: number, obligation: Obligation): string {
-    return obligation.title;
+  private async validarEmpresa(): Promise<void> {
+    const validacionEmpresa = this.estadoValidaciones.find(v => v.tipo === 'empresa')!;
+    validacionEmpresa.estado = 'validando';
+    validacionEmpresa.mensaje = 'Validando empresa...';
+    validacionEmpresa.icono = 'fas fa-spinner fa-spin';
+    validacionEmpresa.color = '#007bff';
+
+    try {
+      const resultado = await this.validacionService
+        .validarEmpresa(this.tramiteActual!.empresa!.id).toPromise();
+
+      if (resultado?.registrada && resultado.estado === 'ACTIVA') {
+        validacionEmpresa.estado = 'exitoso';
+        validacionEmpresa.mensaje = `✓ Empresa registrada y activa: ${this.tramiteActual!.empresa!.razonSocial}`;
+        validacionEmpresa.icono = 'fas fa-check-circle';
+        validacionEmpresa.color = '#28a745';
+      } else {
+        throw new Error(resultado?.mensaje || 'Empresa no registrada o inactiva');
+      }
+    } catch (error: any) {
+      validacionEmpresa.estado = 'error';
+      validacionEmpresa.mensaje = `✗ ${error.message}`;
+      validacionEmpresa.icono = 'fas fa-times-circle';
+      validacionEmpresa.color = '#dc3545';
+      throw error;
+    }
   }
 
-  trackByRequirement(index: number, requirement: CommercializationRequirement): string {
-    return requirement.title;
+  private async validarDocumentos(): Promise<void> {
+    const validacionDocumentos = this.estadoValidaciones.find(v => v.tipo === 'documentos')!;
+    validacionDocumentos.estado = 'validando';
+    validacionDocumentos.mensaje = 'Validando documentos...';
+    validacionDocumentos.icono = 'fas fa-spinner fa-spin';
+    validacionDocumentos.color = '#007bff';
+
+    try {
+      const resultado = await this.validacionService
+        .validarDocumentos({
+          empresaId: this.tramiteActual!.empresa!.id,
+          documentosId: this.tramiteActual!.documentosIds
+        }).toPromise();
+
+      if (resultado?.documentosCompletos) {
+        validacionDocumentos.estado = 'exitoso';
+        validacionDocumentos.mensaje = `✓ Documentos completos (${resultado.totalDocumentos} documentos)`;
+        validacionDocumentos.icono = 'fas fa-check-circle';
+        validacionDocumentos.color = '#28a745';
+      } else {
+        throw new Error(`Faltan documentos: ${resultado?.documentosFaltantes.join(', ')}`);
+      }
+    } catch (error: any) {
+      validacionDocumentos.estado = 'error';
+      validacionDocumentos.mensaje = `✗ ${error.message}`;
+      validacionDocumentos.icono = 'fas fa-times-circle';
+      validacionDocumentos.color = '#dc3545';
+      throw error;
+    }
   }
 
-  trackByRenewalStep(index: number, step: RenewalStep): string {
-    return step.title;
+  private async validarPago(): Promise<void> {
+    const validacionPago = this.estadoValidaciones.find(v => v.tipo === 'pago')!;
+    validacionPago.estado = 'validando';
+    validacionPago.mensaje = 'Validando pago...';
+    validacionPago.icono = 'fas fa-spinner fa-spin';
+    validacionPago.color = '#007bff';
+
+    try {
+      const resultado = await this.validacionService
+        .validarPago(this.tramiteActual!.pago!.id).toPromise();
+
+      if (resultado?.pagoValido && resultado.estado === 'APROBADO') {
+        validacionPago.estado = 'exitoso';
+        validacionPago.mensaje = `✓ Pago aprobado: $${resultado.monto.toLocaleString('es-CO')} COP`;
+        validacionPago.icono = 'fas fa-check-circle';
+        validacionPago.color = '#28a745';
+      } else {
+        throw new Error(resultado?.mensaje || 'Pago no encontrado o no aprobado');
+      }
+    } catch (error: any) {
+      validacionPago.estado = 'error';
+      validacionPago.mensaje = `✗ ${error.message}`;
+      validacionPago.icono = 'fas fa-times-circle';
+      validacionPago.color = '#dc3545';
+      throw error;
+    }
   }
 
-  trackByContact(index: number, contact: ContactInfo): string {
-    return contact.type;
+  private async validacionCompleta(): Promise<void> {
+    try {
+      const resultado = await this.validacionService
+        .validacionCompleta({
+          empresaId: this.tramiteActual!.empresa!.id,
+          documentosId: this.tramiteActual!.documentosIds,
+          pagoId: this.tramiteActual!.pago!.id
+        }).toPromise();
+
+      if (resultado?.puedeRadicar) {
+        this.validacionesCompletas = true;
+        this.mensajeExito = '✅ Todas las validaciones completadas. Puede proceder con la radicación.';
+      } else {
+        throw new Error(resultado?.mensaje || 'No se pueden completar las validaciones');
+      }
+    } catch (error: any) {
+      this.validacionesCompletas = false;
+      throw error;
+    }
   }
 
-  trackByLink(index: number, link: UsefulLink): string {
-    return link.url;
+  async radicarSolicitud(): Promise<void> {
+    if (!this.tramiteActual || !this.validacionesCompletas) {
+      this.errorMessage = 'Complete las validaciones previas antes de radicar';
+      return;
+    }
+
+    this.cargando = true;
+    this.errorMessage = '';
+
+    try {
+      // Actualizar observaciones si se modificaron
+      const observaciones = this.observacionesForm.get('observaciones')?.value;
+      if (observaciones !== this.tramiteActual.observaciones) {
+        this.tramiteEstadoService.actualizarObservaciones(observaciones);
+        this.tramiteActual = this.tramiteEstadoService.getTramiteActual();
+      }
+
+      // Crear solicitud de radicación
+      const solicitudData: RadicacionSolicitudDTO = {
+        empresaId: this.tramiteActual.empresa!.id,
+        productoId: this.tramiteActual.producto!.id,
+        tipoTramite: this.tramiteActual.tipoTramite!,
+        documentosId: this.tramiteActual.documentosIds,
+        pagoId: this.tramiteActual.pago!.id,
+        observaciones: this.tramiteActual.observaciones || ''
+      };
+
+      console.log('Radicando solicitud:', solicitudData);
+
+      // Llamar al servicio de radicación
+      const respuesta = await this.solicitudService.radicarSolicitud(solicitudData).toPromise();
+
+      if (respuesta) {
+        // ÉXITO EN LA RADICACIÓN
+        this.solicitudRadicada = true;
+        this.solicitudRadicadaData = respuesta;
+        this.numeroRadicado = respuesta.numeroRadicado;
+        this.fechaRadicacion = respuesta.fechaRadicacion;
+        this.mostrarResumen = false;
+
+        console.log('Solicitud radicada exitosamente:', respuesta);
+
+        // Scroll hacia arriba
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+    } catch (error: any) {
+      console.error('Error al radicar solicitud:', error);
+      this.manejarErrorRadicacion(error);
+    } finally {
+      this.cargando = false;
+    }
   }
 
-  trackByString(index: number, item: string): string {
-    return item;
+  private manejarErrorRadicacion(error: any): void {
+    if (error.message.includes('DOCUMENTOS_INCOMPLETOS')) {
+      this.errorMessage = '❌ Documentos incompletos. Verifique que todos los documentos obligatorios estén cargados.';
+    } else if (error.message.includes('PAGO_INVALIDO')) {
+      this.errorMessage = '❌ Pago inválido. Verifique que el pago esté aprobado.';
+    } else if (error.message.includes('SOLICITUD_DUPLICADA')) {
+      this.errorMessage = '❌ Ya existe una solicitud radicada para este producto y tipo de trámite.';
+    } else {
+      this.errorMessage = error.message || '❌ Error al radicar la solicitud. Intente nuevamente.';
+    }
+  }
+
+  // Métodos de navegación
+  volver(): void {
+    this.router.navigate(['/tramites/registro/paso-cuatro']);
+  }
+
+  volverAPasos(): void {
+    this.router.navigate(['/tramites/registro/paso-dos']);
+  }
+
+  descargarComprobante(): void {
+    if (this.solicitudRadicadaData) {
+      const contenido = `
+COMPROBANTE DE RADICACIÓN - SEGAR
+=================================
+
+Número de Radicado: ${this.solicitudRadicadaData.numeroRadicado}
+Fecha de Radicación: ${new Date(this.solicitudRadicadaData.fechaRadicacion).toLocaleString('es-CO')}
+Producto: ${this.solicitudRadicadaData.nombreProducto}
+Tipo de Trámite: ${this.tipoTramiteLabels[this.solicitudRadicadaData.tipoTramite]}
+Estado: ${this.solicitudRadicadaData.estado}
+
+Empresa: ${this.tramiteActual?.empresa?.razonSocial}
+NIT: ${this.tramiteActual?.empresa?.nit}
+
+${this.solicitudRadicadaData.observaciones ? 'Observaciones: ' + this.solicitudRadicadaData.observaciones : ''}
+
+Mensaje del Sistema: ${this.solicitudRadicadaData.mensaje}
+
+----------------------------------
+Este documento certifica que su solicitud ha sido radicada exitosamente.
+Conserve este número de radicado para futuras consultas.
+
+Generado el: ${new Date().toLocaleString('es-CO')}
+      `;
+
+      const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Comprobante-${this.solicitudRadicadaData.numeroRadicado}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  }
+
+  nuevaSolicitud(): void {
+    this.tramiteEstadoService.limpiarEstado();
+    this.router.navigate(['/tramites/registro/paso-uno']);
+  }
+
+  irAConsultas(): void {
+    this.router.navigate(['/tramites/consulta-solicitudes']);
+  }
+
+  reiniciarValidaciones(): void {
+    this.validacionesCompletas = false;
+    this.errorMessage = '';
+    this.mensajeExito = '';
+
+    // Resetear estado de validaciones
+    this.estadoValidaciones.forEach(validacion => {
+      validacion.estado = 'pendiente';
+      validacion.mensaje = 'Pendiente de validación...';
+      validacion.icono = 'fas fa-clock';
+      validacion.color = '#6c757d';
+    });
+
+    this.ejecutarValidacionesPrevias();
   }
 }
