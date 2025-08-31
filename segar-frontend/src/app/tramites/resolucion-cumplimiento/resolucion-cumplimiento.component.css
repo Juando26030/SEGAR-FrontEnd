@@ -1,0 +1,234 @@
+/* Estilos para Resolución y Cumplimiento siguiendo el patrón del proyecto */
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #2563eb;
+}
+
+.tab-active {
+  border-bottom: 3px solid #10b981;
+  color: #10b981;
+}
+
+.tab-content {
+  padding-top: 1rem;
+}
+
+.section-card {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Estilos específicos para resolución */
+.resolucion-aprobada {
+  animation: slideInFromTop 0.6s ease-out;
+}
+
+.resolucion-rechazada {
+  animation: slideInFromTop 0.6s ease-out;
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Banners de estado */
+.banner-aprobacion {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 2px solid #10b981;
+}
+
+.banner-rechazo {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  border: 2px solid #ef4444;
+}
+
+/* Iconos de estado */
+.icono-aprobado {
+  animation: bounceIn 0.8s ease-out;
+}
+
+.icono-rechazado {
+  animation: shakeX 0.8s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shakeX {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-10px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(10px);
+  }
+}
+
+/* Números de resolución destacados */
+.numero-resolucion {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.numero-registro {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+/* Botones de descarga */
+.btn-descarga {
+  transition: all 0.3s ease;
+}
+
+.btn-descarga:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-descarga:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Timeline del historial */
+.timeline-item {
+  position: relative;
+}
+
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 2rem;
+  height: calc(100% - 1rem);
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.timeline-marker {
+  position: relative;
+  z-index: 10;
+}
+
+/* Cards de información */
+.info-card {
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Estados de validación */
+.estado-aprobado {
+  color: #059669;
+  background-color: #ecfdf5;
+  border-color: #10b981;
+}
+
+.estado-rechazado {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border-color: #ef4444;
+}
+
+.estado-en-revision {
+  color: #d97706;
+  background-color: #fffbeb;
+  border-color: #f59e0b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .resolucion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-finales {
+    flex-direction: column;
+  }
+
+  .numero-resolucion,
+  .numero-registro {
+    font-size: 1rem;
+  }
+}
+
+/* Loading states */
+.loading-overlay {
+  backdrop-filter: blur(2px);
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Alertas */
+.alerta-exito {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-left: 4px solid #10b981;
+}
+
+.alerta-error {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  border-left: 4px solid #ef4444;
+}
+
+.alerta-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+.alerta-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #f59e0b;
+}

@@ -1,8 +1,204 @@
 /* You can add global styles to this file, and also import other style files */
+/* Fuentes - DEBE ir primero antes de cualquier otra regla */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Estilos globales */
 body {
   font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Reset para asegurar consistencia */
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+/* Componentes globales reutilizables */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium text-sm transition-all duration-300 cursor-pointer inline-flex items-center justify-center;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .btn-disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  .alert {
+    @apply p-4 rounded-md mb-4;
+  }
+
+  .alert-success {
+    @apply bg-green-50 text-green-700 border border-green-200;
+  }
+
+  .alert-error {
+    @apply bg-red-50 text-red-700 border border-red-200;
+  }
+
+  .alert-warning {
+    @apply bg-yellow-50 text-yellow-700 border border-yellow-200;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 text-blue-700 border border-blue-200;
+  }
+}
+
+/* Utilidades personalizadas */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-smooth {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-strong {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  .gradient-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Clases de animación */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Estilos para componentes específicos */
+.loading-spinner {
+  @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+.checkmark-circle {
+  @apply w-12 h-12 bg-green-500 rounded-full flex items-center justify-center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Media queries para responsive design */
+@media (max-width: 640px) {
+  .responsive-hide-sm {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-hide-md {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .responsive-hide-lg {
+    display: none;
+  }
 }
