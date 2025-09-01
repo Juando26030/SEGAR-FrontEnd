@@ -1,7 +1,7 @@
 import { DocumentTemplateDto, DocumentStatus } from './document-template.dto';
 
 // Re-exportar DocumentStatus para que esté disponible desde este módulo
-export { DocumentStatus } from './document-template.dto';
+export type { DocumentStatus } from './document-template.dto';
 
 /**
  * DTO para instancias de documentos dinámicos
@@ -50,6 +50,7 @@ export interface UpdateDocumentInstanceDto {
 
 export interface FileUploadDto {
   file: File;
+  description?: string;  // Agregar campo description opcional
   metadata?: Record<string, any>;
 }
 

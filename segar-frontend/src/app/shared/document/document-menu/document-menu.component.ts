@@ -16,8 +16,10 @@ import { DocumentFormComponent } from '../document-form/document-form.component'
 })
 export class DocumentMenuComponent implements OnInit, OnDestroy {
   @Input() tramiteId!: number;
-  @Input() currentStep?: string;
+  @Input() tramiteType!: 'REGISTRO' | 'RENOVACION' | 'MODIFICACION';
+  @Input() currentStep!: string; // Cambiar a string para que sea compatible
   @Input() isVisible = false;
+  @Input() displayMode: 'inline' | 'modal' = 'inline'; // Agregar modo de display
 
   templates: DocumentTemplateDto[] = [];
   instances: DocumentInstanceDto[] = [];

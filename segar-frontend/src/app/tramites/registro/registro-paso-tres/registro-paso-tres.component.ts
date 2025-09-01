@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+// Importar componente del sistema de documentos dinámicos
+import { DocumentMenuComponent } from '../../../shared/document/document-menu/document-menu.component';
 
 interface OptionItem {
   value: string;
@@ -11,18 +13,6 @@ interface OptionItem {
 interface Tab {
   id: string;
   label: string;
-}
-
-interface DocumentCategory {
-  title: string;
-  documents: Document[];
-}
-
-interface Document {
-  id: string;
-  name: string;
-  acceptedTypes: string;
-  required?: boolean;
 }
 
 interface CompletionStep {
@@ -81,12 +71,23 @@ interface SolicitudForm {
 @Component({
   standalone: true,
   selector: 'app-registro-paso-tres',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    DocumentMenuComponent
+  ],
   templateUrl: './registro-paso-tres.component.html',
   styleUrls: ['./registro-paso-tres.component.css']
 })
 export class RegistroPasoTresComponent {
   activeTab = 'clasificacion';
+
+  // Propiedades para el sistema de documentos dinámicos
+  tramiteId: number = 1; // TODO: obtener desde ruta o contexto
+  currentTramiteType: 'REGISTRO' | 'RENOVACION' | 'MODIFICACION' = 'REGISTRO';
+
+  constructor() {}
 
   readonly tabs: Tab[] = [
     { id: 'clasificacion', label: 'Clasificación del Producto' },
@@ -213,40 +214,6 @@ export class RegistroPasoTresComponent {
     { value: 'Perú', label: 'Perú' }
   ];
 
-  readonly documentCategories: DocumentCategory[] = [
-    {
-      title: 'Documentos Legales',
-      documents: [
-        { id: 'cert-existencia', name: 'Certificado de Existencia y Representación Legal', acceptedTypes: '.pdf', required: true },
-        { id: 'poder', name: 'Poder (si aplica)', acceptedTypes: '.pdf' },
-        { id: 'cert-venta-libre', name: 'Certificado de Venta Libre', acceptedTypes: '.pdf' }
-      ]
-    },
-    {
-      title: 'Documentos Técnicos',
-      documents: [
-        { id: 'ficha-tecnica', name: 'Ficha Técnica del Producto', acceptedTypes: '.pdf,.doc,.docx', required: true },
-        { id: 'composicion', name: 'Composición Cuali-Cuantitativa', acceptedTypes: '.pdf,.doc,.docx', required: true },
-        { id: 'proceso-fabricacion', name: 'Proceso de Fabricación', acceptedTypes: '.pdf,.doc,.docx', required: true }
-      ]
-    },
-    {
-      title: 'Análisis de Laboratorio',
-      documents: [
-        { id: 'analisis-fisicoquimico', name: 'Análisis Fisicoquímico', acceptedTypes: '.pdf', required: true },
-        { id: 'analisis-microbiologico', name: 'Análisis Microbiológico', acceptedTypes: '.pdf', required: true },
-        { id: 'info-nutricional', name: 'Información Nutricional', acceptedTypes: '.pdf,.doc,.docx', required: true }
-      ]
-    },
-    {
-      title: 'Etiquetado',
-      documents: [
-        { id: 'artes-finales', name: 'Artes Finales de Etiquetas', acceptedTypes: '.pdf,.jpg,.png', required: true },
-        { id: 'tabla-nutricional', name: 'Tabla Nutricional', acceptedTypes: '.pdf,.jpg,.png', required: true }
-      ]
-    }
-  ];
-
   readonly completionSteps: CompletionStep[] = [
     { title: 'Clasificación', status: 'Completada' },
     { title: 'Formulario', status: 'Completado' },
@@ -296,10 +263,7 @@ export class RegistroPasoTresComponent {
 
     console.log('Formulario guardado:', this.solicitudForm);
     alert('Formulario guardado correctamente. Puede continuar con la documentación técnica.');
-  }
-
-  onVerifyDocumentacion(): void {
-    alert('Documentación verificada correctamente. Todos los archivos han sido validados.');
+    this.setActiveTab('documentacion');
   }
 
   onRadicarSolicitud(): void {
@@ -318,32 +282,6 @@ export class RegistroPasoTresComponent {
       solicitud: this.solicitudForm,
       fechaRadicacion: new Date()
     });
-  }
-
-  onFileSelected(event: Event, documentId: string): void {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-
-    if (!file) return;
-
-    // Validar tipo de archivo
-    const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.png'];
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-
-    if (!allowedTypes.includes(fileExtension)) {
-      alert('Tipo de archivo no permitido. Solo se aceptan archivos PDF, DOC, DOCX, JPG y PNG');
-      target.value = '';
-      return;
-    }
-
-    // Validar tamaño (10MB máximo)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('El archivo no puede ser mayor a 10MB');
-      target.value = '';
-      return;
-    }
-
-    console.log(`Archivo seleccionado para ${documentId}:`, file.name);
   }
 
   isFormCompleteForRadication(): boolean {
@@ -426,14 +364,6 @@ export class RegistroPasoTresComponent {
 
   trackByValue(index: number, item: OptionItem): string {
     return item.value;
-  }
-
-  trackByDocCategory(index: number, category: DocumentCategory): string {
-    return category.title;
-  }
-
-  trackByDocument(index: number, document: Document): string {
-    return document.id;
   }
 
   trackByStep(index: number, step: CompletionStep): string {

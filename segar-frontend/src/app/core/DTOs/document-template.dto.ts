@@ -33,6 +33,7 @@ export interface DocumentFieldDefinition {
   placeholder?: string;
   helpText?: string;
   dependsOn?: string;
+  conditionalLogic?: ConditionalLogic; // Agregar propiedad faltante
   columns?: TableColumn[]; // Para campos tipo tabla
   allowedMime?: string[]; // Para campos tipo file
   maxSize?: number; // Para campos tipo file
@@ -57,6 +58,12 @@ export interface ValidationRule {
   type: 'min' | 'max' | 'pattern' | 'custom';
   value: any;
   message: string;
+}
+
+export interface ConditionalLogic {
+  condition: string; // Expresión condicional, ej: "field1 === 'value'"
+  action: 'show' | 'hide' | 'require' | 'disable';
+  dependsOn: string[]; // Campos de los que depende
 }
 
 export interface FileRules {

@@ -29,6 +29,10 @@ export class DocumentFormComponent implements OnInit, OnDestroy {
   isSaving = false;
   isDirty = false;
 
+  // Propiedades para secciones y navegación
+  sections: DocumentFieldDefinition[][] = [];
+  currentSection = 0;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -47,6 +51,98 @@ export class DocumentFormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // Método para cancelar
+  cancel(): void {
+    this.cancelled.emit();
+  }
+
+  // Métodos para manejo de secciones
+  getSectionTitle(section: DocumentFieldDefinition[]): string {
+    const headerField = section.find(f => f.type === 'section-header');
+    return headerField?.label || `Sección ${this.sections.indexOf(section) + 1}`;
+  }
+
+  previousSection(): void {
+    if (this.currentSection > 0) {
+      this.currentSection--;
+    }
+  }
+
+  nextSection(): void {
+    if (this.currentSection < this.sections.length - 1) {
+      this.currentSection++;
+    }
+  }
+
+  canProceedToNextSection(): boolean {
+    const currentFields = this.sections[this.currentSection];
+    return currentFields.every(field => {
+      if (field.required && field.type !== 'section-header') {
+        const control = this.dynamicForm.get(field.key);
+        return control && control.valid && control.value;
+      }
+      return true;
+    });
+  }
+
+  // Métodos para campos
+  shouldShowField(field: DocumentFieldDefinition): boolean {
+    if (field.type === 'section-header') return false;
+
+    // Lógica condicional de campos si aplica
+    if (field.conditionalLogic) {
+      // Implementar lógica condicional aquí
+    }
+
+    return true;
+  }
+
+  trackByFieldKey(index: number, field: DocumentFieldDefinition): string {
+    return field.key;
+  }
+
+  getFieldErrors(fieldKey: string): string[] {
+    const control = this.dynamicForm.get(fieldKey);
+    const errors: string[] = [];
+
+    if (control && control.errors && (control.dirty || control.touched)) {
+      Object.keys(control.errors).forEach(errorKey => {
+        switch (errorKey) {
+          case 'required':
+            errors.push('Este campo es requerido');
+            break;
+          case 'email':
+            errors.push('Formato de email inválido');
+            break;
+          case 'minlength':
+            errors.push(`Mínimo ${control.errors![errorKey].requiredLength} caracteres`);
+            break;
+          case 'maxlength':
+            errors.push(`Máximo ${control.errors![errorKey].requiredLength} caracteres`);
+            break;
+          case 'pattern':
+            errors.push('Formato inválido');
+            break;
+          default:
+            errors.push('Valor inválido');
+        }
+      });
+    }
+
+    return errors;
+  }
+
+  // Métodos para guardar
+  saveDraft(): void {
+    this.saveDocument('DRAFT');
+  }
+
+  saveAndComplete(): void {
+    if (this.dynamicForm.valid) {
+      this.saveDocument('FILLED');
+    }
   }
 
   private buildForm(): void {
@@ -128,7 +224,8 @@ export class DocumentFormComponent implements OnInit, OnDestroy {
 
     if (field.columns) {
       field.columns.forEach(column => {
-        rowGroup.addControl(column.key || column, new FormControl(''));
+        const columnKey = typeof column === 'string' ? column : column.key;
+        rowGroup.addControl(columnKey, new FormControl(''));
       });
     }
 
@@ -156,6 +253,43 @@ export class DocumentFormComponent implements OnInit, OnDestroy {
     const documentData: CreateDocumentInstanceDto | UpdateDocumentInstanceDto = {
       templateId: this.template.id,
       filledData: this.dynamicForm.value
+    };
+
+    const saveOperation = this.existingInstance
+      ? this.documentService.updateDocumentInstance(
+          this.tramiteId,
+          this.existingInstance.id,
+          documentData as UpdateDocumentInstanceDto
+        )
+      : this.documentService.createDocumentInstance(this.tramiteId, documentData as CreateDocumentInstanceDto);
+
+    saveOperation
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (savedDocument) => {
+          this.isSaving = false;
+          this.isDirty = false;
+          this.documentSaved.emit(savedDocument);
+        },
+        error: (error) => {
+          this.isSaving = false;
+          console.error('Error al guardar documento:', error);
+        }
+      });
+  }
+
+  // Método helper para obtener FormControl de forma segura
+  getFormControl(fieldKey: string): FormControl {
+    return this.dynamicForm.get(fieldKey) as FormControl;
+  }
+
+  private saveDocument(status: 'DRAFT' | 'FILLED'): void {
+    this.isSaving = true;
+
+    const documentData: CreateDocumentInstanceDto | UpdateDocumentInstanceDto = {
+      templateId: this.template.id,
+      filledData: this.dynamicForm.value,
+      status: status
     };
 
     const saveOperation = this.existingInstance

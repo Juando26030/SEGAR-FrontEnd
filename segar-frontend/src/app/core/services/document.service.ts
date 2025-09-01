@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
+import { catchError, tap, delay } from 'rxjs/operators';
 
 import {
   DocumentTemplateDto,
@@ -74,21 +74,190 @@ export class DocumentService {
    * ENDPOINTS DE INSTANCIAS DE DOCUMENTO
    */
 
+  // Método temporal para obtener plantillas de prueba
+  private getMockTemplates(): DocumentTemplateDto[] {
+    return [
+      {
+        id: 1,
+        code: 'FORMULARIO_SOLICITUD',
+        name: 'Formulario de Solicitud de Registro Sanitario',
+        description: 'Formulario oficial para solicitud de registro sanitario según formato INVIMA',
+        fieldsDefinition: [
+          {
+            key: 'producto_nombre',
+            label: 'Nombre del Producto',
+            type: 'text',
+            required: true,
+            placeholder: 'Ej: Yogurt Natural Premium',
+            helpText: 'Nombre comercial del producto alimenticio'
+          },
+          {
+            key: 'marca_comercial',
+            label: 'Marca Comercial',
+            type: 'text',
+            required: true,
+            placeholder: 'Ej: LacteosPremium'
+          },
+          {
+            key: 'fabricante_nombre',
+            label: 'Razón Social del Fabricante',
+            type: 'text',
+            required: true,
+            placeholder: 'Empresa Alimentaria S.A.S.'
+          },
+          {
+            key: 'ingredientes',
+            label: 'Lista de Ingredientes (orden descendente)',
+            type: 'textarea',
+            required: true,
+            placeholder: 'Leche pasteurizada, cultivos lácticos, azúcar...'
+          },
+          {
+            key: 'vida_util',
+            label: 'Vida Útil (días)',
+            type: 'number',
+            required: true,
+            placeholder: '30'
+          }
+        ],
+        fileRules: {
+          allowedMimeTypes: ['application/pdf'],
+          maxSizeBytes: 5242880,
+          multipleAllowed: false
+        },
+        appliesToTramiteTypes: [TramiteType.REGISTRO],
+        version: 1,
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: 'system'
+      },
+      {
+        id: 2,
+        code: 'FICHA_TECNICA',
+        name: 'Ficha Técnica del Producto',
+        description: 'Especificaciones técnicas detalladas del producto alimenticio',
+        fieldsDefinition: [
+          {
+            key: 'composicion_cualitativa',
+            label: 'Composición Cualitativa y Cuantitativa',
+            type: 'textarea',
+            required: true,
+            helpText: 'Detalle completo de ingredientes con porcentajes'
+          },
+          {
+            key: 'proceso_fabricacion',
+            label: 'Proceso de Fabricación',
+            type: 'textarea',
+            required: true
+          },
+          {
+            key: 'especificaciones_fisicoquimicas',
+            label: 'Especificaciones Fisicoquímicas',
+            type: 'table',
+            required: true,
+            columns: [
+              { key: 'parametro', label: 'Parámetro', type: 'text', required: true },
+              { key: 'unidad', label: 'Unidad', type: 'text', required: true },
+              { key: 'limite', label: 'Límite', type: 'text', required: true },
+              { key: 'resultado', label: 'Resultado', type: 'text', required: true }
+            ]
+          }
+        ],
+        fileRules: {
+          allowedMimeTypes: ['application/pdf', 'application/msword'],
+          maxSizeBytes: 10485760,
+          multipleAllowed: false
+        },
+        appliesToTramiteTypes: [TramiteType.REGISTRO],
+        version: 1,
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: 'system'
+      },
+      {
+        id: 3,
+        code: 'CERTIFICADO_ANALISIS',
+        name: 'Certificado de Análisis (COA)',
+        description: 'Certificado de análisis fisicoquímico y microbiológico emitido por laboratorio acreditado',
+        fieldsDefinition: [
+          {
+            key: 'laboratorio_nombre',
+            label: 'Nombre del Laboratorio',
+            type: 'text',
+            required: true
+          },
+          {
+            key: 'lote_analizado',
+            label: 'Lote Analizado',
+            type: 'text',
+            required: true
+          },
+          {
+            key: 'fecha_analisis',
+            label: 'Fecha de Análisis',
+            type: 'date',
+            required: true
+          },
+          {
+            key: 'archivo_certificado',
+            label: 'Certificado (PDF)',
+            type: 'file',
+            required: true,
+            allowedMime: ['application/pdf'],
+            maxSize: 5242880
+          }
+        ],
+        fileRules: {
+          allowedMimeTypes: ['application/pdf'],
+          maxSizeBytes: 5242880,
+          multipleAllowed: false
+        },
+        appliesToTramiteTypes: [TramiteType.REGISTRO],
+        version: 1,
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: 'system'
+      }
+    ];
+  }
+
   getDocumentTemplatesForTramite(tramiteId: number): Observable<DocumentTemplateDto[]> {
-    return this.http.get<DocumentTemplateDto[]>(
-      `${this.apiUrl}/tramites/${tramiteId}/document-templates`
-    ).pipe(
-      catchError(this.handleError)
+    // Usar datos mock temporalmente
+    return of(this.getMockTemplates()).pipe(
+      delay(1000) // Simular delay de red
     );
+
+    // Código real para producción (comentado temporalmente)
+    /*
+    return this.http.get<DocumentTemplateDto[]>(
+      `${this.apiUrl}/tramites/${tramiteId}/document-templates`,
+      this.getHttpOptions()
+    ).pipe(
+      tap(templates => console.log('Plantillas cargadas:', templates)),
+      catchError(this.handleError<DocumentTemplateDto[]>('getDocumentTemplatesForTramite', []))
+    );
+    */
   }
 
   getDocumentInstancesForTramite(tramiteId: number): Observable<DocumentInstanceDto[]> {
-    return this.http.get<DocumentInstanceDto[]>(
-      `${this.apiUrl}/tramites/${tramiteId}/document-instances`
-    ).pipe(
-      tap(instances => this.documentsSubject.next(instances)),
-      catchError(this.handleError)
+    // Devolver array vacío temporalmente
+    return of([]).pipe(
+      delay(500)
     );
+
+    // Código real para producción (comentado temporalmente)
+    /*
+    return this.http.get<DocumentInstanceDto[]>(
+      `${this.apiUrl}/tramites/${tramiteId}/document-instances`,
+      this.getHttpOptions()
+    ).pipe(
+      tap(instances => console.log('Instancias cargadas:', instances)),
+      catchError(this.handleError<DocumentInstanceDto[]>('getDocumentInstancesForTramite', []))
+    );
+    */
   }
 
   getDocumentInstance(tramiteId: number, instanceId: number): Observable<DocumentInstanceDto> {
