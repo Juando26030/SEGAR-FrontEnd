@@ -1,0 +1,173 @@
+/* File Upload Component Styles */
+.file-upload-container {
+  @apply space-y-4;
+}
+
+.drop-zone {
+  @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-all duration-300;
+}
+
+.drop-zone:hover {
+  @apply border-blue-400 bg-blue-50;
+}
+
+.drop-zone.drag-over {
+  @apply border-blue-500 bg-blue-100;
+}
+
+.drop-zone.has-files {
+  @apply border-solid border-gray-200 bg-gray-50;
+}
+
+.drop-zone-content {
+  @apply flex flex-col items-center space-y-4;
+}
+
+.upload-icon {
+  @apply w-12 h-12 text-gray-400;
+}
+
+.upload-primary-text {
+  @apply text-sm text-gray-700;
+}
+
+.upload-secondary-text {
+  @apply text-xs text-gray-500;
+}
+
+.upload-limit-text {
+  @apply text-xs text-gray-400;
+}
+
+.selected-files {
+  @apply space-y-3;
+}
+
+.file-item {
+  @apply flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm transition-all duration-200;
+}
+
+.file-item:hover {
+  @apply shadow-md;
+}
+
+.file-item.upload-complete {
+  @apply border-green-200 bg-green-50;
+}
+
+.file-item.upload-error {
+  @apply border-red-200 bg-red-50;
+}
+
+.file-preview {
+  @apply flex-shrink-0 w-12 h-12 flex items-center justify-center;
+}
+
+.image-preview {
+  @apply w-full h-full object-cover rounded border;
+}
+
+.file-icon {
+  @apply flex items-center justify-center w-full h-full text-gray-500;
+}
+
+.file-info {
+  @apply flex-1 min-w-0;
+}
+
+.file-name {
+  @apply text-sm font-medium text-gray-900 truncate;
+}
+
+.file-details {
+  @apply flex items-center space-x-2 text-xs text-gray-500 mt-1;
+}
+
+.file-size {
+  @apply font-mono;
+}
+
+.upload-status {
+  @apply font-medium;
+}
+
+.progress-bar-container {
+  @apply mt-2 w-full;
+}
+
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-blue-500 transition-all duration-300 ease-out;
+}
+
+.file-actions {
+  @apply flex-shrink-0;
+}
+
+.remove-file-btn {
+  @apply p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.add-more-btn {
+  @apply flex items-center px-3 py-2 border border-dashed border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors;
+}
+
+.upload-actions {
+  @apply flex justify-end;
+}
+
+.upload-btn {
+  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors;
+}
+
+.file-requirements {
+  @apply mt-4 p-3 bg-gray-50 rounded-md border;
+}
+
+.requirements-grid {
+  @apply space-y-1;
+}
+
+.requirement-item {
+  @apply flex justify-between text-xs;
+}
+
+.requirement-label {
+  @apply text-gray-600 font-medium;
+}
+
+.requirement-value {
+  @apply text-gray-900 font-mono;
+}
+
+/* Animation for file upload */
+@keyframes uploadPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.uploading {
+  animation: uploadPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .file-item {
+    @apply flex-col space-x-0 space-y-2;
+  }
+
+  .file-preview {
+    @apply w-full h-auto;
+  }
+
+  .file-actions {
+    @apply w-full flex justify-end;
+  }
+}

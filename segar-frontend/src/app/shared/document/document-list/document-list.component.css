@@ -1,0 +1,99 @@
+/* Document List Component Styles */
+.document-list-container {
+  @apply space-y-6;
+}
+
+.document-list-header {
+  @apply bg-white p-4 border border-gray-200 rounded-lg shadow-sm;
+}
+
+/* Table Styles */
+.document-table {
+  @apply bg-white;
+}
+
+.document-table th {
+  @apply select-none;
+}
+
+.document-table th:hover {
+  @apply bg-gray-100;
+}
+
+.document-table tbody tr {
+  @apply transition-colors duration-200;
+}
+
+.document-table tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Grid Styles */
+.document-grid {
+  @apply bg-gray-50 p-4 rounded-lg;
+}
+
+.document-card {
+  @apply transition-all duration-300;
+}
+
+.document-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+/* Status Badge Animations */
+.status-badge {
+  @apply transition-all duration-200;
+}
+
+/* Action Button Hover Effects */
+.action-button {
+  @apply p-2 rounded-md transition-all duration-200;
+}
+
+.action-button:hover {
+  @apply transform scale-105;
+}
+
+/* Sorting Icons */
+.sort-icon {
+  @apply transition-transform duration-200;
+}
+
+.sort-icon.rotate-180 {
+  @apply transform rotate-180;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State Styles */
+.empty-state {
+  @apply text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300;
+}
+
+.empty-state-icon {
+  @apply w-16 h-16 text-gray-400 mx-auto mb-4;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .document-list-header {
+    @apply p-3;
+  }
+
+  .document-table {
+    @apply text-sm;
+  }
+
+  .document-grid {
+    @apply grid-cols-1;
+  }
+}
