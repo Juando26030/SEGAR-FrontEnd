@@ -42,6 +42,7 @@ export class DocumentFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.buildForm();
+    this.organizeSections(); // Agregar organización de secciones
     if (this.existingInstance) {
       this.loadExistingData();
     }
@@ -313,5 +314,17 @@ export class DocumentFormComponent implements OnInit, OnDestroy {
           console.error('Error al guardar documento:', error);
         }
       });
+  }
+
+  private organizeSections(): void {
+    if (!this.template.fieldsDefinition) {
+      this.sections = [];
+      return;
+    }
+
+    // Para simplificar, ponemos todos los campos en una sección
+    // En futuras versiones se puede implementar lógica más compleja de secciones
+    this.sections = [this.template.fieldsDefinition];
+    this.currentSection = 0;
   }
 }
