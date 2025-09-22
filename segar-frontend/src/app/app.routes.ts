@@ -17,7 +17,6 @@ import { ConfiguracionComponent } from './pages/configuracion/configuracion.comp
 import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/registro-paso-tres.component';
 import { RegistroPasoCuatroComponent } from './tramites/registro/registro-paso-cuatro/registro-paso-cuatro.component';
 import { RegistroPasoCincoComponent } from './tramites/registro/registro-paso-cinco/registro-paso-cinco.component';
-import { ResolucionCumplimientoComponent } from './tramites/resolucion-cumplimiento/resolucion-cumplimiento.component';
 
 export const routes: Routes = [
   {
@@ -53,13 +52,6 @@ export const routes: Routes = [
           { path: 'paso-4', component: RegistroPasoCuatroComponent },
           { path: 'paso-5', component: RegistroPasoCincoComponent },
           { path: '', redirectTo: 'paso-3', pathMatch: 'full' }
-        ]
-      },
-      {
-        path: 'tramites',
-        children: [
-          { path: 'resolucion/:id', component: ResolucionCumplimientoComponent },
-          { path: 'resolucion', redirectTo: 'panel', pathMatch: 'full' }
         ]
       }
     ]
