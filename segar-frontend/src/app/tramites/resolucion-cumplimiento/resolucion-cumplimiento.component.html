@@ -1,0 +1,359 @@
+<div class="max-w-6xl mx-auto p-6">
+  <!-- Header -->
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">Paso 5: Resolución y Cumplimiento</h2>
+    <p class="text-gray-600">Resultado final del trámite de registro sanitario ante el INVIMA</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="cargando" class="text-center py-12">
+    <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p class="text-lg text-gray-600">Cargando información del trámite...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ errorMessage }}</p>
+        <div class="mt-3">
+          <button class="bg-red-100 hover:bg-red-200 text-red-800 text-sm px-3 py-1 rounded"
+                  (click)="volverATramites()">
+            Volver a Trámites
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="mensajeExito" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-green-700">{{ mensajeExito }}</p>
+        <button class="text-green-600 text-sm underline mt-1" (click)="limpiarMensajes()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content - Solo si tenemos datos -->
+  <div *ngIf="!cargando && tramiteCompleto">
+
+    <!-- Información General del Trámite -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3 flex-1">
+          <h3 class="text-lg font-semibold text-blue-800 mb-2">Información del Trámite</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-700">
+            <div><strong>Número de Radicado:</strong> {{ tramiteCompleto.numeroRadicado }}</div>
+            <div><strong>Fecha de Creación:</strong> {{ formatearSoloFecha(tramiteCompleto.fechaCreacion) }}</div>
+            <div>
+              <strong>Estado:</strong>
+              <span class="ml-2 px-2 py-1 text-xs font-medium rounded-full" [ngClass]="obtenerClaseEstado(tramiteCompleto.estado)">
+                {{ tramiteCompleto.estado }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRÁMITE APROBADO -->
+    <div *ngIf="tramiteAprobado && resolucion" class="mb-8">
+      <!-- Banner de Aprobación -->
+      <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center justify-center mb-4">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
+              <svg class="h-10 w-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          <div class="ml-6 text-center">
+            <h3 class="text-2xl font-bold text-green-800">¡Trámite Aprobado!</h3>
+            <p class="text-green-700 mt-1">Su solicitud de registro sanitario ha sido aprobada por el INVIMA</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de la Resolución -->
+      <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <h4 class="text-xl font-semibold text-gray-900 mb-4">📋 Resolución de Aprobación</h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número de Resolución:</label>
+            <p class="text-lg font-semibold text-blue-600 font-mono">{{ resolucion.numeroResolucion }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Emisión:</label>
+            <p class="text-gray-900">{{ formatearSoloFecha(resolucion.fechaEmision) }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Autoridad:</label>
+            <p class="text-gray-900">{{ resolucion.autoridad }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
+            <span class="px-3 py-1 text-xs font-medium rounded-full" [ngClass]="obtenerClaseEstado(resolucion.estado)">
+              {{ resolucion.estado }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6" *ngIf="resolucion.observaciones">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones:</label>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-gray-800">{{ resolucion.observaciones }}</p>
+          </div>
+        </div>
+
+        <!-- Botón de Descarga de Resolución -->
+        <div class="mt-6">
+          <button
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            [disabled]="cargandoDescarga"
+            (click)="descargarResolucion()">
+            <svg *ngIf="!cargandoDescarga" class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            <svg *ngIf="cargandoDescarga" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ cargandoDescarga ? 'Descargando...' : 'Descargar Resolución' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Registro Sanitario -->
+      <div *ngIf="registroSanitario" class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <h4 class="text-xl font-semibold text-gray-900 mb-4">🏆 Registro Sanitario</h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número de Registro:</label>
+            <p class="text-lg font-semibold text-green-600 font-mono">{{ registroSanitario.numeroRegistro }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
+            <span class="px-3 py-1 text-xs font-medium rounded-full" [ngClass]="obtenerClaseEstado(registroSanitario.estado)">
+              {{ registroSanitario.estado }}
+            </span>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Expedición:</label>
+            <p class="text-gray-900">{{ formatearSoloFecha(registroSanitario.fechaExpedicion) }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento:</label>
+            <p class="text-gray-900">{{ formatearSoloFecha(registroSanitario.fechaVencimiento) }}</p>
+          </div>
+        </div>
+
+        <!-- Botón de Descarga de Registro Sanitario -->
+        <div class="mt-6">
+          <button
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            [disabled]="cargandoDescarga"
+            (click)="descargarRegistroSanitario()">
+            <svg *ngIf="!cargandoDescarga" class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            <svg *ngIf="cargandoDescarga" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ cargandoDescarga ? 'Descargando...' : 'Descargar Registro Sanitario' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRÁMITE RECHAZADO -->
+    <div *ngIf="tramiteRechazado && resolucion" class="mb-8">
+      <!-- Banner de Rechazo -->
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center justify-center mb-4">
+          <div class="flex-shrink-0">
+            <div class="flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+              <svg class="h-10 w-10 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          <div class="ml-6 text-center">
+            <h3 class="text-2xl font-bold text-red-800">Trámite Rechazado</h3>
+            <p class="text-red-700 mt-1">Su solicitud de registro sanitario ha sido rechazada por el INVIMA</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de la Resolución de Rechazo -->
+      <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        <h4 class="text-xl font-semibold text-gray-900 mb-4">📋 Resolución de Rechazo</h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número de Resolución:</label>
+            <p class="text-lg font-semibold text-red-600 font-mono">{{ resolucion.numeroResolucion }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Emisión:</label>
+            <p class="text-gray-900">{{ formatearSoloFecha(resolucion.fechaEmision) }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Autoridad:</label>
+            <p class="text-gray-900">{{ resolucion.autoridad }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
+            <span class="px-3 py-1 text-xs font-medium rounded-full" [ngClass]="obtenerClaseEstado(resolucion.estado)">
+              {{ resolucion.estado }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Motivos del Rechazo:</label>
+          <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+            <p class="text-red-800">{{ resolucion.observaciones }}</p>
+          </div>
+        </div>
+
+        <!-- Botón de Descarga de Resolución -->
+        <div class="mt-6">
+          <button
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            [disabled]="cargandoDescarga"
+            (click)="descargarResolucion()">
+            <svg *ngIf="!cargandoDescarga" class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            <svg *ngIf="cargandoDescarga" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ cargandoDescarga ? 'Descargando...' : 'Descargar Resolución' }}
+          </button>
+        </div>
+
+        <!-- Opciones para Rechazo -->
+        <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+          <h5 class="font-medium text-yellow-800 mb-2">¿Qué puede hacer ahora?</h5>
+          <ul class="text-sm text-yellow-700 space-y-1">
+            <li>• Revisar los motivos del rechazo detalladamente</li>
+            <li>• Corregir los aspectos señalados por el INVIMA</li>
+            <li>• Iniciar un nuevo trámite con la información corregida</li>
+            <li>• Contactar al INVIMA para aclaraciones adicionales</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial del Trámite -->
+    <div *ngIf="historial.length > 0" class="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+      <h4 class="text-xl font-semibold text-gray-900 mb-4">📈 Historial del Trámite</h4>
+
+      <div class="flow-root">
+        <ul class="-mb-8">
+          <li *ngFor="let evento of historial; let i = index" class="relative">
+            <div class="relative flex space-x-3">
+              <div>
+                <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                  <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              </div>
+              <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ evento.accion }}</p>
+                  <p class="text-sm text-gray-500">{{ evento.descripcion }}</p>
+                  <p class="text-xs text-gray-400">Por: {{ evento.usuario }}</p>
+                </div>
+                <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                  <time>{{ formatearFecha(evento.fecha) }}</time>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="i < historial.length - 1" class="absolute top-5 left-4 -ml-px h-6 w-0.5 bg-gray-200"></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Acciones Finales -->
+    <div class="bg-gray-50 rounded-lg p-6">
+      <h4 class="text-lg font-semibold text-gray-900 mb-4">Acciones</h4>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <!-- Finalizar Trámite -->
+        <button *ngIf="!tramiteFinalizado && (tramiteAprobado || tramiteRechazado)"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          (click)="finalizarTramite()">
+          <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          Finalizar Trámite
+        </button>
+
+        <!-- Nuevo Trámite -->
+        <button
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          (click)="iniciarNuevoTramite()">
+          <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Iniciar Nuevo Trámite
+        </button>
+
+        <!-- Volver a Trámites -->
+        <button
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          (click)="volverATramites()">
+          <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Volver a Trámites
+        </button>
+      </div>
+    </div>
+
+    <!-- Estado Finalizado -->
+    <div *ngIf="tramiteFinalizado" class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Trámite Finalizado</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <p>Este trámite ha sido marcado como finalizado. Puede consultar toda la información y descargar los documentos en cualquier momento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

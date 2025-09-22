@@ -1,202 +1,231 @@
 /* Eliminado slide-container para integración completa */
 
+/* Estilos para el sistema de pestañas */
 .tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1rem;
-  overflow-x: auto;
+  @apply flex border-b border-gray-200 mb-4 overflow-x-auto;
 }
 
 .tab {
-  padding: 0.75rem 1.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.tab:hover {
-  color: #2563eb;
+  @apply px-6 py-3 font-medium cursor-pointer transition-all duration-300 whitespace-nowrap border-0 bg-transparent text-gray-600 hover:text-blue-600;
 }
 
 .tab-active {
+  @apply text-green-600 font-semibold;
   border-bottom: 3px solid #10b981;
-  color: #10b981;
 }
 
 .tab-content {
-  padding-top: 1rem;
+  @apply pt-4;
 }
 
 .section-card {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.slide-footer {
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-  padding: 0.75rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 0 0 12px 12px;
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6;
 }
 
 /* Navegación entre pasos */
 .step-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-radius: 0 0 12px 12px;
+  @apply flex justify-between items-center p-4 bg-gray-50 border-t border-gray-200 rounded-b-xl mt-8;
 }
 
 .nav-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
+  @apply inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium no-underline transition-all duration-300 border-0 cursor-pointer;
 }
 
 .nav-btn-primary {
-  background-color: #10b981;
-  color: white;
+  @apply bg-green-500 text-white hover:bg-green-600;
+  transform: translateY(0);
 }
 
 .nav-btn-primary:hover {
-  background-color: #059669;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
 .nav-btn-secondary {
-  background-color: #e2e8f0;
-  color: #64748b;
-}
-
-.nav-btn-secondary:hover {
-  background-color: #cbd5e1;
+  @apply bg-gray-200 text-gray-600 hover:bg-gray-300;
 }
 
 .nav-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+  @apply opacity-50 cursor-not-allowed;
+  transform: none !important;
 }
 
 .step-indicator-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #64748b;
+  @apply flex items-center gap-2 text-sm text-gray-600;
 }
 
 .step-indicator-nav .current-step {
-  font-weight: 600;
-  color: #10b981;
+  @apply font-semibold text-green-600;
 }
 
-.progress-bar {
-  height: 8px;
-  background-color: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin: 20px 0;
+/* Checkmark circle animation */
+.checkmark-circle {
+  @apply bg-green-500 rounded-full flex items-center justify-center opacity-0;
+  width: 60px;
+  height: 60px;
+  transform: scale(0);
+  transition: all 0.5s ease;
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(to right, #10b981, #059669);
-  border-radius: 4px;
-  transition: width 1s ease;
+.checkmark-circle.show {
+  @apply opacity-100;
+  transform: scale(1);
 }
 
-.progress-bar-small {
-  height: 6px;
-  background-color: #e5e7eb;
-  border-radius: 3px;
-  overflow: hidden;
+/* Validacion items */
+.validacion-item {
+  @apply transition-all duration-300 rounded-lg;
 }
 
-.progress-fill-vigencia {
-  height: 100%;
-  background: linear-gradient(to right, #3b82f6, #1e40af);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+.validacion-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.step-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: white;
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.step-active {
-  background-color: #10b981;
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.step-completed {
-  background-color: #059669;
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-.step-pending {
-  background-color: #94a3b8;
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.timeline-connector {
-  height: 2px;
-  background-color: #e2e8f0;
-  flex-grow: 1;
+/* Clases de animación */
+.fade-in {
+  animation: fadeInUp 0.5s ease-out;
 }
 
-.connector-filled {
-  background-color: #10b981;
+.slide-in {
+  animation: slideInFromTop 0.5s ease-out;
 }
 
-.certificate {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' fill='none'%3E%3Cpath d='M85 15H15C12.2386 15 10 17.2386 10 20V80C10 82.7614 12.2386 85 15 85H85C87.7614 85 90 82.7614 90 80V20C90 17.2386 87.7614 15 85 15Z' stroke='%2310B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M30 40H70' stroke='%2310B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M30 50H70' stroke='%2310B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M30 60H50' stroke='%2310B981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 80%;
+.scale-in {
+  animation: scaleIn 0.3s ease-out;
 }
 
-.seal {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 80px;
-  height: 80px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80' fill='none'%3E%3Ccircle cx='40' cy='40' r='35' fill='%23DCFCE7' stroke='%2310B981' stroke-width='2'/%3E%3Cpath d='M40 16V64M16 40H64M22.8 22.8L57.2 57.2M22.8 57.2L57.2 22.8' stroke='%2310B981' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='40' cy='40' r='12' fill='%2310B981' fill-opacity='0.1' stroke='%2310B981' stroke-width='2'/%3E%3C/svg%3E");
-  opacity: 0.8;
+.bounce-in {
+  animation: bounceIn 0.8s ease-out;
 }
 
+/* Estilos para los botones mejorados */
+.btn-radicar {
+  @apply bg-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center justify-center mx-auto;
+  min-width: 280px;
+}
+
+.btn-radicar:hover:not(:disabled) {
+  @apply bg-green-700;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-radicar:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none;
+}
+
+.btn-action {
+  @apply transition-all duration-300;
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estados de loading */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Pantalla de confirmación */
+.success-card {
+  animation: bounceIn 0.8s ease-out;
+}
+
+.success-icon {
+  animation: fadeInUp 2s infinite alternate;
+}
+
+/* Número de radicado destacado */
+.numero-radicado {
+  @apply font-mono tracking-wide font-bold;
+  letter-spacing: 0.1em;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .slide-content {
-    padding: 1rem;
+  .tabs {
+    @apply flex-wrap;
   }
 
-  .timeline-connector {
-    display: none;
+  .tab {
+    @apply flex-1 text-center text-sm px-4 py-2;
+    min-width: 120px;
+  }
+
+  .section-card {
+    @apply p-4;
+  }
+
+  .step-navigation {
+    @apply flex-col gap-4 text-center;
+  }
+
+  .nav-btn {
+    @apply w-full justify-center;
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
+  }
+
+  .checkmark-circle {
+    width: 48px;
+    height: 48px;
   }
 }

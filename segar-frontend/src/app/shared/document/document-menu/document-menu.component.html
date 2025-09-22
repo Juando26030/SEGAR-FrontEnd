@@ -1,0 +1,110 @@
+<!-- Document Menu - Modal OR Inline -->
+<div [ngClass]="displayMode === 'modal' ? 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center' : ''"
+     *ngIf="displayMode === 'inline' || isVisible"
+     (click)="displayMode === 'modal' ? isVisible = false : null">
+
+  <div [ngClass]="displayMode === 'modal' ? 'bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden m-4' : 'w-full'"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header - Solo para modal -->
+    <div *ngIf="displayMode === 'modal'" class="bg-blue-600 text-white p-4 flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-semibold">Documentos del Trámite</h2>
+        <p class="text-blue-100 text-sm">Gestión de documentos según requisitos INVIMA</p>
+      </div>
+      <button (click)="isVisible = false" class="text-white hover:text-gray-200 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="bg-gray-50 p-4 border-b rounded-md mb-4" *ngIf="!loading">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium text-gray-700">Progreso de documentos</span>
+        <span class="text-sm text-gray-500">{{ getCompletionPercentage() }}% completado</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" [style.width.%]="getCompletionPercentage()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="text-gray-500 mt-2">Cargando documentos...</p>
+    </div>
+
+    <!-- Documents Grid -->
+    <div *ngIf="!loading && !showForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div *ngFor="let template of templates; trackBy: trackByTemplateId"
+           class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+           (click)="openDocument(template)">
+
+        <!-- Document Status Badge -->
+        <div class="flex justify-between items-start mb-3">
+          <span class="px-2 py-1 text-xs font-medium rounded-full" [class]="getStatusClass(getDocumentStatus(template))">
+            {{ getDocumentStatus(template) | titlecase }}
+          </span>
+          <div class="flex space-x-2">
+            <button *ngIf="getDocumentStatus(template) !== 'PENDING'"
+                    (click)="downloadDocument(template); $event.stopPropagation()"
+                    class="text-blue-500 hover:text-blue-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              </svg>
+            </button>
+            <button *ngIf="getDocumentStatus(template) === 'FILLED'"
+                    (click)="exportToPdf(template); $event.stopPropagation()"
+                    class="text-green-500 hover:text-green-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Document Info -->
+        <h4 class="font-semibold text-gray-900 mb-2">{{ template.name }}</h4>
+        <p class="text-sm text-gray-600 mb-3">{{ template.description }}</p>
+
+        <!-- Action Button -->
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">
+            {{ template.code }}
+          </span>
+          <button class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors">
+            {{ getDocumentStatus(template) === 'PENDING' ? 'Completar' : 'Editar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Modal -->
+    <div *ngIf="showForm && selectedDocument"
+         class="fixed inset-0 bg-black bg-opacity-50 z-60 flex items-center justify-center">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden m-4">
+        <app-document-form
+          [template]="selectedDocument"
+          [tramiteId]="tramiteId"
+          [existingInstance]="getDocumentInstance(selectedDocument)"
+          (documentSaved)="onDocumentSaved()"
+          (cancelled)="closeForm()">
+        </app-document-form>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && templates.length === 0" class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No hay documentos requeridos</h3>
+      <p class="mt-1 text-sm text-gray-500">No se encontraron plantillas de documentos para este trámite.</p>
+    </div>
+
+  </div>
+</div>

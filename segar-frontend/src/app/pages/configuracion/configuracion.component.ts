@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { NotificationService } from '../../services/notification.service';
 
 interface UserConfig {
   // Preferencias de Usuario
@@ -137,7 +139,10 @@ export class ConfiguracionComponent {
     { value: 1440, label: '24 horas' }
   ];
 
-  constructor() {
+  constructor(
+    private router: Router,
+    private notificationService: NotificationService
+  ) {
     this.checkForChanges();
   }
 
@@ -194,53 +199,64 @@ export class ConfiguracionComponent {
     return `${dateFormat} ${timeFormat}`;
   }
 
-  saveConfiguration() {
-    // Validar contraseñas si se está cambiando
-    if (this.config.newPassword || this.config.confirmNewPassword) {
-      if (!this.config.currentPassword) {
-        this.showErrorNotification('Debe ingresar su contraseña actual para cambiarla');
-        return;
-      }
+  closeAllSessions() {
+    if (confirm('¿Está seguro de que desea cerrar todas las sesiones activas? Será redirigido al login.')) {
+      this.notificationService.info(
+        'Cerrando sesiones',
+        'Se están cerrando todas las sesiones activas...'
+      );
+      
+      // Simular cierre de sesiones
+      setTimeout(() => {
+        this.notificationService.success(
+          'Sesiones cerradas',
+          'Todas las sesiones han sido cerradas correctamente'
+        );
+      }, 2000);
+    }
+  }
+
+  saveConfiguration(): void {
+    if (!this.hasChanges) return;
+
+    // Validar contraseñas si se están cambiando
+    if (this.activeTab === 'password' && this.config.newPassword) {
       if (!this.passwordsMatch) {
-        this.showErrorNotification('Las nuevas contraseñas no coinciden');
+        this.notificationService.error('Error de validación', 'Las contraseñas no coinciden');
         return;
       }
-      if (this.config.newPassword.length < 8) {
-        this.showErrorNotification('La nueva contraseña debe tener al menos 8 caracteres');
-        return;
-      }
-      if (this.getPasswordStrength().score < 50) {
-        this.showErrorNotification('La contraseña es demasiado débil. Use mayúsculas, números y símbolos.');
+      
+      const strength = this.getPasswordStrength();
+      if (strength.score < 75) {
+        this.notificationService.warning('Contraseña débil', 'Por favor, usa una contraseña más segura');
         return;
       }
     }
 
-    // Aquí iría la lógica para guardar la configuración en el backend
-    console.log('Guardando configuración:', this.config);
-    
-    // Simular guardado exitoso
-    this.originalConfig = { ...this.config };
-    // Limpiar campos de contraseña después de guardar
-    this.config.currentPassword = '';
-    this.config.newPassword = '';
-    this.config.confirmNewPassword = '';
-    this.hasChanges = false;
-    
-    // Mostrar notificación de éxito
-    this.showSuccessNotification('Configuración guardada exitosamente');
+    // Simular guardado
+    setTimeout(() => {
+      this.originalConfig = { ...this.config };
+      this.hasChanges = false;
+      
+      this.notificationService.success(
+        'Configuración guardada',
+        'Tus preferencias han sido actualizadas correctamente'
+      );
+    }, 1000);
   }
 
-  resetConfiguration() {
+  resetConfiguration(): void {
     this.config = { ...this.originalConfig };
-    // Limpiar campos de contraseña
-    this.config.currentPassword = '';
-    this.config.newPassword = '';
-    this.config.confirmNewPassword = '';
     this.hasChanges = false;
+    
+    this.notificationService.info(
+      'Configuración restablecida',
+      'Se han restaurado los valores anteriores'
+    );
   }
 
-  restoreDefaults() {
-    if (confirm('¿Está seguro de que desea restaurar la configuración predeterminada? Se perderán todos los cambios personalizados.')) {
+  restoreDefaults(): void {
+    if (confirm('¿Estás seguro de que quieres restaurar la configuración predeterminada? Se perderán todos los cambios.')) {
       this.config = {
         timezone: 'America/Guatemala',
         dateFormat: 'DD/MM/YYYY',
@@ -256,58 +272,13 @@ export class ConfiguracionComponent {
         newPassword: '',
         confirmNewPassword: ''
       };
-      this.checkForChanges();
+      
+      this.hasChanges = true;
+      
+      this.notificationService.warning(
+        'Configuración predeterminada',
+        'Se han restaurado los valores predeterminados. Recuerda guardar los cambios.'
+      );
     }
-  }
-
-  closeAllSessions() {
-    if (confirm('¿Está seguro de que desea cerrar todas las sesiones activas? Será redirigido al login.')) {
-      // Aquí iría la lógica para cerrar todas las sesiones
-      console.log('Cerrando todas las sesiones...');
-      this.showSuccessNotification('Todas las sesiones han sido cerradas');
-      // En una app real, redirigir al login después de un delay
-      setTimeout(() => {
-        console.log('Redirigiendo al login...');
-        // window.location.href = '/auth/login';
-      }, 2000);
-    }
-  }
-
-  private showSuccessNotification(message: string) {
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
-    notification.innerHTML = `
-      <div class="flex items-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        ${message}
-      </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.remove();
-    }, 3000);
-  }
-
-  private showErrorNotification(message: string) {
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
-    notification.innerHTML = `
-      <div class="flex items-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-        ${message}
-      </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.remove();
-    }, 4000);
   }
 }

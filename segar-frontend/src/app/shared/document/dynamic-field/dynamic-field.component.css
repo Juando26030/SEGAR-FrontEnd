@@ -1,0 +1,90 @@
+/* Dynamic Field Component Styles */
+.dynamic-field {
+  @apply space-y-1;
+}
+
+.field-type-checkbox {
+  @apply space-y-0;
+}
+
+.field-type-multiselect .multiselect-container {
+  max-height: 10rem;
+}
+
+.field-type-radio .radio-group {
+  @apply space-y-2;
+}
+
+.field-type-file {
+  @apply space-y-3;
+}
+
+/* Input focus styles */
+.dynamic-field input:focus,
+.dynamic-field select:focus,
+.dynamic-field textarea:focus {
+  @apply ring-2 ring-blue-500 ring-opacity-50;
+}
+
+.dynamic-field input.border-red-300:focus,
+.dynamic-field select.border-red-300:focus,
+.dynamic-field textarea.border-red-300:focus {
+  @apply ring-red-500;
+}
+
+/* Character count animations */
+.character-count {
+  transition: color 0.2s ease;
+}
+
+/* Error message animation */
+.error-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom styling for checkboxes and radio buttons */
+.custom-checkbox,
+.custom-radio {
+  @apply transition-colors duration-200;
+}
+
+.custom-checkbox:hover,
+.custom-radio:hover {
+  @apply border-blue-400;
+}
+
+.custom-checkbox:focus,
+.custom-radio:focus {
+  @apply ring-2 ring-blue-500 ring-opacity-50;
+}
+
+/* Disabled state */
+.dynamic-field input:disabled,
+.dynamic-field select:disabled,
+.dynamic-field textarea:disabled {
+  @apply bg-gray-50 text-gray-500 cursor-not-allowed;
+}
+
+/* Field validation states */
+.field-valid {
+  @apply border-green-300 bg-green-50;
+}
+
+.field-invalid {
+  @apply border-red-300 bg-red-50;
+}
+
+.field-warning {
+  @apply border-yellow-300 bg-yellow-50;
+}
