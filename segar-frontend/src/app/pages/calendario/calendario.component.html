@@ -1,32 +1,103 @@
-<div class="mb-6">
-  <h1 class="text-2xl font-bold text-gray-800">Calendario de Trámites</h1>
-  <p class="text-sm text-gray-600">Visualiza trámites por vencer, eventos regulatorios y recordatorios.</p>
-</div>
+<div class="calendario-container">
+  <div class="calendario-header">
+    <!-- Sección izquierda: Título y subtítulo -->
+    <div class="titulo-seccion">
+      <h1 class="titulo-principal">Calendario de Gestión</h1>
+      <p class="subtitulo">Sistema de Registro Sanitario</p>
+    </div>
 
-<div class="grid grid-cols-1 md:grid-cols-7 border rounded overflow-hidden shadow text-center text-sm font-medium">
-  <div class="bg-gray-100 p-2">Dom</div>
-  <div class="bg-gray-100 p-2">Lun</div>
-  <div class="bg-gray-100 p-2">Mar</div>
-  <div class="bg-gray-100 p-2">Mié</div>
-  <div class="bg-gray-100 p-2">Jue</div>
-  <div class="bg-gray-100 p-2">Vie</div>
-  <div class="bg-gray-100 p-2">Sáb</div>
+    <!-- Sección derecha: Navegación y estadísticas -->
+    <div class="header-derecha">
+      <!-- Navegación y botones -->
+      <div class="header-content">
+        <div class="navegacion-mes">
+          <button class="btn-nav" (click)="mesAnterior()" title="Mes anterior">‹</button>
+          <div class="mes-anio">{{ nombreMes }} {{ anio }}</div>
+          <button class="btn-nav" (click)="mesSiguiente()" title="Mes siguiente">›</button>
+        </div>
 
-  
-  <ng-container *ngFor="let day of calendarDays">
-    <div
-      class="relative p-2 h-[100px] border"
-      [ngClass]="{
-        'bg-red-100': day.tipo === 'vencimiento',
-        'bg-yellow-100': day.tipo === 'evento',
-        'bg-green-100': day.tipo === 'recordatorio',
-        'text-gray-400': day.otra
-      }"
-    >
-      <span class="absolute top-1 left-1 text-xs font-semibold">{{ day.dia }}</span>
-      <div *ngIf="day.titulo" class="mt-5 text-[11px] text-gray-800 font-medium px-1 truncate">
-        {{ day.titulo }}
+        <div class="acciones-header">
+          <button class="btn-hoy" (click)="irHoy()" title="Ir al día de hoy">Hoy</button>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="resumen-eventos">
+        <div class="stat-card total">
+          <span class="stat-number">{{ obtenerResumenEventos().total }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card criticos">
+          <span class="stat-number">{{ obtenerResumenEventos().criticos }}</span>
+          <span class="stat-label">Críticos</span>
+        </div>
+        <div class="stat-card completados">
+          <span class="stat-number">{{ obtenerResumenEventos().completados }}</span>
+          <span class="stat-label">Completados</span>
+        </div>
       </div>
     </div>
-  </ng-container>
+  </div>
+
+
+  <!-- Wrapper del calendario -->
+  <div class="calendario-wrapper">
+    <!-- Encabezados de días -->
+    <div class="dias-semana">
+      <div class="dia-semana-header" *ngFor="let dia of diasSemana">{{ dia }}</div>
+    </div>
+
+    <!-- Grid del calendario -->
+    <div class="calendario-grid">
+      <div
+        class="celda-dia"
+        *ngFor="let diaCalendario of calendarDays"
+        [ngClass]="{
+          'otro-mes': diaCalendario.esOtroMes,
+          'hoy': diaCalendario.esHoy,
+          'feriado': diaCalendario.esFeriado
+        }">
+
+        <div class="numero-dia">
+          {{ diaCalendario.dia }}
+          <span *ngIf="diaCalendario.esHoy" class="badge-hoy">Hoy</span>
+        </div>
+
+        <div class="eventos-container" *ngIf="diaCalendario.eventos && diaCalendario.eventos.length > 0">
+          <div
+            *ngFor="let evento of diaCalendario.eventos.slice(0, 3)"
+            [class]="obtenerClaseEvento(evento)"
+            (click)="seleccionarEvento(evento)"
+            [title]="evento.descripcion || evento.titulo">
+
+            <span class="evento-icono material-icons-outlined">{{ obtenerIconoEvento(evento.tipo) }}</span>
+            <span class="evento-texto">{{ evento.titulo }}</span>
+          </div>
+
+          <div class="mas-eventos" *ngIf="diaCalendario.eventos.length > 3">
+            +{{ diaCalendario.eventos.length - 3 }} eventos más
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalles del evento -->
+  <div class="modal-overlay" *ngIf="mostrarDetalles && eventoSeleccionado" (click)="cerrarDetalles()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ eventoSeleccionado.titulo }}</h3>
+        <button class="btn-cerrar" (click)="cerrarDetalles()">×</button>
+      </div>
+
+      <div class="evento-detalle">
+        <p><strong>Tipo:</strong> {{ eventoSeleccionado.tipo | titlecase }}</p>
+        <p *ngIf="eventoSeleccionado.hora"><strong>Hora:</strong> {{ eventoSeleccionado.hora }}</p>
+        <p *ngIf="eventoSeleccionado.prioridad"><strong>Prioridad:</strong> {{ eventoSeleccionado.prioridad | titlecase }}</p>
+        <p *ngIf="eventoSeleccionado.descripcion"><strong>Descripción:</strong></p>
+        <p *ngIf="eventoSeleccionado.descripcion">{{ eventoSeleccionado.descripcion }}</p>
+      </div>
+    </div>
+  </div>
+
 </div>
