@@ -1,215 +1,215 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+interface Evento {
+  id: number;
+  titulo: string;
+  descripcion?: string;
+  fecha: string;
+  hora?: string;
+  tipo: 'recordatorio' | 'vencimiento' | 'renovacion' | 'plazo_final' | 'completado';
+  categoria?: string;
+  prioridad: 'baja' | 'media' | 'alta';
+  fechaCreacion: Date;
+}
 
 interface DiaCalendario {
   dia: number;
+  esOtroMes: boolean;
+  esHoy: boolean;
+  esFeriado: boolean;
   fecha: Date;
-  esOtroMes?: boolean;
-  eventos?: EventoCalendario[];
-  esHoy?: boolean;
-  esFeriado?: boolean;
-}
-
-interface EventoCalendario {
-  id: string;
-  tipo: 'completado' | 'recordatorio' | 'vencimiento' | 'renovacion' | 'plazo_final';
-  titulo: string;
-  descripcion?: string;
-  completado?: boolean;
-  prioridad?: 'baja' | 'media' | 'alta' | 'critica';
-  hora?: string;
+  eventos: Evento[];
 }
 
 @Component({
-  standalone: true,
   selector: 'app-calendario',
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
-  imports: [CommonModule]
+  imports: [CommonModule, FormsModule],
+  standalone: true
 })
 export class CalendarioComponent implements OnInit {
+  fechaActual = new Date();
+  mesActual = this.fechaActual.getMonth();
+  anioActual = this.fechaActual.getFullYear();
+
+  diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  meses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
   calendarDays: DiaCalendario[] = [];
-  mesActual: Date = new Date();
-  nombreMes: string = '';
-  anio: number = 0;
-  diasSemana: string[] = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  diasSemanaCortos: string[] = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  eventoSeleccionado: EventoCalendario | null = null;
+  eventos: Evento[] = [];
+
+  // Variables para detalles de evento
   mostrarDetalles = false;
+  eventoSeleccionado: Evento | null = null;
+
+  // Variables para nuevo evento
+  mostrarModalNuevoEvento = false;
+  nuevoEvento = {
+    titulo: '',
+    descripcion: '',
+    fecha: '',
+    hora: '',
+    tipo: '' as 'recordatorio' | 'vencimiento' | 'renovacion' | 'plazo_final' | 'completado',
+    categoria: '',
+    prioridad: 'media' as 'baja' | 'media' | 'alta'
+  };
+
+  constructor() {}
 
   ngOnInit(): void {
+    this.cargarEventosEjemplo();
     this.generarCalendario();
   }
 
-  generarCalendario(): void {
-    const primerDia = new Date(this.mesActual.getFullYear(), this.mesActual.getMonth(), 1);
-    const ultimoDia = new Date(this.mesActual.getFullYear(), this.mesActual.getMonth() + 1, 0);
+  get nombreMes(): string {
+    return this.meses[this.mesActual];
+  }
 
-    this.nombreMes = primerDia.toLocaleDateString('es-ES', { month: 'long' });
-    this.anio = primerDia.getFullYear();
+  get anio(): number {
+    return this.anioActual;
+  }
+
+  cargarEventosEjemplo(): void {
+    const hoy = new Date();
+
+    this.eventos = [
+      {
+        id: 1,
+        titulo: 'Renovación Registro Sanitario',
+        descripcion: 'Renovar registro sanitario del producto ABC-123',
+        fecha: new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 2).toISOString().split('T')[0],
+        hora: '10:00',
+        tipo: 'renovacion',
+        categoria: 'registro_sanitario',
+        prioridad: 'alta',
+        fechaCreacion: new Date()
+      },
+      {
+        id: 2,
+        titulo: 'Vencimiento Licencia',
+        descripcion: 'Vence licencia de funcionamiento',
+        fecha: new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 7).toISOString().split('T')[0],
+        hora: '14:30',
+        tipo: 'vencimiento',
+        categoria: 'licencia',
+        prioridad: 'alta',
+        fechaCreacion: new Date()
+      },
+      {
+        id: 3,
+        titulo: 'Reunión con INVIMA',
+        descripcion: 'Reunión de seguimiento con el INVIMA',
+        fecha: hoy.toISOString().split('T')[0],
+        hora: '09:00',
+        tipo: 'recordatorio',
+        categoria: 'auditoria',
+        prioridad: 'media',
+        fechaCreacion: new Date()
+      }
+    ];
+  }
+
+  generarCalendario(): void {
+    const primerDia = new Date(this.anioActual, this.mesActual, 1);
+    const ultimoDia = new Date(this.anioActual, this.mesActual + 1, 0);
+    const primerDiaSemana = primerDia.getDay();
+    const diasEnMes = ultimoDia.getDate();
 
     this.calendarDays = [];
 
     // Días del mes anterior
-    const diasPrevios = primerDia.getDay();
-    for (let i = diasPrevios - 1; i >= 0; i--) {
-      const fecha = new Date(primerDia);
-      fecha.setDate(fecha.getDate() - i - 1);
+    const mesAnterior = new Date(this.anioActual, this.mesActual, 0);
+    for (let i = primerDiaSemana - 1; i >= 0; i--) {
+      const dia = mesAnterior.getDate() - i;
+      const fecha = new Date(this.anioActual, this.mesActual - 1, dia);
+
       this.calendarDays.push({
-        dia: fecha.getDate(),
-        fecha: new Date(fecha),
-        esOtroMes: true
+        dia,
+        esOtroMes: true,
+        esHoy: false,
+        esFeriado: false,
+        fecha,
+        eventos: this.obtenerEventosPorFecha(fecha)
       });
     }
 
     // Días del mes actual
-    for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
-      const fecha = new Date(this.mesActual.getFullYear(), this.mesActual.getMonth(), dia);
+    for (let dia = 1; dia <= diasEnMes; dia++) {
+      const fecha = new Date(this.anioActual, this.mesActual, dia);
+      const esHoy = this.esFechaHoy(fecha);
+
       this.calendarDays.push({
         dia,
-        fecha: new Date(fecha),
-        eventos: this.obtenerEventosPorFecha(fecha),
-        esHoy: this.esHoy(fecha),
-        esFeriado: this.esFeriado(fecha)
+        esOtroMes: false,
+        esHoy,
+        esFeriado: false,
+        fecha,
+        eventos: this.obtenerEventosPorFecha(fecha)
       });
     }
 
-    // Días del siguiente mes
-    const totalCeldas = 42;
-    const diasRestantes = totalCeldas - this.calendarDays.length;
-    for (let dia = 1; dia <= diasRestantes; dia++) {
-      const fecha = new Date(this.mesActual.getFullYear(), this.mesActual.getMonth() + 1, dia);
+    // Días del mes siguiente para completar la grilla
+    const celdasRestantes = 42 - this.calendarDays.length;
+    for (let dia = 1; dia <= celdasRestantes; dia++) {
+      const fecha = new Date(this.anioActual, this.mesActual + 1, dia);
+
       this.calendarDays.push({
         dia,
-        fecha: new Date(fecha),
-        esOtroMes: true
+        esOtroMes: true,
+        esHoy: false,
+        esFeriado: false,
+        fecha,
+        eventos: this.obtenerEventosPorFecha(fecha)
       });
     }
   }
 
-  obtenerEventosPorFecha(fecha: Date): EventoCalendario[] {
-    const eventos: EventoCalendario[] = [];
+  obtenerEventosPorFecha(fecha: Date): Evento[] {
+    const fechaStr = fecha.toISOString().split('T')[0];
+    return this.eventos.filter(evento => evento.fecha === fechaStr);
+  }
 
-    if (fecha.getDate() === 5) {
-      eventos.push({
-        id: '1',
-        tipo: 'completado',
-        titulo: 'Inspección INVIMA - Planta Principal',
-        descripcion: 'Inspección sanitaria completada exitosamente. Certificación aprobada.',
-        completado: true,
-        prioridad: 'media',
-        hora: '09:00'
-      });
-    }
-
-    if (fecha.getDate() === 11) {
-      eventos.push({
-        id: '2',
-        tipo: 'vencimiento',
-        titulo: 'Vencimiento Registro Sanitario YGR-001',
-        descripcion: 'El registro sanitario del Yogur ABC vence en 5 días. Renovación urgente requerida.',
-        prioridad: 'critica',
-        hora: '23:59'
-      });
-    }
-
-    if (fecha.getDate() === 16) {
-      eventos.push({
-        id: '3',
-        tipo: 'recordatorio',
-        titulo: 'Envío de muestras al laboratorio',
-        descripcion: 'Recordatorio: Enviar muestras del lote L2024-089 para análisis microbiológico',
-        prioridad: 'media',
-        hora: '14:30'
-      });
-    }
-
-    if (fecha.getDate() === 21) {
-      eventos.push({
-        id: '4',
-        tipo: 'renovacion',
-        titulo: 'Renovación Registro Sanitario XYZ-789',
-        descripcion: 'Iniciar proceso de renovación del registro sanitario. Documentación pendiente.',
-        prioridad: 'alta',
-        hora: '10:00'
-      });
-    }
-
-    if (fecha.getDate() === 25) {
-      eventos.push({
-        id: '5',
-        tipo: 'plazo_final',
-        titulo: 'Respuesta final requerimiento INVIMA',
-        descripcion: 'Último día para responder al requerimiento REQ-2024-456. Documentación técnica requerida.',
-        prioridad: 'critica',
-        hora: '17:00'
-      });
-    }
-
-    return eventos;
+  esFechaHoy(fecha: Date): boolean {
+    const hoy = new Date();
+    return fecha.getDate() === hoy.getDate() &&
+      fecha.getMonth() === hoy.getMonth() &&
+      fecha.getFullYear() === hoy.getFullYear();
   }
 
   mesAnterior(): void {
-    this.mesActual.setMonth(this.mesActual.getMonth() - 1);
+    if (this.mesActual === 0) {
+      this.mesActual = 11;
+      this.anioActual--;
+    } else {
+      this.mesActual--;
+    }
     this.generarCalendario();
   }
 
   mesSiguiente(): void {
-    this.mesActual.setMonth(this.mesActual.getMonth() + 1);
+    if (this.mesActual === 11) {
+      this.mesActual = 0;
+      this.anioActual++;
+    } else {
+      this.mesActual++;
+    }
     this.generarCalendario();
   }
 
   irHoy(): void {
-    this.mesActual = new Date();
+    const hoy = new Date();
+    this.mesActual = hoy.getMonth();
+    this.anioActual = hoy.getFullYear();
     this.generarCalendario();
   }
 
-  esHoy(fecha: Date): boolean {
-    const hoy = new Date();
-    return fecha.toDateString() === hoy.toDateString();
-  }
-
-  esFeriado(fecha: Date): boolean {
-    // Implementar lógica de feriados colombianos
-    return false;
-  }
-
-  obtenerClaseEvento(evento: EventoCalendario): string {
-    const clasesBase = ['evento-item'];
-
-    switch (evento.tipo) {
-      case 'completado':
-        clasesBase.push('evento-completado');
-        break;
-      case 'recordatorio':
-        clasesBase.push('evento-recordatorio');
-        break;
-      case 'vencimiento':
-      case 'renovacion':
-      case 'plazo_final':
-        clasesBase.push('evento-critico');
-        break;
-    }
-
-    if (evento.prioridad === 'critica') {
-      clasesBase.push('prioridad-critica');
-    }
-
-    return clasesBase.join(' ');
-  }
-
-  obtenerIconoEvento(tipo: string): string {
-    switch (tipo) {
-      case 'completado': return 'check_circle';
-      case 'recordatorio': return 'schedule';
-      case 'vencimiento': return 'warning';
-      case 'renovacion': return 'refresh';
-      case 'plazo_final': return 'priority_high';
-      default: return 'event';
-    }
-  }
-
-  seleccionarEvento(evento: EventoCalendario): void {
+  seleccionarEvento(evento: Evento): void {
     this.eventoSeleccionado = evento;
     this.mostrarDetalles = true;
   }
@@ -219,21 +219,105 @@ export class CalendarioComponent implements OnInit {
     this.eventoSeleccionado = null;
   }
 
-  obtenerResumenEventos(): { total: number; criticos: number; completados: number } {
-    let total = 0;
-    let criticos = 0;
-    let completados = 0;
+  obtenerClaseEvento(evento: Evento): string {
+    let claseBase = 'evento-item';
 
-    this.calendarDays.forEach(dia => {
-      if (dia.eventos) {
-        total += dia.eventos.length;
-        criticos += dia.eventos.filter(e => e.prioridad === 'critica').length;
-        completados += dia.eventos.filter(e => e.tipo === 'completado').length;
-      }
-    });
+    switch (evento.tipo) {
+      case 'completado':
+        claseBase += ' evento-completado';
+        break;
+      case 'recordatorio':
+        claseBase += ' evento-recordatorio';
+        break;
+      case 'vencimiento':
+      case 'plazo_final':
+        claseBase += ' evento-critico';
+        if (evento.prioridad === 'alta') {
+          claseBase += ' prioridad-critica';
+        }
+        break;
+      default:
+        claseBase += ' evento-recordatorio';
+    }
 
-    return { total, criticos, completados };
+    return claseBase;
   }
 
+  obtenerIconoEvento(tipo: string): string {
+    switch (tipo) {
+      case 'recordatorio':
+        return '🔔';
+      case 'vencimiento':
+        return '⏰';
+      case 'renovacion':
+        return '🔄';
+      case 'plazo_final':
+        return '⚠️';
+      case 'completado':
+        return '✅';
+      default:
+        return '📅';
+    }
+  }
 
+  obtenerResumenEventos(): { total: number; criticos: number; completados: number } {
+    const eventosMesActual = this.eventos.filter(evento => {
+      const fechaEvento = new Date(evento.fecha);
+      return fechaEvento.getMonth() === this.mesActual &&
+        fechaEvento.getFullYear() === this.anioActual;
+    });
+
+    return {
+      total: eventosMesActual.length,
+      criticos: eventosMesActual.filter(e =>
+        e.tipo === 'vencimiento' || e.tipo === 'plazo_final' || e.prioridad === 'alta'
+      ).length,
+      completados: eventosMesActual.filter(e => e.tipo === 'completado').length
+    };
+  }
+
+  abrirModalNuevoEvento(): void {
+    this.mostrarModalNuevoEvento = true;
+    const hoy = new Date();
+    this.nuevoEvento.fecha = hoy.toISOString().split('T')[0];
+  }
+
+  cerrarModalNuevoEvento(): void {
+    this.mostrarModalNuevoEvento = false;
+    this.resetearFormulario();
+  }
+
+  resetearFormulario(): void {
+    this.nuevoEvento = {
+      titulo: '',
+      descripcion: '',
+      fecha: '',
+      hora: '',
+      tipo: '' as any,
+      categoria: '',
+      prioridad: 'media'
+    };
+  }
+
+  guardarNuevoEvento(): void {
+    if (this.nuevoEvento.titulo && this.nuevoEvento.fecha && this.nuevoEvento.tipo) {
+      const evento: Evento = {
+        id: Date.now(),
+        titulo: this.nuevoEvento.titulo,
+        descripcion: this.nuevoEvento.descripcion,
+        fecha: this.nuevoEvento.fecha,
+        hora: this.nuevoEvento.hora,
+        tipo: this.nuevoEvento.tipo,
+        categoria: this.nuevoEvento.categoria,
+        prioridad: this.nuevoEvento.prioridad,
+        fechaCreacion: new Date()
+      };
+
+      this.eventos.push(evento);
+      this.generarCalendario();
+      this.cerrarModalNuevoEvento();
+
+      console.log('Evento creado:', evento);
+    }
+  }
 }

@@ -1,4 +1,5 @@
 <div class="calendario-container">
+  <!-- Header del Calendario -->
   <div class="calendario-header">
     <!-- Sección izquierda: Título y subtítulo -->
     <div class="titulo-seccion">
@@ -10,6 +11,8 @@
     <div class="header-derecha">
       <!-- Navegación y botones -->
       <div class="header-content">
+        <div></div> <!-- Columna vacía para el grid -->
+
         <div class="navegacion-mes">
           <button class="btn-nav" (click)="mesAnterior()" title="Mes anterior">‹</button>
           <div class="mes-anio">{{ nombreMes }} {{ anio }}</div>
@@ -17,6 +20,10 @@
         </div>
 
         <div class="acciones-header">
+          <button class="btn-nuevo-evento" (click)="abrirModalNuevoEvento()" title="Crear nuevo evento">
+            <span class="icono">+</span>
+            Nuevo Evento
+          </button>
           <button class="btn-hoy" (click)="irHoy()" title="Ir al día de hoy">Hoy</button>
         </div>
       </div>
@@ -39,65 +46,236 @@
     </div>
   </div>
 
-
-  <!-- Wrapper del calendario -->
+  <!-- Grilla del Calendario -->
   <div class="calendario-wrapper">
-    <!-- Encabezados de días -->
+    <!-- Encabezados de días de la semana -->
     <div class="dias-semana">
       <div class="dia-semana-header" *ngFor="let dia of diasSemana">{{ dia }}</div>
     </div>
 
-    <!-- Grid del calendario -->
+    <!-- Días del calendario -->
     <div class="calendario-grid">
       <div
         class="celda-dia"
-        *ngFor="let diaCalendario of calendarDays"
-        [ngClass]="{
-          'otro-mes': diaCalendario.esOtroMes,
-          'hoy': diaCalendario.esHoy,
-          'feriado': diaCalendario.esFeriado
-        }">
+        *ngFor="let dia of calendarDays"
+        [class.otro-mes]="dia.esOtroMes"
+        [class.hoy]="dia.esHoy"
+        [class.tiene-eventos]="dia.eventos.length > 0"
+      >
+        <!-- Número del día -->
+        <div class="numero-dia">{{ dia.dia }}</div>
 
-        <div class="numero-dia">
-          {{ diaCalendario.dia }}
-          <span *ngIf="diaCalendario.esHoy" class="badge-hoy">Hoy</span>
-        </div>
-
-        <div class="eventos-container" *ngIf="diaCalendario.eventos && diaCalendario.eventos.length > 0">
+        <!-- Eventos del día -->
+        <div class="eventos-container" *ngIf="dia.eventos.length > 0">
           <div
-            *ngFor="let evento of diaCalendario.eventos.slice(0, 3)"
-            [class]="obtenerClaseEvento(evento)"
+            class="evento-item"
+            *ngFor="let evento of dia.eventos; let i = index"
+            [ngClass]="obtenerClaseEvento(evento)"
             (click)="seleccionarEvento(evento)"
-            [title]="evento.descripcion || evento.titulo">
-
-            <span class="evento-icono material-icons-outlined">{{ obtenerIconoEvento(evento.tipo) }}</span>
+            [title]="evento.titulo + (evento.hora ? ' - ' + evento.hora : '')"
+          >
+            <span class="evento-icono">{{ obtenerIconoEvento(evento.tipo) }}</span>
             <span class="evento-texto">{{ evento.titulo }}</span>
           </div>
 
-          <div class="mas-eventos" *ngIf="diaCalendario.eventos.length > 3">
-            +{{ diaCalendario.eventos.length - 3 }} eventos más
+          <!-- Indicador de más eventos -->
+          <div class="mas-eventos" *ngIf="dia.eventos.length > 2">
+            +{{ dia.eventos.length - 2 }} más
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de detalles del evento -->
-  <div class="modal-overlay" *ngIf="mostrarDetalles && eventoSeleccionado" (click)="cerrarDetalles()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+  <!-- Modal de Detalles del Evento -->
+  <div class="modal-overlay" *ngIf="mostrarDetalles" (click)="cerrarDetalles()">
+    <div class="modal-detalles" (click)="$event.stopPropagation()" *ngIf="eventoSeleccionado">
       <div class="modal-header">
-        <h3>{{ eventoSeleccionado.titulo }}</h3>
+        <h3 class="modal-titulo">{{ eventoSeleccionado!.titulo }}</h3>
         <button class="btn-cerrar" (click)="cerrarDetalles()">×</button>
       </div>
 
-      <div class="evento-detalle">
-        <p><strong>Tipo:</strong> {{ eventoSeleccionado.tipo | titlecase }}</p>
-        <p *ngIf="eventoSeleccionado.hora"><strong>Hora:</strong> {{ eventoSeleccionado.hora }}</p>
-        <p *ngIf="eventoSeleccionado.prioridad"><strong>Prioridad:</strong> {{ eventoSeleccionado.prioridad | titlecase }}</p>
-        <p *ngIf="eventoSeleccionado.descripcion"><strong>Descripción:</strong></p>
-        <p *ngIf="eventoSeleccionado.descripcion">{{ eventoSeleccionado.descripcion }}</p>
+      <div class="modal-body">
+        <div class="detalle-item" *ngIf="eventoSeleccionado!.descripcion">
+          <span class="detalle-label">Descripción:</span>
+          <span class="detalle-valor">{{ eventoSeleccionado!.descripcion }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Fecha:</span>
+          <span class="detalle-valor">{{ eventoSeleccionado!.fecha | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="detalle-item" *ngIf="eventoSeleccionado!.hora">
+          <span class="detalle-label">Hora:</span>
+          <span class="detalle-valor">{{ eventoSeleccionado!.hora }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Tipo:</span>
+          <span class="detalle-valor tipo-badge" [ngClass]="'tipo-' + eventoSeleccionado!.tipo">
+            {{ eventoSeleccionado!.tipo | titlecase }}
+          </span>
+        </div>
+
+        <div class="detalle-item" *ngIf="eventoSeleccionado!.categoria">
+          <span class="detalle-label">Categoría:</span>
+          <span class="detalle-valor">{{ eventoSeleccionado!.categoria | titlecase }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Prioridad:</span>
+          <span class="detalle-valor prioridad-badge" [ngClass]="'prioridad-' + eventoSeleccionado!.prioridad">
+            {{ eventoSeleccionado!.prioridad | titlecase }}
+          </span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-editar" type="button">Editar</button>
+        <button class="btn-eliminar" type="button">Eliminar</button>
       </div>
     </div>
   </div>
 
+  <!-- Modal de Nuevo Evento -->
+  <div class="modal-overlay" *ngIf="mostrarModalNuevoEvento" (click)="cerrarModalNuevoEvento()">
+    <div class="modal-form" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-titulo">Crear Nuevo Evento</h2>
+        <button class="btn-cerrar" (click)="cerrarModalNuevoEvento()">×</button>
+      </div>
+
+      <form (ngSubmit)="guardarNuevoEvento()" #eventoForm="ngForm">
+        <div class="form-body">
+          <div class="form-group">
+            <label class="form-label" for="titulo">Título del Evento *</label>
+            <input
+              type="text"
+              id="titulo"
+              class="form-input"
+              [(ngModel)]="nuevoEvento.titulo"
+              name="titulo"
+              placeholder="Ingresa el título del evento"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="descripcion">Descripción</label>
+            <textarea
+              id="descripcion"
+              class="form-textarea"
+              [(ngModel)]="nuevoEvento.descripcion"
+              name="descripcion"
+              placeholder="Describe los detalles del evento..."
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fecha">Fecha *</label>
+              <input
+                type="date"
+                id="fecha"
+                class="form-input"
+                [(ngModel)]="nuevoEvento.fecha"
+                name="fecha"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="hora">Hora</label>
+              <input
+                type="time"
+                id="hora"
+                class="form-input"
+                [(ngModel)]="nuevoEvento.hora"
+                name="hora"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="tipo">Tipo de Evento *</label>
+              <select
+                id="tipo"
+                class="form-select"
+                [(ngModel)]="nuevoEvento.tipo"
+                name="tipo"
+                required
+              >
+                <option value="">Seleccionar tipo...</option>
+                <option value="recordatorio">Recordatorio</option>
+                <option value="vencimiento">Vencimiento</option>
+                <option value="renovacion">Renovación</option>
+                <option value="plazo_final">Plazo Final</option>
+                <option value="completado">Completado</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="categoria">Categoría</label>
+              <select
+                id="categoria"
+                class="form-select"
+                [(ngModel)]="nuevoEvento.categoria"
+                name="categoria"
+              >
+                <option value="">Seleccionar categoría...</option>
+                <option value="registro_sanitario">Registro Sanitario</option>
+                <option value="licencia">Licencia</option>
+                <option value="certificacion">Certificación</option>
+                <option value="auditoria">Auditoría</option>
+                <option value="tramite">Trámite</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Prioridad *</label>
+            <div class="prioridad-selector">
+              <div
+                class="prioridad-opcion baja"
+                [class.selected]="nuevoEvento.prioridad === 'baja'"
+                (click)="nuevoEvento.prioridad = 'baja'"
+              >
+                <span class="prioridad-texto">Baja</span>
+              </div>
+              <div
+                class="prioridad-opcion media"
+                [class.selected]="nuevoEvento.prioridad === 'media'"
+                (click)="nuevoEvento.prioridad = 'media'"
+              >
+                <span class="prioridad-texto">Media</span>
+              </div>
+              <div
+                class="prioridad-opcion alta"
+                [class.selected]="nuevoEvento.prioridad === 'alta'"
+                (click)="nuevoEvento.prioridad = 'alta'"
+              >
+                <span class="prioridad-texto">Alta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancelar" (click)="cerrarModalNuevoEvento()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn-guardar"
+            [disabled]="!eventoForm.valid"
+          >
+            Guardar Evento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
