@@ -17,6 +17,7 @@ import { ConfiguracionComponent } from './pages/configuracion/configuracion.comp
 import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/registro-paso-tres.component';
 import { RegistroPasoCuatroComponent } from './tramites/registro/registro-paso-cuatro/registro-paso-cuatro.component';
 import { RegistroPasoCincoComponent } from './tramites/registro/registro-paso-cinco/registro-paso-cinco.component';
+import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
 
 export const routes: Routes = [
   {
@@ -27,6 +28,7 @@ export const routes: Routes = [
   {
     path: 'main',
     component: MenuLayoutComponent,
+    canActivate: [AuthGuard],  // <- PROTEGER CON AUTH GUARD
     children: [
       { path: '', redirectTo: 'panel', pathMatch: 'full' },
       { path: 'panel', component: PanelPrincipalComponent },
