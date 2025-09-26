@@ -1,18 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Evento {
-  id: number;
-  titulo: string;
-  descripcion?: string;
-  fecha: string;
-  hora?: string;
-  tipo: 'recordatorio' | 'vencimiento' | 'renovacion' | 'plazo_final' | 'completado';
-  categoria?: string;
-  prioridad: 'baja' | 'media' | 'alta';
-  fechaCreacion: Date;
-}
+import { CalendarioService } from '../../core/services/calendario.service';
+import { EventoDTO, CrearEventoDTO, EstadisticasCalendarioDTO } from '../../core/DTOs/calendario.dto';
 
 interface DiaCalendario {
   dia: number;
@@ -20,7 +10,7 @@ interface DiaCalendario {
   esHoy: boolean;
   esFeriado: boolean;
   fecha: Date;
-  eventos: Evento[];
+  eventos: EventoDTO[];
 }
 
 @Component({
@@ -42,29 +32,98 @@ export class CalendarioComponent implements OnInit {
   ];
 
   calendarDays: DiaCalendario[] = [];
-  eventos: Evento[] = [];
+  eventos: EventoDTO[] = [];
+  estadisticas: EstadisticasCalendarioDTO | null = null;
+  tiposEvento: string[] = [];
+  categoriasEvento: string[] = [];
 
   // Variables para detalles de evento
   mostrarDetalles = false;
-  eventoSeleccionado: Evento | null = null;
+  eventoSeleccionado: EventoDTO | null = null;
 
   // Variables para nuevo evento
   mostrarModalNuevoEvento = false;
-  nuevoEvento = {
+  editandoEvento = false;
+  eventoEditandoId: number | null = null;
+
+  nuevoEvento: CrearEventoDTO = {
     titulo: '',
     descripcion: '',
     fecha: '',
     hora: '',
-    tipo: '' as 'recordatorio' | 'vencimiento' | 'renovacion' | 'plazo_final' | 'completado',
-    categoria: '',
-    prioridad: 'media' as 'baja' | 'media' | 'alta'
+    tipo: 'RECORDATORIO',
+    categoria: 'TRAMITE',
+    prioridad: 'MEDIA'
   };
 
-  constructor() {}
+  cargando = false;
+
+  constructor(private calendarioService: CalendarioService) {}
 
   ngOnInit(): void {
-    this.cargarEventosEjemplo();
-    this.generarCalendario();
+    this.cargarDatosIniciales();
+  }
+
+  private cargarDatosIniciales(): void {
+    this.cargando = true;
+
+    // Cargar eventos del mes actual
+    this.cargarEventosPorMes();
+
+    // Cargar estadísticas
+    this.cargarEstadisticas();
+
+    // Cargar tipos y categorías
+    this.cargarTiposYCategorias();
+  }
+
+  cargarEventosPorMes(): void {
+    this.calendarioService.obtenerEventosPorMes(this.mesActual + 1, this.anioActual)
+      .subscribe({
+        next: (eventos) => {
+          this.eventos = eventos;
+          this.generarCalendario();
+          this.cargando = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar eventos:', error);
+          this.cargando = false;
+        }
+      });
+  }
+
+  cargarEstadisticas(): void {
+    this.calendarioService.obtenerEstadisticas()
+      .subscribe({
+        next: (estadisticas) => {
+          this.estadisticas = estadisticas;
+        },
+        error: (error) => {
+          console.error('Error al cargar estadísticas:', error);
+        }
+      });
+  }
+
+  cargarTiposYCategorias(): void {
+    this.calendarioService.obtenerTiposEvento()
+      .subscribe({
+        next: (tipos) => {
+          this.tiposEvento = tipos;
+        },
+        error: (error) => {
+          console.error('Error al cargar tipos de evento:', error);
+        }
+      });
+
+    this.calendarioService.obtenerCategoriasEvento()
+      .subscribe({
+        next: (categorias) => {
+          this.categoriasEvento = categorias;
+        },
+        error: (error) => {
+          console.error('Error al cargar categorías de evento:', error);
+        }
+      });
   }
 
   get nombreMes(): string {
@@ -73,46 +132,6 @@ export class CalendarioComponent implements OnInit {
 
   get anio(): number {
     return this.anioActual;
-  }
-
-  cargarEventosEjemplo(): void {
-    const hoy = new Date();
-
-    this.eventos = [
-      {
-        id: 1,
-        titulo: 'Renovación Registro Sanitario',
-        descripcion: 'Renovar registro sanitario del producto ABC-123',
-        fecha: new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 2).toISOString().split('T')[0],
-        hora: '10:00',
-        tipo: 'renovacion',
-        categoria: 'registro_sanitario',
-        prioridad: 'alta',
-        fechaCreacion: new Date()
-      },
-      {
-        id: 2,
-        titulo: 'Vencimiento Licencia',
-        descripcion: 'Vence licencia de funcionamiento',
-        fecha: new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 7).toISOString().split('T')[0],
-        hora: '14:30',
-        tipo: 'vencimiento',
-        categoria: 'licencia',
-        prioridad: 'alta',
-        fechaCreacion: new Date()
-      },
-      {
-        id: 3,
-        titulo: 'Reunión con INVIMA',
-        descripcion: 'Reunión de seguimiento con el INVIMA',
-        fecha: hoy.toISOString().split('T')[0],
-        hora: '09:00',
-        tipo: 'recordatorio',
-        categoria: 'auditoria',
-        prioridad: 'media',
-        fechaCreacion: new Date()
-      }
-    ];
   }
 
   generarCalendario(): void {
@@ -170,7 +189,7 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
-  obtenerEventosPorFecha(fecha: Date): Evento[] {
+  obtenerEventosPorFecha(fecha: Date): EventoDTO[] {
     const fechaStr = fecha.toISOString().split('T')[0];
     return this.eventos.filter(evento => evento.fecha === fechaStr);
   }
@@ -189,7 +208,7 @@ export class CalendarioComponent implements OnInit {
     } else {
       this.mesActual--;
     }
-    this.generarCalendario();
+    this.cargarEventosPorMes();
   }
 
   mesSiguiente(): void {
@@ -199,17 +218,17 @@ export class CalendarioComponent implements OnInit {
     } else {
       this.mesActual++;
     }
-    this.generarCalendario();
+    this.cargarEventosPorMes();
   }
 
   irHoy(): void {
     const hoy = new Date();
     this.mesActual = hoy.getMonth();
     this.anioActual = hoy.getFullYear();
-    this.generarCalendario();
+    this.cargarEventosPorMes();
   }
 
-  seleccionarEvento(evento: Evento): void {
+  seleccionarEvento(evento: EventoDTO): void {
     this.eventoSeleccionado = evento;
     this.mostrarDetalles = true;
   }
@@ -219,20 +238,134 @@ export class CalendarioComponent implements OnInit {
     this.eventoSeleccionado = null;
   }
 
-  obtenerClaseEvento(evento: Evento): string {
+  abrirModalNuevoEvento(): void {
+    this.editandoEvento = false;
+    this.eventoEditandoId = null;
+    this.mostrarModalNuevoEvento = true;
+    const hoy = new Date();
+    this.nuevoEvento.fecha = hoy.toISOString().split('T')[0];
+  }
+
+  abrirModalEditarEvento(evento: EventoDTO): void {
+    this.editandoEvento = true;
+    this.eventoEditandoId = evento.id;
+    this.mostrarModalNuevoEvento = true;
+
+    this.nuevoEvento = {
+      titulo: evento.titulo,
+      descripcion: evento.descripcion || '',
+      fecha: evento.fecha,
+      hora: evento.hora || '',
+      tipo: evento.tipo,
+      categoria: evento.categoria,
+      prioridad: evento.prioridad,
+      empresaId: evento.empresaId,
+      tramiteId: evento.tramiteId,
+      documentoId: evento.documentoId
+    };
+  }
+
+  cerrarModalNuevoEvento(): void {
+    this.mostrarModalNuevoEvento = false;
+    this.resetearFormulario();
+  }
+
+  resetearFormulario(): void {
+    this.nuevoEvento = {
+      titulo: '',
+      descripcion: '',
+      fecha: '',
+      hora: '',
+      tipo: 'RECORDATORIO',
+      categoria: 'TRAMITE',
+      prioridad: 'MEDIA'
+    };
+    this.editandoEvento = false;
+    this.eventoEditandoId = null;
+  }
+
+  guardarEvento(): void {
+    if (!this.nuevoEvento.titulo || !this.nuevoEvento.fecha || !this.nuevoEvento.tipo) {
+      return;
+    }
+
+    this.cargando = true;
+
+    if (this.editandoEvento && this.eventoEditandoId) {
+      // Actualizar evento existente
+      this.calendarioService.actualizarEvento(this.eventoEditandoId, this.nuevoEvento)
+        .subscribe({
+          next: () => {
+            this.cargarEventosPorMes();
+            this.cargarEstadisticas();
+            this.cerrarModalNuevoEvento();
+          },
+          error: (error) => {
+            console.error('Error al actualizar evento:', error);
+            this.cargando = false;
+          }
+        });
+    } else {
+      // Crear nuevo evento
+      this.calendarioService.crearEvento(this.nuevoEvento)
+        .subscribe({
+          next: () => {
+            this.cargarEventosPorMes();
+            this.cargarEstadisticas();
+            this.cerrarModalNuevoEvento();
+          },
+          error: (error) => {
+            console.error('Error al crear evento:', error);
+            this.cargando = false;
+          }
+        });
+    }
+  }
+
+  eliminarEvento(evento: EventoDTO): void {
+    if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+      this.calendarioService.eliminarEvento(evento.id)
+        .subscribe({
+          next: () => {
+            this.cargarEventosPorMes();
+            this.cargarEstadisticas();
+            this.cerrarDetalles();
+          },
+          error: (error) => {
+            console.error('Error al eliminar evento:', error);
+          }
+        });
+    }
+  }
+
+  marcarComoCompletado(evento: EventoDTO): void {
+    this.calendarioService.marcarComoCompletado(evento.id)
+      .subscribe({
+        next: () => {
+          this.cargarEventosPorMes();
+          this.cargarEstadisticas();
+          this.cerrarDetalles();
+        },
+        error: (error) => {
+          console.error('Error al marcar evento como completado:', error);
+        }
+      });
+  }
+
+  obtenerClaseEvento(evento: EventoDTO): string {
     let claseBase = 'evento-item';
 
     switch (evento.tipo) {
-      case 'completado':
+      case 'COMPLETADO':
         claseBase += ' evento-completado';
         break;
-      case 'recordatorio':
+      case 'RECORDATORIO':
         claseBase += ' evento-recordatorio';
         break;
-      case 'vencimiento':
-      case 'plazo_final':
+      case 'VENCIMIENTO':
+      case 'PLAZO_FINAL':
         claseBase += ' evento-critico';
-        if (evento.prioridad === 'alta') {
+        if (evento.prioridad === 'ALTA') {
           claseBase += ' prioridad-critica';
         }
         break;
@@ -245,15 +378,15 @@ export class CalendarioComponent implements OnInit {
 
   obtenerIconoEvento(tipo: string): string {
     switch (tipo) {
-      case 'recordatorio':
+      case 'RECORDATORIO':
         return '🔔';
-      case 'vencimiento':
+      case 'VENCIMIENTO':
         return '⏰';
-      case 'renovacion':
+      case 'RENOVACION':
         return '🔄';
-      case 'plazo_final':
+      case 'PLAZO_FINAL':
         return '⚠️';
-      case 'completado':
+      case 'COMPLETADO':
         return '✅';
       default:
         return '📅';
@@ -270,54 +403,17 @@ export class CalendarioComponent implements OnInit {
     return {
       total: eventosMesActual.length,
       criticos: eventosMesActual.filter(e =>
-        e.tipo === 'vencimiento' || e.tipo === 'plazo_final' || e.prioridad === 'alta'
+        e.tipo === 'VENCIMIENTO' || e.tipo === 'PLAZO_FINAL' || e.prioridad === 'ALTA'
       ).length,
-      completados: eventosMesActual.filter(e => e.tipo === 'completado').length
+      completados: eventosMesActual.filter(e => e.tipo === 'COMPLETADO').length
     };
   }
 
-  abrirModalNuevoEvento(): void {
-    this.mostrarModalNuevoEvento = true;
-    const hoy = new Date();
-    this.nuevoEvento.fecha = hoy.toISOString().split('T')[0];
-  }
-
-  cerrarModalNuevoEvento(): void {
-    this.mostrarModalNuevoEvento = false;
-    this.resetearFormulario();
-  }
-
-  resetearFormulario(): void {
-    this.nuevoEvento = {
-      titulo: '',
-      descripcion: '',
-      fecha: '',
-      hora: '',
-      tipo: '' as any,
-      categoria: '',
-      prioridad: 'media'
-    };
-  }
-
-  guardarNuevoEvento(): void {
-    if (this.nuevoEvento.titulo && this.nuevoEvento.fecha && this.nuevoEvento.tipo) {
-      const evento: Evento = {
-        id: Date.now(),
-        titulo: this.nuevoEvento.titulo,
-        descripcion: this.nuevoEvento.descripcion,
-        fecha: this.nuevoEvento.fecha,
-        hora: this.nuevoEvento.hora,
-        tipo: this.nuevoEvento.tipo,
-        categoria: this.nuevoEvento.categoria,
-        prioridad: this.nuevoEvento.prioridad,
-        fechaCreacion: new Date()
-      };
-
-      this.eventos.push(evento);
-      this.generarCalendario();
-      this.cerrarModalNuevoEvento();
-
-      console.log('Evento creado:', evento);
+  mostrarTodosEventosDia(eventos: EventoDTO[]): void {
+    // Por ahora muestra el primer evento, puedes implementar un modal con todos
+    if (eventos.length > 0) {
+      this.seleccionarEvento(eventos[0]);
     }
   }
+
 }

@@ -909,3 +909,82 @@
   }
 }
 
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Nuevos estilos para estados */
+.estado-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.estado-activo {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.estado-completado {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.estado-vencido {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.estado-cancelado {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+/* Botón completar */
+.btn-completar {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-completar:hover {
+  background-color: #45a049;
+}
+
+/* Botones deshabilitados */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
