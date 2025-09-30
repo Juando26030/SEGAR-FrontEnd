@@ -18,6 +18,7 @@ import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/
 import { RegistroPasoCuatroComponent } from './tramites/registro/registro-paso-cuatro/registro-paso-cuatro.component';
 import { RegistroPasoCincoComponent } from './tramites/registro/registro-paso-cinco/registro-paso-cinco.component';
 import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
+import { CorreosComponent } from './pages/correos/correos.component';  // <- IMPORTAR COMPONENTE DE CORREOS
 
 export const routes: Routes = [
   {
@@ -40,6 +41,7 @@ export const routes: Routes = [
       { path: 'perfil', component: UserProfileComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
       { path: 'generador-documento', component: GeneradorDocumentoComponent },
+      { path: 'correos', component: CorreosComponent },  // <- RUTA PARA EL COMPONENTE DE CORREOS
       {
         path: 'nuevo/info',
         children: [

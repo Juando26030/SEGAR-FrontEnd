@@ -13,6 +13,19 @@
     <a routerLink="/main/calendario" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
       <span class="ml-2">Calendario</span>
     </a>
+    <a routerLink="/main/correos" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d] justify-between">
+      <div class="flex items-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        <span class="ml-2">Correos</span>
+      </div>
+      <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center"
+            style="display: none;"
+            id="unread-badge">
+        0
+      </span>
+    </a>
     <a routerLink="/main/nuevo" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
       <span class="ml-2">Nuevo Trámite</span>
     </a>
