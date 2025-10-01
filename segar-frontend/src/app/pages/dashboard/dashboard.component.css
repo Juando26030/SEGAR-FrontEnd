@@ -40,7 +40,6 @@ btn-refresh.modern-btn {
 }
 
 .btn-refresh:hover {
-  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
@@ -68,7 +67,7 @@ btn-refresh.modern-btn {
 }
 
 .last-update-card.glass-effect {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1d4177 0%, #3663b7 100%);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
@@ -143,7 +142,7 @@ btn-refresh.modern-btn {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3663b6 0%, #1d4177 100%);
   color: white;
   border: none;
   border-radius: 8px;

@@ -7,6 +7,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-nuevo-tramite',
   imports: [CommonModule, RouterLink],
   templateUrl: './nuevo-tramite.component.html',
+  styleUrls: ['./nuevo-tramite.component.css']  // Asegúrate de que esté aquí
+
 })
 export class NuevoTramiteComponent {
   constructor(private router: Router) {}
@@ -20,4 +22,5 @@ export class NuevoTramiteComponent {
       alert(`Has seleccionado: ${tipo}. En la próxima versión se mostrará el formulario correspondiente.`);
     }
   }
+
 }

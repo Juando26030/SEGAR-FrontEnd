@@ -1,6 +1,18 @@
-<div class="mb-6">
-  <h1 class="text-2xl font-bold text-gray-800">Nuevo Trámite</h1>
-  <p class="text-sm text-gray-600">Seleccione el tipo de trámite que desea registrar ante el INVIMA.</p>
+<div class="dashboard-container">
+<!-- Header del Nuevo Trámite -->
+<div class="nuevo-tramite-header enhanced">
+  <div class="nuevo-tramite-header-background-pattern"></div>
+
+  <div class="nuevo-tramite-header-content">
+    <h1 class="nuevo-tramite-title animated">
+      <i class="fas fa-plus-circle nuevo-tramite-title-icon"></i>
+      <span class="nuevo-tramite-title-main">Nuevo</span>
+      <span class="nuevo-tramite-title-accent">Trámite</span>
+    </h1>
+    <p class="nuevo-tramite-subtitle">
+      Seleccione el tipo de trámite que desea registrar ante el INVIMA
+    </p>
+  </div>
 </div>
 
 <!-- Cuadro de Información Importante -->
@@ -14,12 +26,12 @@
     <div class="ml-3 flex-1">
       <h3 class="text-lg font-semibold text-orange-800 mb-2">Importante: Requerimientos que debemos tener en cuenta</h3>
       <p class="text-sm text-orange-700 mb-4">
-        Antes de iniciar cualquier trámite, es fundamental que revise la información preparatoria 
+        Antes de iniciar cualquier trámite, es fundamental que revise la información preparatoria
         para asegurar que cuenta con toda la documentación necesaria.
       </p>
       <div class="flex flex-wrap gap-3">
-        <a 
-          [routerLink]="['/main/nuevo/info/evaluacion']" 
+        <a
+          [routerLink]="['/main/nuevo/info/evaluacion']"
           class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 text-sm font-medium rounded-md transition-colors duration-200"
         >
           <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -27,8 +39,8 @@
           </svg>
           1. Evaluación Inicial
         </a>
-        <a 
-          [routerLink]="['/main/nuevo/info/plataforma']" 
+        <a
+          [routerLink]="['/main/nuevo/info/plataforma']"
           class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-800 text-sm font-medium rounded-md transition-colors duration-200"
         >
           <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,4 +99,5 @@
       Seleccionar
     </button>
   </div>
+</div>
 </div>
