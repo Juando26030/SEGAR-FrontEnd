@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
+import { AuthService } from '../auth/services/auth.service';
 
 export interface Email {
   id: number;
@@ -76,10 +77,13 @@ export interface EmailSearchFilters {
 export class EmailService {
   private readonly API_BASE_URL = 'http://localhost:8090/api/notifications/emails';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    const token = this.authService.getToken();
 
     if (!token) {
       console.error('❌ No hay token de autenticación disponible');
