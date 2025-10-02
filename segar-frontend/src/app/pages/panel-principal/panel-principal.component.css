@@ -267,17 +267,17 @@
 
 .kpi-icon-wrapper.primary {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  color: white;
+  color: #75bd57;
 }
 
 .kpi-icon-wrapper.warning {
   background: linear-gradient(135deg, var(--warning-color), #fbbf24);
-  color: white;
+  color: #ff9b00;
 }
 
 .kpi-icon-wrapper.danger {
   background: linear-gradient(135deg, var(--danger-color), #f87171);
-  color: white;
+  color: #d32727;
 }
 
 .kpi-icon-wrapper.success {
@@ -519,7 +519,7 @@
 
 .tramite-code.modern {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  color: white;
+  color: #000000;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-weight: 600;
