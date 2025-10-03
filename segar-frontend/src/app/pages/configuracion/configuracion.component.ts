@@ -5,23 +5,16 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../services/notification.service';
 
 interface UserConfig {
-  // Preferencias de Usuario
   timezone: string;
   dateFormat: string;
   timeFormat: string;
   language: string;
-  
-  // Configuración de Notificaciones
   emailNotifications: boolean;
   smsNotifications: boolean;
   pushNotifications: boolean;
   notificationSound: boolean;
-  
-  // Configuración de Sesión
-  sessionTimeout: number; // en minutos
+  sessionTimeout: number;
   rememberSession: boolean;
-  
-  // Cambio de Contraseña
   currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
@@ -35,8 +28,6 @@ interface UserConfig {
   styleUrl: './configuracion.component.css'
 })
 export class ConfiguracionComponent {
-  
-  // Usuario actual simulado (en una app real vendría de un servicio de auth)
   currentUser = {
     id: '1',
     name: 'Juan Díaz',
@@ -46,23 +37,16 @@ export class ConfiguracionComponent {
   };
 
   config: UserConfig = {
-    // Preferencias de Usuario
     timezone: 'America/Guatemala',
     dateFormat: 'DD/MM/YYYY',
     timeFormat: '24h',
     language: 'es',
-    
-    // Configuración de Notificaciones
     emailNotifications: true,
     smsNotifications: false,
     pushNotifications: true,
     notificationSound: true,
-    
-    // Configuración de Sesión
     sessionTimeout: 30,
     rememberSession: false,
-    
-    // Cambio de Contraseña
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: ''
@@ -74,27 +58,35 @@ export class ConfiguracionComponent {
   showCurrentPassword = false;
   showNewPassword = false;
   showConfirmPassword = false;
-  
+
   tabs = [
-    { 
-      id: 'preferences', 
-      name: 'Preferencias', 
-      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' 
+    {
+      id: 'preferences',
+      name: 'Preferencias',
+      label: 'Preferencias', // Agregar esta propiedad
+      code: 'PREF',
+      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'
     },
-    { 
-      id: 'notifications', 
-      name: 'Notificaciones', 
-      icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' 
+    {
+      id: 'notifications',
+      name: 'Notificaciones',
+      label: 'Notificaciones', // Agregar esta propiedad
+      code: 'NOTIF',
+      icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'
     },
-    { 
-      id: 'session', 
-      name: 'Sesión', 
-      icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' 
+    {
+      id: 'session',
+      name: 'Sesión',
+      label: 'Sesión', // Agregar esta propiedad
+      code: 'SESS',
+      icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
     },
-    { 
-      id: 'password', 
-      name: 'Contraseña', 
-      icon: 'M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2h-2m0 0H9m6 0v2a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6' 
+    {
+      id: 'password',
+      name: 'Credenciales',
+      label: 'Credenciales', // Agregar esta propiedad
+      code: 'AUTH',
+      icon: 'M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2h-2m0 0H9m6 0v2a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6'
     }
   ];
 
@@ -102,19 +94,15 @@ export class ConfiguracionComponent {
     { value: 'America/Guatemala', label: 'Guatemala (GMT-6)' },
     { value: 'America/Mexico_City', label: 'México (GMT-6)' },
     { value: 'America/New_York', label: 'Nueva York (GMT-5)' },
-    { value: 'America/Los_Angeles', label: 'Los Ángeles (GMT-8)' },
     { value: 'Europe/Madrid', label: 'Madrid (GMT+1)' },
-    { value: 'America/Bogota', label: 'Bogotá (GMT-5)' },
-    { value: 'America/Argentina/Buenos_Aires', label: 'Buenos Aires (GMT-3)' },
-    { value: 'America/Lima', label: 'Lima (GMT-5)' }
+    { value: 'UTC', label: 'UTC (GMT+0)' }
   ];
 
   dateFormats = [
     { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (31/12/2025)' },
     { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (12/31/2025)' },
     { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (2025-12-31)' },
-    { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY (31-12-2025)' },
-    { value: 'DD/MM/YY', label: 'DD/MM/YY (31/12/25)' }
+    { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY (31-12-2025)' }
   ];
 
   timeFormats = [
@@ -134,9 +122,7 @@ export class ConfiguracionComponent {
     { value: 30, label: '30 minutos' },
     { value: 60, label: '1 hora' },
     { value: 120, label: '2 horas' },
-    { value: 240, label: '4 horas' },
-    { value: 480, label: '8 horas' },
-    { value: 1440, label: '24 horas' }
+    { value: 480, label: '8 horas' }
   ];
 
   constructor(
@@ -178,40 +164,74 @@ export class ConfiguracionComponent {
     return this.config.newPassword === this.config.confirmNewPassword;
   }
 
-  getPasswordStrength(): { score: number; text: string; color: string } {
+  // Método agregado para la vista previa de fecha
+  getPreviewDate(): string {
+    return this.getCurrentDateTime();
+  }
+
+  // Método actualizado para incluir todas las propiedades requeridas
+  getPasswordStrength(): {
+    score: number;
+    text: string;
+    color: string;
+    level: string;
+    percentage: number;
+    label: string;
+  } {
     const password = this.config.newPassword || '';
     let score = 0;
-    
+    let level = '';
+    let label = '';
+
     if (password.length >= 8) score += 25;
     if (/[A-Z]/.test(password)) score += 25;
     if (/[0-9]/.test(password)) score += 25;
     if (/[!@#$%^&*]/.test(password)) score += 25;
-    
-    if (score < 50) return { score, text: 'Débil', color: 'bg-red-500' };
-    if (score < 100) return { score, text: 'Moderada', color: 'bg-yellow-500' };
-    return { score, text: 'Fuerte', color: 'bg-green-500' };
+
+    if (score < 50) {
+      level = 'critical';
+      label = 'Crítica';
+      return { score, text: 'Crítica', color: 'strength-critical', level, percentage: score, label };
+    }
+    if (score < 75) {
+      level = 'moderate';
+      label = 'Moderada';
+      return { score, text: 'Moderada', color: 'strength-moderate', level, percentage: score, label };
+    }
+    if (score < 100) {
+      level = 'strong';
+      label = 'Fuerte';
+      return { score, text: 'Fuerte', color: 'strength-strong', level, percentage: score, label };
+    }
+
+    level = 'excellent';
+    label = 'Excelente';
+    return { score, text: 'Excelente', color: 'strength-excellent', level, percentage: score, label };
   }
 
   getCurrentDateTime(): string {
     const now = new Date();
-    const dateFormat = this.config.dateFormat.replace('YYYY', '2025').replace('MM', '07').replace('DD', '01');
-    const timeFormat = this.config.timeFormat === '12h' ? '2:30 PM' : '14:30';
-    return `${dateFormat} ${timeFormat}`;
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: this.config.timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+
+    return now.toLocaleString(this.config.language, options);
   }
 
   closeAllSessions() {
-    if (confirm('¿Está seguro de que desea cerrar todas las sesiones activas? Será redirigido al login.')) {
-      this.notificationService.info(
-        'Cerrando sesiones',
-        'Se están cerrando todas las sesiones activas...'
-      );
-      
-      // Simular cierre de sesiones
+    if (confirm('¿Está seguro de que desea invalidar todas las sesiones activas? Esta acción es irreversible.')) {
+      this.notificationService.info('Cerrando sesiones', 'Procesando invalidación de sesiones...');
+
       setTimeout(() => {
-        this.notificationService.success(
-          'Sesiones cerradas',
-          'Todas las sesiones han sido cerradas correctamente'
-        );
+        this.notificationService.success('Sesiones cerradas', 'Todas las sesiones han sido invalidadas correctamente');
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 1500);
       }, 2000);
     }
   }
@@ -219,44 +239,44 @@ export class ConfiguracionComponent {
   saveConfiguration(): void {
     if (!this.hasChanges) return;
 
-    // Validar contraseñas si se están cambiando
     if (this.activeTab === 'password' && this.config.newPassword) {
       if (!this.passwordsMatch) {
         this.notificationService.error('Error de validación', 'Las contraseñas no coinciden');
         return;
       }
-      
+
       const strength = this.getPasswordStrength();
       if (strength.score < 75) {
-        this.notificationService.warning('Contraseña débil', 'Por favor, usa una contraseña más segura');
+        this.notificationService.warning('Seguridad insuficiente', 'La contraseña debe ser más robusta');
         return;
       }
     }
 
-    // Simular guardado
+    this.notificationService.info('Aplicando configuración', 'Guardando cambios en el sistema...');
+
     setTimeout(() => {
       this.originalConfig = { ...this.config };
       this.hasChanges = false;
-      
-      this.notificationService.success(
-        'Configuración guardada',
-        'Tus preferencias han sido actualizadas correctamente'
-      );
-    }, 1000);
+
+      // Limpiar campos de contraseña
+      if (this.config.newPassword) {
+        this.config.currentPassword = '';
+        this.config.newPassword = '';
+        this.config.confirmNewPassword = '';
+      }
+
+      this.notificationService.success('Configuración aplicada', 'Los cambios han sido guardados exitosamente');
+    }, 1500);
   }
 
   resetConfiguration(): void {
     this.config = { ...this.originalConfig };
     this.hasChanges = false;
-    
-    this.notificationService.info(
-      'Configuración restablecida',
-      'Se han restaurado los valores anteriores'
-    );
+    this.notificationService.info('Configuración restablecida', 'Se han restaurado los valores anteriores');
   }
 
   restoreDefaults(): void {
-    if (confirm('¿Estás seguro de que quieres restaurar la configuración predeterminada? Se perderán todos los cambios.')) {
+    if (confirm('¿Confirma la restauración a valores por defecto? Todos los cambios personalizados se perderán.')) {
       this.config = {
         timezone: 'America/Guatemala',
         dateFormat: 'DD/MM/YYYY',
@@ -272,13 +292,9 @@ export class ConfiguracionComponent {
         newPassword: '',
         confirmNewPassword: ''
       };
-      
+
       this.hasChanges = true;
-      
-      this.notificationService.warning(
-        'Configuración predeterminada',
-        'Se han restaurado los valores predeterminados. Recuerda guardar los cambios.'
-      );
+      this.notificationService.warning('Valores predeterminados', 'Configuración restaurada. Aplique los cambios para confirmar.');
     }
   }
 }

@@ -1,60 +1,283 @@
-<div class="flex items-center justify-between mb-6">
-  <h1 class="text-2xl font-bold text-gray-800">Panel Principal</h1>
-  <a
-    routerLink="/nuevo"
-    class="bg-[#1a3b6d] text-white px-4 py-2 rounded hover:bg-[#2a4b7d] transition"
-  >
-    Nuevo Trámite
-  </a>
-</div>
+<div class="panel-principal modern-professional">
+  <!-- Header con gradiente sutil y animaciones -->
+  <div class="panel-header enhanced">
+    <div class="header-background-pattern"></div>
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="panel-title animated">
+          <span class="title-main">Panel</span>
+          <span class="title-accent">Principal</span>
+        </h1>
+        <div class="title-indicator pulse"></div>
+      </div>
+      <div class="header-actions enhanced">
+        <button class="btn-refresh modern-btn" (click)="cargarDatos()">
+          <div class="btn-bg-effect"></div>
+          <div class="btn-content">
+            <i class="fas fa-sync-alt"></i>
+            <span>Actualizar</span>
+          </div>
+        </button>
+        <div class="last-update-card glass-effect">
+          <div class="update-icon">
+            <i class="fas fa-clock pulse-slow"></i>
+          </div>
+          <div class="update-text">
+            <span class="update-label">Última actualización</span>
+            <span class="update-time">{{ fechaActual | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<!-- Tarjetas resumen -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-  <div class="bg-white rounded shadow p-6">
-    <p class="text-sm text-gray-500">Trámites Activos</p>
-    <p class="text-2xl font-bold text-[#1a3b6d]">12</p>
-  </div>
-  <div class="bg-white rounded shadow p-6">
-    <p class="text-sm text-gray-500">Trámites Pendientes</p>
-    <p class="text-2xl font-bold text-[#1a3b6d]">5</p>
-  </div>
-  <div class="bg-white rounded shadow p-6">
-    <p class="text-sm text-gray-500">Vencimientos Próximos</p>
-    <p class="text-2xl font-bold text-[#1a3b6d]">3</p>
-  </div>
-</div>
+  <!-- KPIs con efectos hover y micro-animaciones -->
+  <div class="kpi-container enhanced-grid">
+    <div class="kpi-card primary modern-card" data-animate="slideUp" data-delay="0">
+      <div class="kpi-background">
+        <div class="kpi-pattern"></div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrapper primary">
+            <i class="fas fa-chart-line kpi-icon"></i>
+            <div class="icon-ripple"></div>
+          </div>
+          <span class="kpi-label">Trámites Activos</span>
+        </div>
+        <div class="kpi-value-section">
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.activos }}</div>
+          <div class="kpi-trend positive enhanced">
+            <div class="trend-icon">
+              <i class="fas fa-trending-up"></i>
+            </div>
+            <span class="trend-text">+5.2% vs mes anterior</span>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-shine"></div>
+    </div>
 
-<!-- Tabla de trámites recientes -->
-<div class="bg-white rounded shadow">
-  <div class="p-4 border-b">
-    <h2 class="text-lg font-semibold text-gray-800">Trámites Recientes</h2>
+    <div class="kpi-card warning modern-card" data-animate="slideUp" data-delay="100">
+      <div class="kpi-background">
+        <div class="kpi-pattern"></div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrapper warning">
+            <i class="fas fa-hourglass-half kpi-icon"></i>
+            <div class="icon-ripple"></div>
+          </div>
+          <span class="kpi-label">Pendientes de Revisión</span>
+        </div>
+        <div class="kpi-value-section">
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.pendientes }}</div>
+          <div class="kpi-trend neutral enhanced">
+            <div class="trend-icon">
+              <i class="fas fa-minus"></i>
+            </div>
+            <span class="trend-text">Sin cambios</span>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-shine"></div>
+    </div>
+
+    <div class="kpi-card danger modern-card" data-animate="slideUp" data-delay="200">
+      <div class="kpi-background">
+        <div class="kpi-pattern"></div>
+        <div class="kpi-glow danger-glow"></div>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrapper danger">
+            <i class="fas fa-exclamation-circle kpi-icon pulse-warning"></i>
+            <div class="icon-ripple"></div>
+          </div>
+          <span class="kpi-label">Vencimientos Próximos</span>
+        </div>
+        <div class="kpi-value-section">
+          <div class="kpi-value counter urgent" [attr.data-target]="estadisticas.activos">{{ estadisticas.vencimientos }}</div>
+          <div class="kpi-trend negative enhanced">
+            <div class="trend-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <span class="trend-text">Requiere atención</span>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-shine"></div>
+    </div>
+
+    <div class="kpi-card success modern-card" data-animate="slideUp" data-delay="300">
+      <div class="kpi-background">
+        <div class="kpi-pattern"></div>
+        <div class="kpi-glow"></div>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-header">
+          <div class="kpi-icon-wrapper success">
+            <i class="fas fa-check-circle kpi-icon"></i>
+            <div class="icon-ripple"></div>
+          </div>
+          <span class="kpi-label">Completados</span>
+        </div>
+        <div class="kpi-value-section">
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.completados }}</div>
+          <div class="kpi-trend positive enhanced">
+            <div class="trend-icon">
+              <i class="fas fa-rocket"></i>
+            </div>
+            <span class="trend-text">+12.8% este mes</span>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-shine"></div>
+    </div>
   </div>
-  <div class="overflow-x-auto">
-    <table class="min-w-full text-sm">
-      <thead>
-      <tr class="bg-[#1a3b6d] text-white text-left">
-        <th class="p-4">Trámite</th>
-        <th class="p-4">Fecha</th>
-        <th class="p-4">Estado</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr class="border-b hover:bg-gray-50">
-        <td class="p-4">Registro Producto A</td>
-        <td class="p-4">20/06/2025</td>
-        <td class="p-4 text-green-600 font-semibold">Aprobado</td>
-      </tr>
-      <tr class="border-b hover:bg-gray-50">
-        <td class="p-4">Modificación Producto B</td>
-        <td class="p-4">18/06/2025</td>
-        <td class="p-4 text-yellow-600 font-semibold">Pendiente</td>
-      </tr>
-      <tr class="hover:bg-gray-50">
-        <td class="p-4">Renovación Producto C</td>
-        <td class="p-4">15/06/2025</td>
-        <td class="p-4 text-red-600 font-semibold">Rechazado</td>
-      </tr>
-      </tbody>
-    </table>
+
+  <!-- Tabla con efectos modernos -->
+  <div class="data-section enhanced" data-animate="fadeInUp" data-delay="400">
+    <div class="section-header glass-modern">
+      <div class="section-title enhanced">
+        <h2 class="section-main-title">Trámites Recientes</h2>
+        <div class="section-accent-line"></div>
+        <span class="section-subtitle">
+          <i class="fas fa-chart-bar"></i>
+          Últimas 10 actividades
+        </span>
+      </div>
+      <div class="section-actions modern">
+        <button class="btn-export modern-secondary">
+          <div class="btn-bg-effect"></div>
+          <div class="btn-content">
+            <i class="fas fa-download"></i>
+            <span>Exportar</span>
+          </div>
+        </button>
+        <button class="btn-view-all modern-primary" (click)="verTodosTramites()">
+          <div class="btn-bg-effect"></div>
+          <div class="btn-content">
+            <span>Ver Todos</span>
+            <i class="fas fa-external-link-alt"></i>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container modern-glass">
+      <div class="table-glow-effect"></div>
+      <table class="data-table enhanced">
+        <thead class="table-header-modern">
+        <tr>
+          <th class="sortable enhanced">
+            <div class="th-content">
+              <span>Número de Trámite</span>
+              <i class="fas fa-sort sort-icon"></i>
+            </div>
+          </th>
+          <th class="sortable enhanced">
+            <div class="th-content">
+              <span>Tipo de Proceso</span>
+              <i class="fas fa-sort sort-icon"></i>
+            </div>
+          </th>
+          <th class="enhanced">
+            <div class="th-content">
+              <span>Cliente</span>
+            </div>
+          </th>
+          <th class="enhanced">
+            <div class="th-content">
+              <span>Estado</span>
+            </div>
+          </th>
+          <th class="sortable enhanced">
+            <div class="th-content">
+              <span>Fecha Vencimiento</span>
+              <i class="fas fa-sort sort-icon"></i>
+            </div>
+          </th>
+          <th class="enhanced">
+            <div class="th-content">
+              <span>Prioridad</span>
+            </div>
+          </th>
+          <th class="actions-column enhanced">
+            <div class="th-content">
+              <span>Acciones</span>
+            </div>
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let tramite of tramitesRecientes; let i = index"
+            class="data-row modern-row"
+            [style.animation-delay]="(i * 50) + 'ms'"
+            data-animate="slideInLeft">
+          <td class="code-column enhanced">
+            <div class="cell-content">
+              <span class="tramite-code modern">{{ tramite.numero }}</span>
+            </div>
+          </td>
+          <td class="type-column enhanced">
+            <div class="cell-content">
+              <span class="type-text">{{ tramite.tipo }}</span>
+            </div>
+          </td>
+          <td class="client-column enhanced">
+            <div class="cell-content">
+              <div class="client-info">
+                <div class="client-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <span class="client-name">{{ tramite.cliente }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="status-column enhanced">
+            <div class="cell-content">
+              <div class="status-indicator modern" [class]="getEstadoClass(tramite.estado)">
+                <span class="status-dot pulse-dot"></span>
+                <span class="status-text">{{ tramite.estado }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="date-column enhanced">
+            <div class="cell-content">
+              <div class="date-info">
+                <i class="fas fa-calendar-alt date-icon"></i>
+                <span class="date-text">{{ tramite.fechaVencimiento | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="priority-column enhanced">
+            <div class="cell-content">
+              <span class="priority-tag modern" [class]="getPrioridadClass(tramite.prioridad)">
+                <span class="priority-dot"></span>
+                {{ tramite.prioridad | uppercase }}
+              </span>
+            </div>
+          </td>
+          <td class="actions-column enhanced">
+            <div class="cell-content">
+              <div class="action-buttons modern">
+                <button class="btn-action view modern" (click)="verDetalleTramite(tramite)" title="Ver detalle">
+                  <div class="btn-ripple"></div>
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn-action edit modern" title="Editar">
+                  <div class="btn-ripple"></div>
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

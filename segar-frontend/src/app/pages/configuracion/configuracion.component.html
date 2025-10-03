@@ -1,547 +1,444 @@
-<div class="h-full bg-white">
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Configuración</h1>
-      <p class="text-sm text-gray-600">Personaliza las preferencias de tu cuenta y sistema</p>
-    </div>
-    <div *ngIf="hasChanges" class="flex items-center text-sm text-orange-600">
-      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"/>
-      </svg>
-      Cambios sin guardar
+<div class="config-container">
+  <!-- Header Mejorado -->
+  <div class="config-header">
+    <div class="config-header-content">
+      <div class="config-header-left">
+        <h1>
+          <svg class="config-header-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+          </svg>
+          Configuración
+        </h1>
+        <p>Personaliza tu experiencia en la plataforma</p>
+      </div>
+
+      <div *ngIf="hasChanges" class="config-changes-badge">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+        </svg>
+        Tienes cambios sin guardar
+      </div>
     </div>
   </div>
 
   <!-- Tabs Navigation -->
-  <div class="border-b border-gray-200 mb-6">
-    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-      <button 
+  <div class="config-tabs">
+    <nav class="config-tabs-nav">
+      <button
         *ngFor="let tab of tabs"
-        (click)="setActiveTab(tab.id)"
-        [class]="activeTab === tab.id 
-          ? 'border-[#1a3b6d] text-[#1a3b6d] whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm' 
-          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm'">
-        <div class="flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="tab.icon"/>
-          </svg>
-          {{ tab.name }}
-        </div>
+        class="config-tab"
+        [class.active]="activeTab === tab.id"
+        (click)="setActiveTab(tab.id)">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+          <path [attr.d]="tab.icon"></path>
+        </svg>
+        {{ tab.label }}
       </button>
     </nav>
   </div>
 
   <!-- Tab Content -->
-  <div class="bg-white rounded-lg">
-    
+  <div class="config-content">
+
     <!-- Preferences Tab -->
-    <div *ngIf="activeTab === 'preferences'" class="space-y-6 tab-content">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="space-y-6">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-[#1a3b6d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Configuración Regional
-            </h3>
-            
-            <div class="space-y-4">
-              <div>
-                <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">
-                  Zona Horaria
-                </label>
-                <select 
-                  id="timezone" 
-                  name="timezone"
-                  [(ngModel)]="config.timezone"
-                  (ngModelChange)="onConfigChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-                  <option *ngFor="let tz of timezones" [value]="tz.value">{{ tz.label }}</option>
-                </select>
-                <p class="mt-1 text-xs text-gray-500">Configura tu zona horaria para fechas y horas precisas</p>
-              </div>
-              
-              <div>
-                <label for="language" class="block text-sm font-medium text-gray-700 mb-2">
-                  Idioma de la Interfaz
-                </label>
-                <select 
-                  id="language" 
-                  name="language"
-                  [(ngModel)]="config.language"
-                  (ngModelChange)="onConfigChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-                  <option *ngFor="let lang of languages" [value]="lang.value">{{ lang.label }}</option>
-                </select>
-              </div>
-            </div>
+    <div *ngIf="activeTab === 'preferences'">
+
+      <!-- Zona Horaria y Formato -->
+      <div class="config-section">
+        <div class="config-section-header">
+          <svg class="config-section-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+          </svg>
+          <h3>Configuración Regional</h3>
+        </div>
+        <p>Ajusta tu zona horaria y formatos de fecha preferidos</p>
+
+        <div class="config-form-row">
+          <div class="config-form-group">
+            <label for="timezone" class="config-label">Zona Horaria</label>
+            <select id="timezone" [(ngModel)]="config.timezone" class="config-select">
+              <option value="America/Mexico_City">Ciudad de México (GMT-6)</option>
+              <option value="America/New_York">Nueva York (GMT-5)</option>
+              <option value="Europe/Madrid">Madrid (GMT+1)</option>
+              <option value="Asia/Tokyo">Tokio (GMT+9)</option>
+            </select>
+          </div>
+
+          <div class="config-form-group">
+            <label for="dateFormat" class="config-label">Formato de Fecha</label>
+            <select id="dateFormat" [(ngModel)]="config.dateFormat" class="config-select">
+              <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+              <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+              <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            </select>
+          </div>
+
+          <div class="config-form-group">
+            <label for="timeFormat" class="config-label">Formato de Hora</label>
+            <select id="timeFormat" [(ngModel)]="config.timeFormat" class="config-select">
+              <option value="24h">24 horas</option>
+              <option value="12h">12 horas (AM/PM)</option>
+            </select>
           </div>
         </div>
-        
-        <div class="space-y-6">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-[#1a3b6d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Formato de Fecha y Hora
-            </h3>
-            
-            <div class="space-y-4">
-              <div>
-                <label for="dateFormat" class="block text-sm font-medium text-gray-700 mb-2">
-                  Formato de Fecha
-                </label>
-                <select 
-                  id="dateFormat" 
-                  name="dateFormat"
-                  [(ngModel)]="config.dateFormat"
-                  (ngModelChange)="onConfigChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-                  <option *ngFor="let format of dateFormats" [value]="format.value">{{ format.label }}</option>
-                </select>
-              </div>
-              
-              <div>
-                <label for="timeFormat" class="block text-sm font-medium text-gray-700 mb-2">
-                  Formato de Hora
-                </label>
-                <select 
-                  id="timeFormat" 
-                  name="timeFormat"
-                  [(ngModel)]="config.timeFormat"
-                  (ngModelChange)="onConfigChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-                  <option *ngFor="let format of timeFormats" [value]="format.value">{{ format.label }}</option>
-                </select>
-              </div>
-              
-              <!-- Vista previa del formato -->
-              <div class="p-3 bg-gray-50 rounded-lg border-l-4 border-[#1a3b6d]">
-                <p class="text-sm text-gray-600">Vista previa:</p>
-                <p class="text-lg font-medium text-gray-900">{{ getCurrentDateTime() }}</p>
-              </div>
-            </div>
+
+        <!-- Vista Previa -->
+        <div class="config-preview">
+          <div class="config-preview-header">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+            </svg>
+            Vista previa:
           </div>
+          <div class="config-preview-value">{{ getPreviewDate() }}</div>
         </div>
       </div>
+
+      <!-- Idioma -->
+      <div class="config-section">
+        <div class="config-section-header">
+          <svg class="config-section-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a8.034 8.034 0 01-2.411 1.621 1 1 0 11-.830-1.815A6.07 6.07 0 005.415 9.5l.04-.015a15.676 15.676 0 01-1.415-2.03c-.328-.59-.166-1.32.365-1.674.531-.353 1.218-.2 1.537.344L6 7.64c.37-.896.655-1.848.393-2.955A1 1 0 017 2zM12 6a1 1 0 01.894.553l2.991 5.982a.869.869 0 01.02.037l.99 1.98a1 1 0 11-1.79.895L15.383 14h-4.764l-.724 1.447a1 1 0 11-1.788-.894l.99-1.98.019-.037 2.99-5.982A1 1 0 0112 6zm-1.382 6h2.764L12 9.236 10.618 12z" clip-rule="evenodd"></path>
+          </svg>
+          <h3>Idioma</h3>
+        </div>
+        <p>Selecciona el idioma de la interfaz</p>
+
+        <div class="config-form-group">
+          <label for="language" class="config-label">Idioma de la interfaz</label>
+          <select id="language" [(ngModel)]="config.language" class="config-select">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="pt">Português</option>
+          </select>
+          <div class="config-help-text">El cambio de idioma se aplicará en el próximo inicio de sesión</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Notifications Tab -->
-    <div *ngIf="activeTab === 'notifications'" class="space-y-6 tab-content">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <svg class="w-5 h-5 mr-2 text-[#1a3b6d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+    <div *ngIf="activeTab === 'notifications'">
+
+      <div class="config-section">
+        <div class="config-section-header">
+          <svg class="config-section-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
           </svg>
-          Configuración de Notificaciones
-        </h3>
-        <p class="text-sm text-gray-600 mb-6">Configura cómo y cuándo quieres recibir notificaciones del sistema</p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="notification-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
-                </svg>
-                <div>
-                  <h4 class="text-sm font-medium text-gray-900">Notificaciones por Email</h4>
-                  <p class="text-xs text-gray-500">Recibir actualizaciones importantes por correo</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="config.emailNotifications"
-                  (ngModelChange)="onConfigChange()"
-                  class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
-          
-          <div class="notification-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                <div>
-                  <h4 class="text-sm font-medium text-gray-900">Notificaciones SMS</h4>
-                  <p class="text-xs text-gray-500">Alertas críticas por mensaje de texto</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="config.smsNotifications"
-                  (ngModelChange)="onConfigChange()"
-                  class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
-          
-          <div class="notification-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                <div>
-                  <h4 class="text-sm font-medium text-gray-900">Notificaciones Push</h4>
-                  <p class="text-xs text-gray-500">Notificaciones del navegador en tiempo real</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="config.pushNotifications"
-                  (ngModelChange)="onConfigChange()"
-                  class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
-          
-          <div class="notification-card p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-                </svg>
-                <div>
-                  <h4 class="text-sm font-medium text-gray-900">Sonido de Notificación</h4>
-                  <p class="text-xs text-gray-500">Reproducir sonido al recibir notificaciones</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="config.notificationSound"
-                  (ngModelChange)="onConfigChange()"
-                  class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
+          <h3>Notificaciones</h3>
         </div>
-        
-        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-              <div>
-                <h4 class="text-sm font-medium text-blue-900">Configuración Avanzada</h4>
-                <p class="text-xs text-blue-700">Personaliza completamente tu experiencia de notificaciones</p>
+        <p>Configura cómo y cuándo recibir notificaciones</p>
+
+        <div class="config-toggle-group">
+
+          <div class="config-toggle-item">
+            <div class="config-toggle-content">
+              <div class="config-toggle-info">
+                <h4>
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                  </svg>
+                  Notificaciones por Email
+                </h4>
+                <p>Recibe alertas importantes en tu correo electrónico</p>
               </div>
+
+              <label class="config-switch">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="config.emailNotifications"
+                  (change)="onConfigChange()">
+                <span class="config-switch-slider"></span>
+              </label>
             </div>
-            <a 
-              href="/main/notificaciones"
-              class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-              Configurar
-            </a>
           </div>
+
+          <div class="config-toggle-item">
+            <div class="config-toggle-content">
+              <div class="config-toggle-info">
+                <h4>
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                  </svg>
+                  Notificaciones SMS
+                </h4>
+                <p>Recibe mensajes de texto para eventos críticos</p>
+              </div>
+
+              <label class="config-switch">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="config.smsNotifications"
+                  (change)="onConfigChange()">
+                <span class="config-switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="config-toggle-item">
+            <div class="config-toggle-content">
+              <div class="config-toggle-info">
+                <h4>
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                  </svg>
+                  Notificaciones Push
+                </h4>
+                <p>Recibe alertas instantáneas en tu navegador</p>
+              </div>
+
+              <label class="config-switch">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="config.pushNotifications"
+                  (change)="onConfigChange()">
+                <span class="config-switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="config-toggle-item">
+            <div class="config-toggle-content">
+              <div class="config-toggle-info">
+                <h4>
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-1.929 3.657 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-.995-.102-1.951-.343-2.657a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                  </svg>
+                  Sonidos de Notificación
+                </h4>
+                <p>Reproduce sonidos al recibir alertas</p>
+              </div>
+
+              <label class="config-switch">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="config.notificationSound"
+                  (change)="onConfigChange()">
+                <span class="config-switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
         </div>
       </div>
+
     </div>
 
     <!-- Session Tab -->
-    <div *ngIf="activeTab === 'session'" class="space-y-6 tab-content">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="space-y-6">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-[#1a3b6d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-              </svg>
-              Configuración de Sesión
-            </h3>
-            
-            <div class="space-y-4">
-              <div>
-                <label for="sessionTimeout" class="block text-sm font-medium text-gray-700 mb-2">
-                  Tiempo de Cierre Automático
-                </label>
-                <select 
-                  id="sessionTimeout" 
-                  name="sessionTimeout"
-                  [(ngModel)]="config.sessionTimeout"
-                  (ngModelChange)="onConfigChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-                  <option *ngFor="let timeout of sessionTimeouts" [value]="timeout.value">{{ timeout.label }}</option>
-                </select>
-                <p class="mt-1 text-xs text-gray-500">Tiempo de inactividad antes de cerrar sesión automáticamente</p>
-              </div>
-              
-              <div class="flex items-start">
-                <div class="flex items-center h-5">
-                  <input 
-                    type="checkbox" 
-                    id="rememberSession" 
-                    name="rememberSession"
-                    [(ngModel)]="config.rememberSession"
-                    (ngModelChange)="onConfigChange()"
-                    class="w-4 h-4 text-[#1a3b6d] bg-gray-100 border-gray-300 rounded focus:ring-[#1a3b6d] focus:ring-2">
-                </div>
-                <div class="ml-3 text-sm">
-                  <label for="rememberSession" class="font-medium text-gray-700">
-                    Recordar sesión en este dispositivo
-                  </label>
-                  <p class="text-gray-500">Mantener sesión iniciada por más tiempo en este dispositivo</p>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div *ngIf="activeTab === 'session'">
+
+      <div class="config-section">
+        <div class="config-section-header">
+          <svg class="config-section-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <h3>Configuración de Sesión</h3>
         </div>
-        
-        <div class="space-y-6">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-[#1a3b6d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Información de Sesión Actual
-            </h3>
-            
-            <div class="p-4 bg-gray-50 rounded-lg border">
-              <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Usuario:</span>
-                  <span class="text-sm font-medium text-gray-900">{{ currentUser.name }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Último acceso:</span>
-                  <span class="text-sm font-medium text-gray-900">Hoy, 14:30</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Dispositivo:</span>
-                  <span class="text-sm font-medium text-gray-900">Chrome - Windows</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">IP:</span>
-                  <span class="text-sm font-medium text-gray-900">192.168.1.100</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Sesión expira en:</span>
-                  <span class="text-sm font-medium text-orange-600">{{ config.sessionTimeout }} minutos</span>
-                </div>
-              </div>
+        <p>Administra la seguridad y duración de tu sesión</p>
+
+        <div class="config-form-group">
+          <label for="sessionTimeout" class="config-label">Tiempo de expiración de sesión</label>
+          <select id="sessionTimeout" [(ngModel)]="config.sessionTimeout" class="config-select">
+            <option value="30">30 minutos</option>
+            <option value="60">1 hora</option>
+            <option value="120">2 horas</option>
+            <option value="240">4 horas</option>
+            <option value="480">8 horas</option>
+          </select>
+          <div class="config-help-text">Tu sesión se cerrará automáticamente después de este tiempo de inactividad</div>
+        </div>
+
+        <div class="config-toggle-item">
+          <div class="config-toggle-content">
+            <div class="config-toggle-info">
+              <h4>Recordar sesión</h4>
+              <p>Mantener la sesión iniciada en este dispositivo</p>
             </div>
-            
-            <button 
-              (click)="closeAllSessions()"
-              class="w-full mt-4 inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-              </svg>
-              Cerrar Todas las Sesiones
-            </button>
+            <label class="config-switch">
+              <input
+                type="checkbox"
+                [(ngModel)]="config.rememberSession"
+                (change)="onConfigChange()">
+              <span class="config-switch-slider"></span>
+            </label>
+
           </div>
         </div>
       </div>
+
+      <!-- Sesiones Activas -->
+      <div class="config-section">
+        <div class="config-section-header">
+          <svg class="config-section-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd"></path>
+          </svg>
+          <h3>Sesiones Activas</h3>
+        </div>
+
+        <div class="config-sessions">
+          <div class="config-sessions-header">
+            <h4>Dispositivos con sesión activa</h4>
+          </div>
+          <ul class="config-sessions-list">
+            <li class="config-session-item">
+              <div class="config-session-info">
+                <div class="config-session-device">Chrome - Windows</div>
+                <div class="config-session-details">IP: 192.168.1.100 • Última actividad: Ahora</div>
+              </div>
+              <span class="config-session-current">Actual</span>
+            </li>
+            <li class="config-session-item">
+              <div class="config-session-info">
+                <div class="config-session-device">Safari - iPhone</div>
+                <div class="config-session-details">IP: 192.168.1.101 • Última actividad: Hace 2 horas</div>
+              </div>
+              <button class="config-btn config-btn-outline">Cerrar</button>
+            </li>
+          </ul>
+        </div>
+
+        <button (click)="closeAllSessions()" class="config-btn config-btn-danger config-mt-4">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
+          </svg>
+          Cerrar todas las sesiones
+        </button>
+      </div>
+
     </div>
 
     <!-- Password Tab -->
-    <div *ngIf="activeTab === 'password'" class="space-y-6 tab-content">
-      <div class="max-w-2xl">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <svg class="w-5 h-5 mr-2 text-[#1a3b6d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2h-2m0 0H9m6 0v2a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6"/>
+    <div *ngIf="activeTab === 'password'">
+
+      <div class="config-section">
+        <div class="config-section-header">
+          <svg class="config-section-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"></path>
           </svg>
-          Cambiar Contraseña
-        </h3>
-        <p class="text-sm text-gray-600 mb-6">Mantén tu cuenta segura actualizando tu contraseña regularmente</p>
-        
-        <div class="space-y-4">
-          <div>
-            <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña Actual <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-              <input 
-                [type]="showCurrentPassword ? 'text' : 'password'" 
-                id="currentPassword" 
-                name="currentPassword"
-                [(ngModel)]="config.currentPassword"
-                (ngModelChange)="onConfigChange()"
-                placeholder="Ingresa tu contraseña actual"
-                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-              <button 
-                type="button" 
-                (click)="toggleCurrentPasswordVisibility()"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                <svg *ngIf="!showCurrentPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                <svg *ngIf="showCurrentPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <div>
-            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
-              Nueva Contraseña <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-              <input 
-                [type]="showNewPassword ? 'text' : 'password'" 
-                id="newPassword" 
-                name="newPassword"
-                [(ngModel)]="config.newPassword"
-                (ngModelChange)="onConfigChange()"
-                placeholder="Ingresa tu nueva contraseña"
-                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-              <button 
-                type="button" 
-                (click)="toggleNewPasswordVisibility()"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                <svg *ngIf="!showNewPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                <svg *ngIf="showNewPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                </svg>
-              </button>
-            </div>
-            
-            <!-- Password Strength Indicator -->
-            <div *ngIf="config.newPassword" class="mt-3">
-              <div class="flex items-center justify-between text-xs mb-2">
-                <span class="text-gray-600">Fortaleza de la contraseña:</span>
-                <span [class]="'font-medium ' + (getPasswordStrength().score < 50 ? 'text-red-600' : getPasswordStrength().score < 100 ? 'text-yellow-600' : 'text-green-600')">
-                  {{ getPasswordStrength().text }}
-                </span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  [class]="'h-2 rounded-full transition-all duration-300 ' + getPasswordStrength().color"
-                  [style.width.%]="getPasswordStrength().score">
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div>
-            <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700 mb-2">
-              Confirmar Nueva Contraseña <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-              <input 
-                [type]="showConfirmPassword ? 'text' : 'password'" 
-                id="confirmNewPassword" 
-                name="confirmNewPassword"
-                [(ngModel)]="config.confirmNewPassword"
-                (ngModelChange)="onConfigChange()"
-                placeholder="Confirma tu nueva contraseña"
-                [class.border-red-300]="!passwordsMatch && config.confirmNewPassword"
-                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:border-transparent">
-              <button 
-                type="button" 
-                (click)="toggleConfirmPasswordVisibility()"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                <svg *ngIf="!showConfirmPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                <svg *ngIf="showConfirmPassword" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                </svg>
-              </button>
-            </div>
-            <div *ngIf="!passwordsMatch && config.confirmNewPassword" class="mt-1 text-sm text-red-600 flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <h3>Cambiar Contraseña</h3>
+        </div>
+        <p>Actualiza tu contraseña para mantener tu cuenta segura</p>
+
+        <div class="config-form-group">
+          <label for="currentPassword" class="config-label">Contraseña Actual</label>
+          <div class="config-password-field">
+            <input
+              [type]="showCurrentPassword ? 'text' : 'password'"
+              id="currentPassword"
+              [(ngModel)]="config.currentPassword"
+              class="config-password-input"
+              placeholder="Ingresa tu contraseña actual">
+            <button
+              type="button"
+              (click)="toggleCurrentPasswordVisibility()"
+              class="config-password-toggle">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                <path [attr.d]="showCurrentPassword ? 'M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z' : 'M10 12a2 2 0 100-4 2 2 0 000 4z M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z'"></path>
               </svg>
-              Las contraseñas no coinciden
-            </div>
-          </div>
-          
-          <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 class="text-sm font-medium text-blue-900 mb-2 flex items-center">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Requisitos de la contraseña:
-            </h4>
-            <ul class="text-xs text-blue-700 space-y-1">
-              <li class="flex items-center">
-                <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Mínimo 8 caracteres
-              </li>
-              <li class="flex items-center">
-                <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Al menos una letra mayúscula
-              </li>
-              <li class="flex items-center">
-                <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Al menos un número
-              </li>
-              <li class="flex items-center">
-                <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Al menos un carácter especial (!&#64;#$%^&*)
-              </li>
-            </ul>
+            </button>
           </div>
         </div>
+
+        <div class="config-form-group">
+          <label for="newPassword" class="config-label">Nueva Contraseña</label>
+          <div class="config-password-field">
+            <input
+              [type]="showNewPassword ? 'text' : 'password'"
+              id="newPassword"
+              [(ngModel)]="config.newPassword"
+              class="config-password-input"
+              placeholder="Ingresa tu nueva contraseña">
+            <button
+              type="button"
+              (click)="toggleNewPasswordVisibility()"
+              class="config-password-toggle">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                <path [attr.d]="showNewPassword ? 'M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z' : 'M10 12a2 2 0 100-4 2 2 0 000 4z M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z'"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Indicador de fortaleza -->
+          <div class="config-strength-indicator" [class]="'strength-' + getPasswordStrength().level">
+            <div class="config-strength-bar">
+              <div
+                class="config-strength-fill"
+                [style.width.%]="getPasswordStrength().percentage">
+              </div>
+            </div>
+            <div class="config-strength-text">
+              <span>{{ getPasswordStrength().label }}</span>
+              <span>{{ getPasswordStrength().percentage }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-form-group">
+          <label for="confirmNewPassword" class="config-label">Confirmar Nueva Contraseña</label>
+          <div class="config-password-field">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              id="confirmNewPassword"
+              [(ngModel)]="config.confirmNewPassword"
+              class="config-password-input"
+              [class.error]="!passwordsMatch && config.confirmNewPassword"
+              placeholder="Confirma tu nueva contraseña">
+            <button
+              type="button"
+              (click)="toggleConfirmPasswordVisibility()"
+              class="config-password-toggle">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                <path [attr.d]="showConfirmPassword ? 'M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z' : 'M10 12a2 2 0 100-4 2 2 0 000 4z M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z'"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div *ngIf="!passwordsMatch && config.confirmNewPassword" class="config-error">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            Las contraseñas no coinciden
+          </div>
+        </div>
+
       </div>
+
     </div>
+
   </div>
 
   <!-- Action Buttons -->
-  <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-    <div class="flex space-x-3">
-      <button 
-        (click)="restoreDefaults()"
-        class="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+  <div class="config-actions">
+    <div class="config-actions-left">
+      <button (click)="restoreDefaults()" class="config-btn config-btn-outline">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
         </svg>
         Restaurar Predeterminados
       </button>
     </div>
-    
-    <div class="flex space-x-3">
-      <button 
+
+    <div class="config-actions-right">
+      <button
         *ngIf="hasChanges"
         (click)="resetConfiguration()"
-        class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
+        class="config-btn config-btn-outline">
         Cancelar
       </button>
-      <button 
+
+      <button
         (click)="saveConfiguration()"
-        [disabled]="!hasChanges"
-        [class]="hasChanges 
-          ? 'inline-flex items-center px-6 py-2 bg-[#1a3b6d] text-white text-sm font-medium rounded-lg hover:bg-[#2a4b7d] focus:outline-none focus:ring-2 focus:ring-[#1a3b6d] focus:ring-offset-2 transition-colors' 
-          : 'inline-flex items-center px-6 py-2 bg-gray-300 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed'">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        class="config-btn config-btn-primary"
+        [disabled]="!hasChanges">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
         </svg>
-        Guardar Configuración
+        Guardar Cambios
       </button>
     </div>
   </div>
+
 </div>

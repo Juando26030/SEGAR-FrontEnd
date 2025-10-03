@@ -1,0 +1,147 @@
+/* Variables para la barra superior */
+:root {
+  --topbar-bg-from: #1a3b6d;
+  --topbar-bg-to: #2d5aa0;
+  --topbar-text-primary: #ffffff;
+  --topbar-text-secondary: #dbeafe;
+  --topbar-accent: rgba(255, 255, 255, 0.1);
+  --topbar-border: rgba(255, 255, 255, 0.2);
+  --topbar-shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos de la barra superior */
+.topbar-header {
+  height: 4rem;
+  background: linear-gradient(to right, var(--topbar-bg-from), var(--topbar-bg-to));
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.topbar-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: translateX(100%) skewX(-12deg);
+  animation: shimmer 3s infinite;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+.topbar-icon-container {
+  height: 2.5rem;
+  width: 2.5rem;
+  background: var(--topbar-accent);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.topbar-icon {
+  height: 1.5rem;
+  width: 1.5rem;
+  color: var(--topbar-text-primary);
+}
+
+.topbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--topbar-text-primary);
+  letter-spacing: 0.025em;
+}
+
+.topbar-subtitle {
+  font-size: 0.75rem;
+  color: var(--topbar-text-secondary);
+  font-weight: 500;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+.topbar-separator {
+  height: 2rem;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.topbar-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-logo-wrapper {
+  position: relative;
+}
+
+.topbar-logo {
+  height: 3rem;
+  width: auto;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: var(--topbar-accent);
+  backdrop-filter: blur(4px);
+  padding: 0.25rem;
+  border: 1px solid var(--topbar-border);
+}
+
+.topbar-logo-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.topbar-company-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--topbar-text-primary);
+}
+
+.topbar-company-desc {
+  font-size: 0.75rem;
+  color: var(--topbar-text-secondary);
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .topbar-separator {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .topbar-company-info {
+    display: none;
+  }
+}
+
+/* Animación shimmer */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
