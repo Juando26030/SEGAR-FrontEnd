@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subject, interval, takeUntil } from 'rxjs';
+import { Subject, interval, takeUntil, forkJoin, timer } from 'rxjs';
+import { DashboardService } from '../../core/services/dashboard.service';
 
 interface Estadisticas {
   activos: number;
@@ -30,6 +31,14 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   fechaActual: Date = new Date();
+  ultimaActualizacion: Date = new Date();
+
+  estadisticasAnimadas: Estadisticas = {
+    activos: 0,
+    pendientes: 0,
+    vencimientos: 0,
+    completados: 0
+  };
 
   estadisticas: Estadisticas = {
     activos: 0,
@@ -40,8 +49,12 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
 
   tramitesRecientes: Tramite[] = [];
   isLoading = true;
+  isRefreshing = false; // Para el botón de actualizar
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private dashboardService: DashboardService
+  ) {}
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -57,61 +70,153 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   cargarDatos(): void {
     this.isLoading = true;
 
-    // Simular carga de datos
-    setTimeout(() => {
-      this.estadisticas = {
-        activos: 45,
-        pendientes: 12,
-        vencimientos: 8,
-        completados: 156
-      };
+    forkJoin({
+      resumen: this.dashboardService.getResumen(),
+      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(),
+      requerimientos: this.dashboardService.getRequerimientosPendientes()
+    }).subscribe({
+      next: (data: any) => {
+        console.log('Datos recibidos del backend:', data);
 
-      this.tramitesRecientes = [
-        {
-          numero: 'TR-2024-001',
-          tipo: 'Licencia de Construcción',
-          cliente: 'Constructora ABC S.A.',
-          estado: 'En Revisión',
-          fechaVencimiento: new Date('2024-02-15'),
-          prioridad: 'alta'
-        },
-        {
-          numero: 'TR-2024-002',
-          tipo: 'Permiso Ambiental',
-          cliente: 'EcoProyectos Ltda.',
-          estado: 'Pendiente Documentos',
-          fechaVencimiento: new Date('2024-02-20'),
-          prioridad: 'media'
-        },
-        {
-          numero: 'TR-2024-003',
-          tipo: 'Certificado Técnico',
-          cliente: 'Ingeniería Total',
-          estado: 'Aprobado',
-          fechaVencimiento: new Date('2024-01-30'),
-          prioridad: 'baja'
-        },
-        {
-          numero: 'TR-2024-004',
-          tipo: 'Autorización Sanitaria',
-          cliente: 'Restaurante El Buen Sabor',
-          estado: 'Vencido',
-          fechaVencimiento: new Date('2024-01-25'),
-          prioridad: 'alta'
-        },
-        {
-          numero: 'TR-2024-005',
-          tipo: 'Permiso de Funcionamiento',
-          cliente: 'Comercial La Esquina',
-          estado: 'En Proceso',
-          fechaVencimiento: new Date('2024-03-01'),
-          prioridad: 'media'
-        }
-      ];
+        // Calcular estadísticas según la lógica de negocio
+        const tramitesPorEstado = data.resumen.tramitesPorEstado || [];
 
-      this.isLoading = false;
-      this.animateCounters();
-    }, 1000);
+        // Activos: RADICADO + EN_EVALUACION_TECNICA + REQUIERE_INFORMACION
+        const activos = tramitesPorEstado
+          .filter((item: any) => ['RADICADO', 'EN_EVALUACION_TECNICA', 'REQUIERE_INFORMACION'].includes(item.estado))
+          .reduce((sum: number, item: any) => sum + item.cantidad, 0);
+
+        // Pendientes de revisión: solo REQUIERE_INFORMACION
+        const pendientes = tramitesPorEstado
+          .filter((item: any) => item.estado === 'REQUIERE_INFORMACION')
+          .reduce((sum: number, item: any) => sum + item.cantidad, 0);
+
+        // Completados: APROBADO
+        const completados = tramitesPorEstado
+          .filter((item: any) => item.estado === 'APROBADO')
+          .reduce((sum: number, item: any) => sum + item.cantidad, 0);
+
+        // Vencimientos próximos: registrosPorVencer
+        const vencimientos = data.resumen.registrosPorVencer || 0;
+
+        this.estadisticas = {
+          activos: activos,
+          pendientes: pendientes,
+          vencimientos: vencimientos,
+          completados: completados
+        };
+
+        console.log('Estadísticas mapeadas:', this.estadisticas);
+
+        // Mapear requerimientos
+        this.tramitesRecientes = data.requerimientos.map((req: any) => ({
+          numero: req.number || req.numeroTramite,
+          tipo: req.title || req.tipoTramite,
+          cliente: req.solicitante || 'Cliente no especificado',
+          estado: this.getEstadoTexto(req.status || req.estado),
+          fechaVencimiento: this.validarFecha(req.deadline || req.fechaVencimiento),
+          prioridad: this.obtenerPrioridadPorFecha(req.deadline || req.fechaVencimiento)
+        }));
+
+        console.log('Trámites recientes mapeados:', this.tramitesRecientes);
+
+        // Actualizar timestamp de última actualización
+        this.ultimaActualizacion = new Date();
+        this.isLoading = false;
+        this.isRefreshing = false;
+        // Animar los contadores hacia los nuevos valores
+        this.animarContadores();
+      },
+      error: (error: any) => {
+        console.error('Error cargando datos del dashboard:', error);
+        this.isLoading = false;
+        this.isRefreshing = false;
+      }
+    });
+  }
+
+  animarContadores(): void {
+    // Animar cada estadística individualmente
+    this.animarValor('activos');
+    this.animarValor('pendientes');
+    this.animarValor('vencimientos');
+    this.animarValor('completados');
+  }
+
+  private animarValor(campo: keyof Estadisticas): void {
+    const valorFinal = this.estadisticas[campo];
+    const valorActual = this.estadisticasAnimadas[campo];
+
+    if (valorFinal === valorActual) return;
+
+    const diferencia = valorFinal - valorActual;
+    const pasos = 20;
+    const incremento = diferencia / pasos;
+    let contador = 0;
+
+    const timer = setInterval(() => {
+      contador++;
+      if (contador >= pasos) {
+        this.estadisticasAnimadas[campo] = valorFinal;
+        clearInterval(timer);
+      } else {
+        this.estadisticasAnimadas[campo] = Math.round(valorActual + (incremento * contador));
+      }
+    }, 30);
+  }
+
+  // Método para el botón de actualizar manual
+  actualizarDatos(): void {
+    if (this.isRefreshing) return; // Evitar múltiples clicks
+
+    this.isRefreshing = true;
+    console.log('Actualizando datos manualmente...');
+    this.cargarDatos();
+  }
+
+  private getEstadoTexto(estado: string): string {
+    const estadoTextoMap: { [key: string]: string } = {
+      'RADICADO': 'Radicado',
+      'EN_EVALUACION_TECNICA': 'En Evaluación Técnica',
+      'REQUIERE_INFORMACION': 'Requiere Información',
+      'APROBADO': 'Aprobado',
+      'RECHAZADO': 'Rechazado'
+    };
+
+    return estadoTextoMap[estado] || estado;
+  }
+
+  private obtenerPrioridadPorFecha(fechaString: any): string {
+    if (!fechaString) return 'baja';
+
+    const fecha = new Date(fechaString);
+    const hoy = new Date();
+    const diasRestantes = Math.ceil((fecha.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+
+    return this.obtenerPrioridadPorDias(diasRestantes);
+  }
+
+  private validarFecha(fechaString: any): Date {
+    if (!fechaString) {
+      return new Date(); // Fecha actual como fallback
+    }
+
+    const fecha = new Date(fechaString);
+
+    // Verificar si la fecha es válida
+    if (isNaN(fecha.getTime())) {
+      console.warn('Fecha inválida recibida:', fechaString);
+      return new Date(); // Fecha actual como fallback
+    }
+
+    return fecha;
+  }
+
+  private obtenerPrioridadPorDias(diasRestantes: number): string {
+    if (diasRestantes < 0) return 'alta'; // Vencido
+    if (diasRestantes <= 3) return 'alta'; // Próximo a vencer
+    if (diasRestantes <= 7) return 'media';
+    return 'baja';
   }
 
   iniciarActualizacionAutomatica(): void {
@@ -122,11 +227,14 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
         this.fechaActual = new Date();
       });
 
-    // Recargar datos cada 5 minutos
-    interval(300000)
+    // Recargar datos cada 30 segundos
+    timer(30000, 30000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.cargarDatos();
+        if (!this.isRefreshing) {
+          console.log('Actualización automática cada 30 segundos...');
+          this.cargarDatos();
+        }
       });
   }
 
@@ -143,32 +251,15 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
-  animateCounters(): void {
-    const counters = document.querySelectorAll('.counter[data-target]');
 
-    counters.forEach((counter) => {
-      const target = parseInt(counter.getAttribute('data-target') || '0');
-      const increment = target / 50;
-      let current = 0;
-
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-          current = target;
-          clearInterval(timer);
-        }
-        counter.textContent = Math.floor(current).toString();
-      }, 30);
-    });
-  }
 
   getEstadoClass(estado: string): string {
     const estadoMap: { [key: string]: string } = {
-      'En Revisión': 'estado-activo',
-      'En Proceso': 'estado-activo',
-      'Pendiente Documentos': 'estado-pendiente',
+      'Radicado': 'estado-activo',
+      'En Evaluación Técnica': 'estado-activo',
+      'Requiere Información': 'estado-pendiente',
       'Aprobado': 'estado-activo',
-      'Vencido': 'estado-vencido'
+      'Rechazado': 'estado-vencido'
     };
 
     return estadoMap[estado] || 'estado-pendiente';

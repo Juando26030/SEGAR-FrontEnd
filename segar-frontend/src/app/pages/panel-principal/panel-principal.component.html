@@ -11,11 +11,11 @@
         <div class="title-indicator pulse"></div>
       </div>
       <div class="header-actions enhanced">
-        <button class="btn-refresh modern-btn" (click)="cargarDatos()">
+        <button class="btn-refresh modern-btn" (click)="actualizarDatos()" [disabled]="isRefreshing" [class.loading]="isRefreshing">
           <div class="btn-bg-effect"></div>
           <div class="btn-content">
-            <i class="fas fa-sync-alt"></i>
-            <span>Actualizar</span>
+            <i class="fas fa-sync-alt" [class.fa-spin]="isRefreshing"></i>
+            <span>{{ isRefreshing ? 'Actualizando...' : 'Actualizar' }}</span>
           </div>
         </button>
         <div class="last-update-card glass-effect">
@@ -24,8 +24,7 @@
           </div>
           <div class="update-text">
             <span class="update-label">Última actualización</span>
-            <span class="update-time">{{ fechaActual | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
+            <span class="update-time">{{ ultimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>          </div>
         </div>
       </div>
     </div>
@@ -73,7 +72,7 @@
           <span class="kpi-label">Pendientes de Revisión</span>
         </div>
         <div class="kpi-value-section">
-          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.pendientes }}</div>
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.pendientes">{{ estadisticas.pendientes }}</div>
           <div class="kpi-trend neutral enhanced">
             <div class="trend-icon">
               <i class="fas fa-minus"></i>
@@ -99,7 +98,7 @@
           <span class="kpi-label">Vencimientos Próximos</span>
         </div>
         <div class="kpi-value-section">
-          <div class="kpi-value counter urgent" [attr.data-target]="estadisticas.activos">{{ estadisticas.vencimientos }}</div>
+          <div class="kpi-value counter urgent" [attr.data-target]="estadisticas.vencimientos">{{ estadisticas.vencimientos }}</div>
           <div class="kpi-trend negative enhanced">
             <div class="trend-icon">
               <i class="fas fa-exclamation-triangle"></i>
@@ -125,7 +124,7 @@
           <span class="kpi-label">Completados</span>
         </div>
         <div class="kpi-value-section">
-          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.completados }}</div>
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.completados">{{ estadisticas.completados }}</div>
           <div class="kpi-trend positive enhanced">
             <div class="trend-icon">
               <i class="fas fa-rocket"></i>

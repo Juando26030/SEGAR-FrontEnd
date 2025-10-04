@@ -138,6 +138,9 @@
   gap: 0.5rem;
   z-index: 2;
 }
+.btn-view-all{
+  color: black;
+}
 
 .last-update-card.glass-effect {
   background: rgba(255, 255, 255, 0.15);
@@ -282,7 +285,7 @@
 
 .kpi-icon-wrapper.success {
   background: linear-gradient(135deg, var(--success-color), #34d399);
-  color: white;
+  color: #10b880;
 }
 
 .kpi-icon {
