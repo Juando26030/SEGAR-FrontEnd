@@ -5,7 +5,7 @@
   --primary-dark: #1d4ed8;
   --secondary-color: #f8fafc;
   --accent-color: #06b6d4;
-  --success-color: #10b981;
+  --success-color: #10b981;   /* Verde */
   --warning-color: #f59e0b;
   --danger-color: #ef4444;
   --text-primary: #1e293b;
@@ -270,7 +270,7 @@
 
 .kpi-icon-wrapper.primary {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  color: #75bd57;
+  color: #2563ea;
 }
 
 .kpi-icon-wrapper.warning {
@@ -676,9 +676,14 @@
 }
 
 /* Clases de estado y prioridad */
-.estado-activo {
+.estado-completado {
   background: rgba(16, 185, 129, 0.1);
   color: var(--success-color);
+}
+
+.estado-activo {
+  background: rgba(7, 185, 255, 0.21);
+  color: var(#067efa);
 }
 
 .estado-pendiente {

@@ -32,6 +32,16 @@ export interface RequerimientoPendienteDTO {
   diasRestantes: number;
 }
 
+export interface TramiteRecienteDTO {
+  id: number;
+  radicadoNumber: string;
+  productName: string;
+  procedureType: string;
+  currentStatus: string;
+  lastUpdate: string;
+}
+
+
 export interface DashboardConfig {
   diasVencimiento: number;
   limitRequerimientos: number;
@@ -66,6 +76,14 @@ export class DashboardService {
       params = params.set('year', year.toString());
     }
     return this.http.get<TramitePorMesDTO[]>(`${this.basePath}/tramites/por-mes`, { params });
+  }
+
+  getTramitesRecientes(limit?: number): Observable<TramiteRecienteDTO[]> {
+    let params = new HttpParams();
+    if (limit) {
+      params = params.set('limit', limit.toString());
+    }
+    return this.http.get<TramiteRecienteDTO[]>(`${this.basePath}/tramites/recientes`, { params });
   }
 
   getRequerimientosPendientes(limit?: number): Observable<RequerimientoPendienteDTO[]> {
