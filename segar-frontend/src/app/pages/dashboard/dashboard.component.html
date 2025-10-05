@@ -16,8 +16,8 @@
       <button class="btn-refresh modern-btn" (click)="cargarDatosDashboard()" [disabled]="cargando">
         <div class="btn-bg-effect"></div>
         <div class="btn-content">
-          <i class="fas fa-sync-alt"></i>
-          <span>Actualizar</span>
+          <span>{{ cargando ? 'Actualizando...' : 'Actualizar' }}</span>
+          <i class="fas fa-sync-alt" [class.fa-spin]="cargando"></i>
         </div>
       </button>
       <div class="last-update-card glass-effect">
@@ -26,7 +26,7 @@
         </div>
         <div class="update-text">
           <span class="update-label">Última actualización</span>
-          <span class="update-time">{{ fechaActual | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="update-time">{{ fechaActual | date:'HH:mm:ss' }}</span>
         </div>
       </div>
     </div>
@@ -56,8 +56,8 @@
           </div>
         </div>
         <div class="metric-growth" [class.positive]="finanzas.crecimientoMensual > 0">
-          <span class="growth-icon">{{ finanzas.crecimientoMensual > 0 ? '↗' : '↘' }}</span>
-          <span class="growth-text">{{ finanzas.crecimientoMensual }}% vs mes anterior</span>
+          <i class="fas" [class.fa-arrow-up]="finanzas.crecimientoMensual > 0" [class.fa-arrow-down]="finanzas.crecimientoMensual <= 0"></i>
+          <span>{{ finanzas.crecimientoMensual > 0 ? '+' : '' }}{{ finanzas.crecimientoMensual }}%</span>
         </div>
       </div>
     </div>
@@ -77,59 +77,56 @@
           <div class="progress-item">
             <div class="progress-info">
               <span class="progress-label">Completados</span>
-              <span class="progress-value">{{ tramites.completados }}</span>
+              <span class="progress-value">{{ tramites.completados }} ({{ obtenerPorcentajeTramites(tramites.completados) | number:'1.0-0' }}%)</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill completados"
-                   [style.width.%]="obtenerPorcentajeTramites(tramites.completados)"></div>
+              <div class="progress-fill completados" [style.width.%]="obtenerPorcentajeTramites(tramites.completados)"></div>
             </div>
           </div>
           <div class="progress-item">
             <div class="progress-info">
               <span class="progress-label">En Proceso</span>
-              <span class="progress-value">{{ tramites.enProceso }}</span>
+              <span class="progress-value">{{ tramites.enProceso }} ({{ obtenerPorcentajeTramites(tramites.enProceso) | number:'1.0-0' }}%)</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill proceso"
-                   [style.width.%]="obtenerPorcentajeTramites(tramites.enProceso)"></div>
+              <div class="progress-fill proceso" [style.width.%]="obtenerPorcentajeTramites(tramites.enProceso)"></div>
             </div>
           </div>
           <div class="progress-item">
             <div class="progress-info">
               <span class="progress-label">Pendientes</span>
-              <span class="progress-value">{{ tramites.pendientes }}</span>
+              <span class="progress-value">{{ tramites.pendientes }} ({{ obtenerPorcentajeTramites(tramites.pendientes) | number:'1.0-0' }}%)</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill pendientes"
-                   [style.width.%]="obtenerPorcentajeTramites(tramites.pendientes)"></div>
+              <div class="progress-fill pendientes" [style.width.%]="obtenerPorcentajeTramites(tramites.pendientes)"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- KPIs Documentos -->
+    <!-- KPIs Registros Sanitarios -->
     <div class="metric-card documentos">
       <div class="metric-header">
-        <h3>Gestión Documental</h3>
-        <span class="metric-icon">📄</span>
+        <h3>Registros Sanitarios</h3>
+        <span class="metric-icon">🏥</span>
       </div>
       <div class="metric-content">
         <div class="metric-item principal">
-          <span class="metric-value">{{ documentos.total }}</span>
-          <span class="metric-label">Total Documentos</span>
+          <span class="metric-value">{{ registros.total }}</span>
+          <span class="metric-label">Total Registros</span>
         </div>
         <div class="status-grid">
           <div class="status-item vigentes">
-            <span class="status-number">{{ documentos.vigentes }}</span>
+            <span class="status-number">{{ registros.vigentes }}</span>
             <span class="status-label">Vigentes</span>
           </div>
           <div class="status-item por-vencer">
-            <span class="status-number">{{ documentos.porVencer }}</span>
+            <span class="status-number">{{ registros.porVencer }}</span>
             <span class="status-label">Por Vencer</span>
           </div>
           <div class="status-item vencidos">
-            <span class="status-number">{{ documentos.vencidos }}</span>
+            <span class="status-number">{{ registros.vencidos }}</span>
             <span class="status-label">Vencidos</span>
           </div>
         </div>
@@ -141,49 +138,106 @@
   <div class="dashboard-content">
     <!-- Columna Izquierda: Gráficos -->
     <div class="dashboard-left">
-      <!-- Gráfico de Rendimiento -->
+      <!-- Gráfico de Trámites por Mes -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Rendimiento Semanal</h3>
+          <h3>Trámites por Mes - {{ anoSeleccionado }}</h3>
           <div class="chart-actions">
-            <button class="btn-chart-action active">7D</button>
-            <button class="btn-chart-action">30D</button>
-            <button class="btn-chart-action">90D</button>
+            <button
+              *ngFor="let ano of anosDisponibles"
+              [class.active]="ano === anoSeleccionado"
+              (click)="cambiarAno(ano)"
+              class="btn-chart-action">
+              {{ ano }}
+            </button>
           </div>
         </div>
+
         <div class="chart-container">
-          <!-- Gráfico simple con CSS -->
+          <!-- Loading indicator -->
+          <div class="chart-loading" *ngIf="cargando">
+            <div class="spinner"></div>
+            <span>Cargando datos...</span>
+          </div>
+
+          <!-- Chart Scale -->
+          <div class="chart-scale">
+            <div class="scale-item" *ngFor="let valor of obtenerEscalaGrafico(); trackBy: trackByIndex">
+              <div class="scale-line"></div>
+              <span class="scale-label">{{ valor }}</span>
+            </div>
+          </div>
+
+          <!-- Grid lines -->
+          <div class="chart-grid"></div>
+
+          <!-- Chart bars -->
           <div class="chart-bars">
-            <div class="chart-bar" *ngFor="let valor of datosVentas; let i = index">
-              <div class="bar-fill" [style.height.%]="valor"></div>
-              <span class="bar-label">{{ labelesVentas[i] }}</span>
+            <div
+              class="chart-bar"
+              *ngFor="let tramite of tramitesPorMes; trackBy: trackByMes"
+              [attr.data-mes]="tramite.mes"
+              [attr.data-cantidad]="tramite.cantidad">
+
+              <div
+                class="bar-fill"
+                [style.height.%]="obtenerAlturaBarraPorcentaje(tramite.cantidad)"
+                [title]="obtenerTooltipBarra(tramite)">
+                <div class="bar-value">{{ tramite.cantidad }}</div>
+              </div>
+
+              <div class="bar-label">{{ obtenerNombreMes(tramite.mes) }}</div>
             </div>
           </div>
         </div>
+
+        <!-- Chart summary -->
+        <div class="chart-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 2rem;">
+            <div style="text-align: center;">
+              <div style="font-size: 1.2rem; font-weight: 700; color: #2c3e50;">{{ obtenerTotalTramitesAno() }}</div>
+              <div style="font-size: 0.8rem; color: #6c757d;">Total {{ anoSeleccionado }}</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 1.2rem; font-weight: 700; color: #667eea;">{{ obtenerPromedioMensual() | number:'1.1-1' }}</div>
+              <div style="font-size: 0.8rem; color: #6c757d;">Promedio mensual</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.9rem; font-weight: 600; color: #2c3e50;">Mes con más trámites:</div>
+            <div style="font-size: 0.8rem; color: #667eea;">{{ obtenerMesConMasTramites() }}</div>
+          </div>
+        </div>
       </div>
+
+
+
 
       <!-- Distribución de Trámites -->
       <div class="chart-card">
         <div class="chart-header">
           <h3>Distribución de Trámites</h3>
         </div>
-        <div class="donut-chart">
-          <div class="donut-segments">
-            <div class="donut-segment completados"
-                 [style.--percentage]="obtenerPorcentajeTramites(tramites.completados) + '%'"></div>
-          </div>
-          <div class="donut-legend">
-            <div class="legend-item">
-              <span class="legend-color completados"></span>
-              <span class="legend-text">Completados ({{ tramites.completados }})</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color proceso"></span>
-              <span class="legend-text">En Proceso ({{ tramites.enProceso }})</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color pendientes"></span>
-              <span class="legend-text">Pendientes ({{ tramites.pendientes }})</span>
+        <div class="chart-container">
+          <div class="donut-chart">
+            <div class="donut-segments" [style]="'background: ' + obtenerGradienteDonut()"></div>
+            <div class="donut-legend">
+              <div class="legend-item">
+                <div class="legend-color completados"></div>
+                <span class="legend-text">Completados ({{ tramites.completados }})</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color proceso"></div>
+                <span class="legend-text">En Proceso ({{ tramites.enProceso }})</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color pendientes"></div>
+                <span class="legend-text">Pendientes ({{ tramites.pendientes }})</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color rechazados"></div>
+                <span class="legend-text">Rechazados ({{ tramites.rechazados }})</span>
+              </div>
             </div>
           </div>
         </div>
@@ -195,8 +249,8 @@
       <!-- Eventos Próximos -->
       <div class="activity-card">
         <div class="activity-header">
-          <h3>Próximos Eventos</h3>
-          <button class="btn-ver-todo" (click)="verCalendario()">Ver Calendario</button>
+          <h3>Eventos Próximos</h3>
+          <button class="btn-ver-todo" (click)="verCalendario()">Ver Todo</button>
         </div>
         <div class="events-list">
           <div class="event-item" *ngFor="let evento of eventosRecientes">
@@ -204,7 +258,7 @@
             <div class="event-content">
               <h4 class="event-title">{{ evento.titulo }}</h4>
               <p class="event-date">{{ evento.fecha | date:'dd/MM/yyyy' }}</p>
-              <span class="event-type">{{ evento.tipo | titlecase }}</span>
+              <span class="event-type">{{ evento.tipo }}</span>
             </div>
           </div>
         </div>
@@ -213,30 +267,29 @@
       <!-- Alertas y Notificaciones -->
       <div class="alerts-card">
         <div class="alerts-header">
-          <h3>Alertas Importantes</h3>
+          <h3>Alertas</h3>
+          <button class="btn-ver-todo" (click)="verNotificaciones()">Ver Todas</button>
         </div>
         <div class="alerts-list">
-          <div class="alert-item critical" *ngIf="documentos.vencidos > 0">
-            <span class="alert-icon">⚠️</span>
+          <div class="alert-item critical">
+            <i class="fas fa-exclamation-triangle alert-icon"></i>
             <div class="alert-content">
-              <strong>Documentos Vencidos</strong>
-              <p>{{ documentos.vencidos }} documentos requieren renovación inmediata</p>
+              <strong>Registros por vencer</strong>
+              <p>{{ registros.porVencer }} registros vencen en los próximos 30 días</p>
             </div>
           </div>
-
-          <div class="alert-item warning" *ngIf="documentos.porVencer > 0">
-            <span class="alert-icon">⏰</span>
+          <div class="alert-item warning">
+            <i class="fas fa-clock alert-icon"></i>
             <div class="alert-content">
-              <strong>Próximos a Vencer</strong>
-              <p>{{ documentos.porVencer }} documentos vencen en los próximos 30 días</p>
+              <strong>Trámites pendientes</strong>
+              <p>{{ tramites.pendientes }} trámites requieren atención</p>
             </div>
           </div>
-
-          <div class="alert-item info" *ngIf="tramites.pendientes > 10">
-            <span class="alert-icon">📋</span>
+          <div class="alert-item info">
+            <i class="fas fa-info-circle alert-icon"></i>
             <div class="alert-content">
-              <strong>Trámites Pendientes</strong>
-              <p>{{ tramites.pendientes }} trámites esperan revisión</p>
+              <strong>Sistema actualizado</strong>
+              <p>Última sincronización: {{ fechaActual | date:'HH:mm' }}</p>
             </div>
           </div>
         </div>
@@ -249,26 +302,22 @@
         </div>
         <div class="actions-grid">
           <button class="action-btn" (click)="nuevoTramite()">
-            <span class="action-icon">📋</span>
+            <i class="fas fa-plus action-icon"></i>
             <span class="action-text">Nuevo Trámite</span>
           </button>
-
           <button class="action-btn" (click)="gestionarDocumentos()">
-            <span class="action-icon">📁</span>
-            <span class="action-text">Gestionar Documentos</span>
+            <i class="fas fa-file-alt action-icon"></i>
+            <span class="action-text">Documentos</span>
           </button>
-
-          <button class="action-btn" (click)="verNotificaciones()">
-            <span class="action-icon">🔔</span>
-            <span class="action-text">Ver Notificaciones</span>
+          <button class="action-btn" (click)="verCalendario()">
+            <i class="fas fa-calendar action-icon"></i>
+            <span class="action-text">Calendario</span>
           </button>
-
           <button class="action-btn" (click)="configurarSistema()">
-            <span class="action-icon">⚙️</span>
-            <span class="action-text">Configurar Sistema</span>
+            <i class="fas fa-cog action-icon"></i>
+            <span class="action-text">Configuración</span>
           </button>
         </div>
-
       </div>
     </div>
   </div>

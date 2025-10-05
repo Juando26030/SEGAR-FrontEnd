@@ -10,6 +10,7 @@ export interface DashboardResumenDTO {
   totalRegistros: number;
   registrosVigentes: number;
   registrosPorVencer: number;
+  registrosVencidos: number;
   requerimientosPendientes: number;
 }
 

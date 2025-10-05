@@ -415,6 +415,21 @@
   color: #f59e0b;
 }
 
+.estado-activo {
+  background: rgb(201, 238, 253);
+  color: #0b80f5;
+}
+
+.estado-completado {
+  background: rgb(229, 246, 240);
+  color: #63e665;
+}
+
+.estado-vencido {
+  background: rgb(251, 235, 235);
+  color: #cd4d4d;
+}
+
 .req-footer {
   margin-top: 1rem;
   padding-top: 1rem;
