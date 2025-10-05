@@ -1,10 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarioService } from '../../core/services/calendario.service';
 import { NotificationService } from '../../services/notification.service';
 import { Router } from '@angular/router';
 import { DashboardService, DashboardResumenDTO, TramitePorEstadoDTO, TramitePorMesDTO } from '../../core/services/dashboard.service';
 import { interval, Subject, takeUntil, forkJoin } from 'rxjs';
+import { Chart, registerables } from 'chart.js';
+import {FormsModule} from '@angular/forms';
+
+// Registrar todos los componentes de Chart.js
+Chart.register(...registerables);
 
 interface EstadisticasTramites {
   total: number;
@@ -39,11 +44,14 @@ interface EventoReciente {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('chartCanvas', { static: false }) chartCanvas!: ElementRef<HTMLCanvasElement>;
+
+  private chart: Chart | null = null;
   private destroy$ = new Subject<void>();
 
   fechaActual: Date = new Date();
@@ -78,10 +86,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   datosVentas = [65, 78, 90, 81, 56, 85, 92];
   labelesVentas = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-  // Propiedades para trámites por mes (sin ñ)
+  // Propiedades para trámites por mes
   tramitesPorMes: TramitePorMesDTO[] = [];
   anoSeleccionado = new Date().getFullYear();
-  anosDisponibles = [this.anoSeleccionado - 2, this.anoSeleccionado - 1, this.anoSeleccionado, this.anoSeleccionado + 1];
 
   constructor(
     private calendarioService: CalendarioService,
@@ -93,18 +100,128 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.cargarDatosDashboard();
     this.iniciarActualizacionAutomatica();
+    this.generarRangoAnos();
+
+  }
+
+  ngAfterViewInit() {
+    // Pequeño delay para asegurar que el canvas esté disponible
+    setTimeout(() => {
+      this.crearGraficoBarras();
+    }, 100);
   }
 
   ngOnDestroy() {
+    if (this.chart) {
+      this.chart.destroy();
+    }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private crearGraficoBarras() {
+    if (this.chartCanvas?.nativeElement) {
+      const ctx = this.chartCanvas.nativeElement.getContext('2d');
+
+      if (ctx) {
+        this.chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: this.tramitesPorMes.map(t => this.obtenerNombreMes(t.mes)),
+            datasets: [{
+              label: 'Trámites',
+              data: this.tramitesPorMes.map(t => t.cantidad),
+              backgroundColor: 'rgba(102, 126, 234, 0.8)',
+              borderColor: 'rgba(102, 126, 234, 1)',
+              borderWidth: 2,
+              borderRadius: 6,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 1000,
+              easing: 'easeOutCubic'
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                cornerRadius: 8,
+                displayColors: false,
+                callbacks: {
+                  title: (context) => {
+                    return `${context[0].label} ${this.anoSeleccionado}`;
+                  },
+                  label: (context) => {
+                    const valor = context.parsed.y;
+                    return `${valor} trámite${valor !== 1 ? 's' : ''}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                border: {
+                  display: false
+                },
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                  color: '#6c757d',
+                  font: {
+                    size: 12
+                  },
+                  stepSize: 1
+                }
+              },
+              x: {
+                border: {
+                  display: false
+                },
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: '#6c757d',
+                  font: {
+                    size: 12,
+                    weight: "bold"
+                  }
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            }
+          }
+        });
+      }
+    }
+  }
+
+
+  private actualizarGrafico() {
+    if (this.chart) {
+      this.chart.data.labels = this.tramitesPorMes.map(t => this.obtenerNombreMes(t.mes));
+      this.chart.data.datasets[0].data = this.tramitesPorMes.map(t => t.cantidad);
+      this.chart.update('active');
+    }
   }
 
   async cargarDatosDashboard() {
     try {
       this.cargando = true;
 
-      // Cargar datos en paralelo incluyendo trámites por mes
       const requests = forkJoin({
         resumen: this.dashboardService.getResumen(30),
         tramitesPorEstado: this.dashboardService.getTramitesPorEstado(),
@@ -117,6 +234,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.procesarDatosTramites(data.tramitesPorEstado);
           this.procesarTramitesPorMes(data.tramitesPorMes);
           this.cargarEventosRecientes();
+          this.actualizarGrafico();
           console.log('Datos recibidos del backend:', data);
         },
         error: (error) => {
@@ -138,7 +256,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private procesarDatosResumen(resumen: DashboardResumenDTO) {
-    // Procesar datos de registros sanitarios
     this.registros = {
       total: resumen.totalRegistros,
       vigentes: resumen.registrosVigentes,
@@ -148,7 +265,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private procesarDatosTramites(tramitesPorEstado: TramitePorEstadoDTO[]) {
-    // Inicializar contadores
     this.tramites = {
       total: 0,
       pendientes: 0,
@@ -157,7 +273,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       rechazados: 0
     };
 
-    // Procesar cada estado
     tramitesPorEstado.forEach(item => {
       this.tramites.total += item.cantidad;
 
@@ -186,10 +301,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private procesarTramitesPorMes(tramitesPorMes: TramitePorMesDTO[]) {
-    // Inicializar array con 12 meses
     this.tramitesPorMes = [];
-    this.tramitesPorMes.push({ mes: 1, cantidad: 10 });
-    for (let mes = 2; mes <= 12; mes++) {
+    for (let mes = 1; mes <= 12; mes++) {
       const mesData = tramitesPorMes.find(t => t.mes === mes);
       this.tramitesPorMes.push({
         mes: mes,
@@ -199,7 +312,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private cargarDatosFallback() {
-    // Datos de respaldo en caso de error en la API
     this.tramites = {
       total: 156,
       pendientes: 23,
@@ -215,7 +327,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       vencidos: 5
     };
 
-    // Datos fallback para trámites por mes
     this.tramitesPorMes = [
       { mes: 1, cantidad: 12 }, { mes: 2, cantidad: 18 }, { mes: 3, cantidad: 25 },
       { mes: 4, cantidad: 15 }, { mes: 5, cantidad: 22 }, { mes: 6, cantidad: 28 },
@@ -225,7 +336,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private cargarEventosRecientes() {
-    // Mantener eventos estáticos por ahora
     this.eventosRecientes = [
       { id: 1, titulo: 'Renovación Registro Sanitario', fecha: '2024-01-15', tipo: 'RENOVACION', prioridad: 'ALTA' },
       { id: 2, titulo: 'Auditoría Calidad', fecha: '2024-01-18', tipo: 'AUDITORIA', prioridad: 'MEDIA' },
@@ -234,14 +344,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   iniciarActualizacionAutomatica(): void {
-    // Actualizar fecha cada minuto
     interval(60000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.fechaActual = new Date();
       });
 
-    // Recargar datos cada 5 minutos
     interval(300000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
@@ -254,10 +362,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return meses[numeroMes - 1] || `M${numeroMes}`;
   }
-
-
-
-
 
   obtenerPorcentajeTramites(valor: number): number {
     return this.tramites.total > 0 ? (valor / this.tramites.total) * 100 : 0;
@@ -310,46 +414,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return `conic-gradient(${segmentos.join(', ')})`;
   }
 
-  verCalendario() {
-    this.router.navigate(['/main/calendario']);
-  }
-
-  nuevoTramite(): void {
-    this.router.navigate(['/main/nuevo']);
-  }
-
-  gestionarDocumentos(): void {
-    this.router.navigate(['/main/documentos']);
-  }
-
-  verNotificaciones(): void {
-    this.router.navigate(['/main/notificaciones']);
-  }
-
-  configurarSistema(): void {
-    this.router.navigate(['/main/configuracion']);
-  }
-
-
-  obtenerPorcentajeEscala(valor: number): number {
-    const max = this.obtenerMaximoTramites();
-    return (valor / max) * 100;
-  }
-
-// Agregar estos métodos al componente
-
-  trackByIndex(index: number): number {
-    return index;
-  }
-
-  trackByMes(index: number, item: TramitePorMesDTO): number {
-    return item.mes;
-  }
-
-  obtenerTooltipBarra(tramite: TramitePorMesDTO): string {
-    return `${this.obtenerNombreMes(tramite.mes)} ${this.anoSeleccionado}: ${tramite.cantidad} trámite${tramite.cantidad !== 1 ? 's' : ''}`;
-  }
-
   obtenerTotalTramitesAno(): number {
     return this.tramitesPorMes.reduce((total, tramite) => total + tramite.cantidad, 0);
   }
@@ -369,86 +433,66 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return `${this.obtenerNombreMes(mesMaximo.mes)} (${mesMaximo.cantidad})`;
   }
 
-  obtenerEscalaGrafico(): number[] {
-    const max = this.obtenerMaximoTramites();
+  rangoAnosInicial = 2020;
+  rangoAnosFinal = new Date().getFullYear() + 2;
+  anosDisponibles: number[] = [];
 
-    if (max === 0) {
-      return [0, 0, 0, 0, 0];
-    }
+  anosRapidos = [2022, 2023, 2024, 2025];
+  anosPreset = [
+    { etiqueta: 'Actual', valor: new Date().getFullYear(), descripcion: 'Año en curso' },
+  ];
 
-    // Determinar el valor máximo de la escala basado en el máximo real
-    let escalaMaxima: number;
-
-    if (max <= 5) {
-      escalaMaxima = 5;
-    } else if (max <= 10) {
-      escalaMaxima = 10;
-    } else if (max <= 25) {
-      escalaMaxima = 25;
-    } else if (max <= 50) {
-      escalaMaxima = 50;
-    } else if (max <= 100) {
-      escalaMaxima = Math.ceil(max / 10) * 10; // Redondear a la decena superior
-    } else if (max <= 500) {
-      escalaMaxima = Math.ceil(max / 50) * 50; // Redondear al múltiplo de 50 superior
-    } else if (max <= 1000) {
-      escalaMaxima = Math.ceil(max / 100) * 100; // Redondear al múltiplo de 100 superior
-    } else {
-      escalaMaxima = Math.ceil(max / 500) * 500; // Para valores muy grandes
-    }
-
-    // Crear 5 puntos en la escala
-    const paso = escalaMaxima / 4;
-
-    return [
-      escalaMaxima,
-      Math.round(escalaMaxima - paso),
-      Math.round(escalaMaxima - (paso * 2)),
-      Math.round(escalaMaxima - (paso * 3)),
-      0
-    ];
-  }
-
-  obtenerAlturaBarraPorcentaje(valor: number): number {
-    if (valor === 0) return 0;
-
-    const escala = this.obtenerEscalaGrafico();
-    const maximo = escala[0]; // El primer valor es el máximo de la escala
-
-    if (maximo === 0) return 0;
-
-    // Calcular el porcentaje basado en la escala máxima
-    const porcentaje = (valor / maximo) * 100;
-
-    console.log('Porcentaje:', porcentaje);
-    // Asegurar una altura mínima visible para valores > 0
-    return Math.max(porcentaje, 2);
-  }
-
-  obtenerMaximoTramites(): number {
-    if (!this.tramitesPorMes || this.tramitesPorMes.length === 0) {
-      return 0;
-    }
-
-    return Math.max(...this.tramitesPorMes.map(t => t.cantidad));
-  }
-
-
-// Mejorar el método cambiarAno para mejor UX
-  cambiarAno(ano: number) {
-    if (ano !== this.anoSeleccionado && !this.cargando) {
-      this.anoSeleccionado = ano;
-      this.cargando = true;
+// Métodos para cambiar año
+  cambiarAno(evento: any) {
+    const nuevoAno = typeof evento === 'number' ? evento : parseInt(evento.target.value);
+    if (nuevoAno >= this.rangoAnosInicial && nuevoAno <= this.rangoAnosFinal) {
+      this.anoSeleccionado = nuevoAno;
       this.cargarTramitesPorMes();
     }
   }
 
-// Mejorar el método cargarTramitesPorMes
+  private generarRangoAnos() {
+    this.anosDisponibles = [];
+    for (let ano = this.rangoAnosFinal; ano >= this.rangoAnosInicial; ano--) {
+      this.anosDisponibles.push(ano);
+    }
+  }
+
+  cambiarAnoSlider(evento: any) {
+    const nuevoAno = parseInt(evento.target.value);
+    this.anoSeleccionado = nuevoAno;
+    this.cargarTramitesPorMes();
+  }
+
+  navegarAno(direccion: number) {
+    const nuevoAno = this.anoSeleccionado + direccion;
+    if (nuevoAno >= this.rangoAnosInicial && nuevoAno <= this.rangoAnosFinal) {
+      this.anoSeleccionado = nuevoAno;
+      this.cargarTramitesPorMes();
+    }
+  }
+
+  irAnoActual() {
+    this.anoSeleccionado = new Date().getFullYear();
+    this.cargarTramitesPorMes();
+  }
+
+  validarYCambiarAno(evento: any) {
+    const ano = parseInt(evento.target.value);
+    if (isNaN(ano)) {
+      evento.target.value = this.anoSeleccionado;
+      return;
+    }
+    this.cambiarAno(ano);
+  }
+
+
   private cargarTramitesPorMes() {
     this.dashboardService.getTramitesPorMes(this.anoSeleccionado)
       .subscribe({
         next: (data) => {
           this.procesarTramitesPorMes(data);
+          this.actualizarGrafico();
           this.cargando = false;
         },
         error: (error) => {
@@ -459,5 +503,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  verCalendario() {
+    this.router.navigate(['/main/calendario']);
+  }
 
+  nuevoTramite(): void {
+    this.router.navigate(['/main/nuevo']);
+  }
+
+  gestionarDocumentos(): void {
+    this.router.navigate(['/main/documentos']);
+  }
+
+  verNotificaciones(): void {
+    this.router.navigate(['/main/notificaciones']);
+  }
+
+  configurarSistema(): void {
+    this.router.navigate(['/main/configuracion']);
+  }
 }

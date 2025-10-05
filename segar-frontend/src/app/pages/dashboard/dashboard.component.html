@@ -141,15 +141,44 @@
       <!-- Gráfico de Trámites por Mes -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Trámites por Mes - {{ anoSeleccionado }}</h3>
-          <div class="chart-actions">
-            <button
-              *ngFor="let ano of anosDisponibles"
-              [class.active]="ano === anoSeleccionado"
-              (click)="cambiarAno(ano)"
-              class="btn-chart-action">
-              {{ ano }}
-            </button>
+          <h3>Trámites por Mes</h3>
+          <div class="chart-actions elegant">
+            <div class="year-picker-container">
+              <div class="year-input-group">
+                <input type="number"
+                       class="year-input"
+                       [(ngModel)]="anoSeleccionado"
+                       [min]="rangoAnosInicial"
+                       [max]="rangoAnosFinal"
+                       (change)="validarYCambiarAno($event)">
+
+                <div class="year-actions">
+                  <button class="btn-year-action"
+                          (click)="navegarAno(1)"
+                          [disabled]="anoSeleccionado >= rangoAnosFinal"
+                          title="Año siguiente">
+                    ▲
+                  </button>
+                  <button class="btn-year-action"
+                          (click)="navegarAno(-1)"
+                          [disabled]="anoSeleccionado <= rangoAnosInicial"
+                          title="Año anterior">
+                    ▼
+                  </button>
+                </div>
+              </div>
+
+              <div class="preset-years">
+                <span class="preset-label">Acceso rápido:</span>
+                <button *ngFor="let preset of anosPreset"
+                        class="btn-preset"
+                        [class.active]="anoSeleccionado === preset.valor"
+                        (click)="cambiarAno(preset.valor)"
+                        [title]="preset.descripcion">
+                  {{ preset.etiqueta }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -160,39 +189,12 @@
             <span>Cargando datos...</span>
           </div>
 
-          <!-- Chart Scale -->
-          <div class="chart-scale">
-            <div class="scale-item" *ngFor="let valor of obtenerEscalaGrafico(); trackBy: trackByIndex">
-              <div class="scale-line"></div>
-              <span class="scale-label">{{ valor }}</span>
-            </div>
-          </div>
-
-          <!-- Grid lines -->
-          <div class="chart-grid"></div>
-
-          <!-- Chart bars -->
-          <div class="chart-bars">
-            <div
-              class="chart-bar"
-              *ngFor="let tramite of tramitesPorMes; trackBy: trackByMes"
-              [attr.data-mes]="tramite.mes"
-              [attr.data-cantidad]="tramite.cantidad">
-
-              <div
-                class="bar-fill"
-                [style.height.%]="obtenerAlturaBarraPorcentaje(tramite.cantidad)"
-                [title]="obtenerTooltipBarra(tramite)">
-                <div class="bar-value">{{ tramite.cantidad }}</div>
-              </div>
-
-              <div class="bar-label">{{ obtenerNombreMes(tramite.mes) }}</div>
-            </div>
-          </div>
+          <!-- Canvas para Chart.js -->
+          <canvas #chartCanvas width="400" height="200"></canvas>
         </div>
 
         <!-- Chart summary -->
-        <div class="chart-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="chart-summary">
           <div style="display: flex; gap: 2rem;">
             <div style="text-align: center;">
               <div style="font-size: 1.2rem; font-weight: 700; color: #2c3e50;">{{ obtenerTotalTramitesAno() }}</div>
@@ -209,6 +211,8 @@
           </div>
         </div>
       </div>
+
+
 
 
 
@@ -264,36 +268,7 @@
         </div>
       </div>
 
-      <!-- Alertas y Notificaciones -->
-      <div class="alerts-card">
-        <div class="alerts-header">
-          <h3>Alertas</h3>
-          <button class="btn-ver-todo" (click)="verNotificaciones()">Ver Todas</button>
-        </div>
-        <div class="alerts-list">
-          <div class="alert-item critical">
-            <i class="fas fa-exclamation-triangle alert-icon"></i>
-            <div class="alert-content">
-              <strong>Registros por vencer</strong>
-              <p>{{ registros.porVencer }} registros vencen en los próximos 30 días</p>
-            </div>
-          </div>
-          <div class="alert-item warning">
-            <i class="fas fa-clock alert-icon"></i>
-            <div class="alert-content">
-              <strong>Trámites pendientes</strong>
-              <p>{{ tramites.pendientes }} trámites requieren atención</p>
-            </div>
-          </div>
-          <div class="alert-item info">
-            <i class="fas fa-info-circle alert-icon"></i>
-            <div class="alert-content">
-              <strong>Sistema actualizado</strong>
-              <p>Última sincronización: {{ fechaActual | date:'HH:mm' }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <!-- Accesos Rápidos -->
       <div class="quick-actions-card">
