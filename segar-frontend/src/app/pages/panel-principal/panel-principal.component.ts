@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, interval, takeUntil, forkJoin, timer } from 'rxjs';
 import { DashboardService, TramiteRecienteDTO } from '../../core/services/dashboard.service';
+import { TramiteDetalleModalComponent } from '../../shared/tramite-detalle-modal/tramite-detalle-modal.component';
 
 interface Estadisticas {
   activos: number;
@@ -12,6 +13,7 @@ interface Estadisticas {
 }
 
 interface Tramite {
+  id: number;
   numero: string;
   tipo: string;
   producto: string;
@@ -23,7 +25,7 @@ interface Tramite {
 @Component({
   selector: 'app-panel-principal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,TramiteDetalleModalComponent],
   templateUrl: './panel-principal.component.html',
   styleUrls: ['./panel-principal.component.css']
 })
@@ -120,7 +122,8 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
           producto: tramite.productName,
           riesgo: this.extraerRiesgoAlimento(tramite.procedureType),
           ultimaActualizacion: this.validarFecha(tramite.lastUpdate),
-          estado: this.dashboardService.mapearEstado(tramite.currentStatus)
+          estado: this.dashboardService.mapearEstado(tramite.currentStatus),
+          id: tramite.id
         }));
 
         // Guardar copia original y aplicar ordenamiento si existe
@@ -272,9 +275,6 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     return riesgoMap[riesgo] || 'prioridad-media';
   }
 
-  verDetalleTramite(tramite: Tramite): void {
-    console.log('Ver detalle del trámite:', tramite);
-  }
 
   verTodosTramites(): void {
     console.log('Navegar a todos los trámites');
@@ -374,6 +374,23 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   getSortClass(campo: string): string {
     return this.sortField === campo ? 'sorted' : '';
   }
+
+// Agregar las propiedades para el modal
+  modalVisible: boolean = false;
+  tramiteSeleccionadoId: number | null = null;
+
+// Actualizar el método verDetalleTramite
+  verDetalleTramite(tramite: Tramite): void {
+    this.tramiteSeleccionadoId = tramite.id;
+    this.modalVisible = true;
+  }
+
+// Método para cerrar el modal
+  cerrarModal(): void {
+    this.modalVisible = false;
+    this.tramiteSeleccionadoId = null;
+  }
+
 }
 
 

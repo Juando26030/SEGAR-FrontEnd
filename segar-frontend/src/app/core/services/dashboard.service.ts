@@ -13,6 +13,32 @@ export interface DashboardResumenDTO {
   requerimientosPendientes: number;
 }
 
+// Agregar la nueva interfaz DTO al inicio del archivo
+export interface TramiteEstadisticasDTO {
+  diasTranscurridos: number;
+  totalEventos: number;
+  eventosCompletados: number;
+  requerimientosPendientes: number;
+  notificacionesNoLeidas: number;
+  porcentajeProgreso: number;
+}
+
+export interface TramiteDetalleDTO {
+  id: number;
+  radicadoNumber: string;
+  submissionDate: string;
+  procedureType: string;
+  productName: string;
+  currentStatus: string;
+  lastUpdate: string;
+  eventos: any[];
+  requerimientos: any[];
+  notificaciones: any[];
+  historial: any[];
+  estadisticas: TramiteEstadisticasDTO;
+}
+
+
 export interface TramitePorEstadoDTO {
   estado: string;
   cantidad: number;
@@ -145,5 +171,9 @@ export class DashboardService {
     } else {
       return { color: '#198754', texto: `${diasRestantes} días`, clase: 'text-success' };
     }
+  }
+
+  getTramiteDetalle(id: number): Observable<TramiteDetalleDTO> {
+    return this.http.get<TramiteDetalleDTO>(`${this.basePath}/tramite/${id}`);
   }
 }

@@ -145,7 +145,7 @@
         <div class="section-accent-line"></div>
         <span class="section-subtitle">
           <i class="fas fa-chart-bar"></i>
-          Últimas 10 actividades
+          Últimas 5 actividades
         </span>
       </div>
       <div class="section-actions modern">
@@ -283,4 +283,11 @@
       </table>
     </div>
   </div>
+  <!-- Agregar al final del archivo, justo antes del </div> de cierre -->
+  <app-tramite-detalle-modal
+    [tramiteId]="tramiteSeleccionadoId"
+    [isVisible]="modalVisible"
+    (cerrar)="cerrarModal()">
+  </app-tramite-detalle-modal>
+
 </div>
