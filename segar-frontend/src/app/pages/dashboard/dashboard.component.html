@@ -1,9 +1,13 @@
 <div class="dashboard-container">
-  <!-- Loading Overlay -->
+  <!-- Loading Overlay Mejorado -->
   <div class="loading-overlay" *ngIf="cargando">
-    <div class="spinner"></div>
-    <p>Cargando dashboard...</p>
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h3 class="loading-text">Cargando Dashboard<span class="loading-dots"></span></h3>
+      <p class="loading-subtitle">Obteniendo los datos más recientes</p>
+    </div>
   </div>
+
 
   <!-- Header del Dashboard -->
   <div class="dashboard-header">
