@@ -212,11 +212,6 @@
         </div>
       </div>
 
-
-
-
-
-
       <!-- Distribución de Trámites -->
       <div class="chart-card">
         <div class="chart-header">
@@ -251,22 +246,31 @@
     <!-- Columna Derecha: Actividad y Alertas -->
     <div class="dashboard-right">
       <!-- Eventos Próximos -->
+      <!-- Eventos Próximos -->
       <div class="activity-card">
         <div class="activity-header">
           <h3>Eventos Próximos</h3>
           <button class="btn-ver-todo" (click)="verCalendario()">Ver Todo</button>
         </div>
         <div class="events-list">
-          <div class="event-item" *ngFor="let evento of eventosRecientes">
-            <div class="event-indicator" [class]="'prioridad-' + evento.prioridad.toLowerCase()"></div>
+          <div class="event-item" *ngFor="let evento of eventosRecientes" (click)="verCalendario()">
+            <div class="event-indicator" [class]="obtenerClasePrioridad(evento.prioridadEvento)"></div>
             <div class="event-content">
-              <h4 class="event-title">{{ evento.titulo }}</h4>
-              <p class="event-date">{{ evento.fecha | date:'dd/MM/yyyy' }}</p>
-              <span class="event-type">{{ evento.tipo }}</span>
+              <div class="event-title">{{ evento.titulo }}</div>
+              <div class="event-date">{{ formatearFecha(evento.fecha) }}</div>
+              <div class="event-description" *ngIf="evento.descripcion">{{ evento.descripcion }}</div>
+              <div class="event-days" [class]="obtenerClaseDiasRestantes(obtenerDiasRestantes(evento.fecha))">
+                {{ obtenerTextoDiasRestantes(obtenerDiasRestantes(evento.fecha)) }}
+              </div>
             </div>
+          </div>
+          <div *ngIf="eventosRecientes.length === 0" class="no-events">
+            <i class="fas fa-calendar-check" style="font-size: 2rem; color: #dee2e6; margin-bottom: 1rem;"></i>
+            <p style="color: #6c757d; text-align: center; margin: 0;">No hay eventos próximos programados</p>
           </div>
         </div>
       </div>
+
 
 
 

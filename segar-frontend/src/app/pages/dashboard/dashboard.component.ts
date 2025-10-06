@@ -7,6 +7,8 @@ import { DashboardService, DashboardResumenDTO, TramitePorEstadoDTO, TramitePorM
 import { interval, Subject, takeUntil, forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import {FormsModule} from '@angular/forms';
+import { EventoDTO} from '../../core/DTOs/calendario.dto';
+
 
 // Registrar todos los componentes de Chart.js
 Chart.register(...registerables);
@@ -36,10 +38,14 @@ interface EstadisticasRegistros {
 interface EventoReciente {
   id: number;
   titulo: string;
+  descripcion?: string;
   fecha: string;
-  tipo: string;
-  prioridad: string;
+  tipoEvento: string;
+  categoriaEvento: string;
+  prioridadEvento: string;
+  estadoEvento: string;
 }
+
 
 @Component({
   selector: 'app-dashboard',
@@ -223,9 +229,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cargando = true;
 
       const requests = forkJoin({
-        resumen: this.dashboardService.getResumen(30),
+        resumen: this.dashboardService.getResumen(),
         tramitesPorEstado: this.dashboardService.getTramitesPorEstado(),
-        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado)
+        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado),
+        eventosProximos: this.calendarioService.obtenerEventosProximos()
       });
 
       requests.subscribe({
@@ -233,7 +240,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           this.procesarDatosResumen(data.resumen);
           this.procesarDatosTramites(data.tramitesPorEstado);
           this.procesarTramitesPorMes(data.tramitesPorMes);
-          this.cargarEventosRecientes();
+          this.eventosRecientes = this.procesarEventosProximos(data.eventosProximos);
           this.actualizarGrafico();
           console.log('Datos recibidos del backend:', data);
         },
@@ -253,6 +260,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cargarDatosFallback();
       this.cargando = false;
     }
+  }
+// Método para procesar eventos próximos del calendario
+  private procesarEventosProximos(eventos: EventoDTO[]): EventoReciente[] {
+    return eventos.map(evento => ({
+      id: evento.id,
+      titulo: evento.titulo,
+      descripcion: evento.descripcion,
+      fecha: evento.fecha,
+      tipoEvento: evento.tipo,
+      categoriaEvento: evento.categoria,
+      prioridadEvento: evento.prioridad,
+      estadoEvento: evento.estado,
+    }));
   }
 
   private procesarDatosResumen(resumen: DashboardResumenDTO) {
@@ -333,15 +353,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       { mes: 7, cantidad: 19 }, { mes: 8, cantidad: 24 }, { mes: 9, cantidad: 16 },
       { mes: 10, cantidad: 20 }, { mes: 11, cantidad: 14 }, { mes: 12, cantidad: 11 }
     ];
+
+    this.eventosRecientes = [];
   }
 
-  private cargarEventosRecientes() {
-    this.eventosRecientes = [
-      { id: 1, titulo: 'Renovación Registro Sanitario', fecha: '2024-01-15', tipo: 'RENOVACION', prioridad: 'ALTA' },
-      { id: 2, titulo: 'Auditoría Calidad', fecha: '2024-01-18', tipo: 'AUDITORIA', prioridad: 'MEDIA' },
-      { id: 3, titulo: 'Vencimiento Licencia', fecha: '2024-01-20', tipo: 'VENCIMIENTO', prioridad: 'ALTA' }
-    ];
-  }
+
 
   iniciarActualizacionAutomatica(): void {
     interval(60000)
@@ -522,4 +538,66 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   configurarSistema(): void {
     this.router.navigate(['/main/configuracion']);
   }
+
+  obtenerClasePrioridad(prioridad: string): string {
+    switch (prioridad?.toUpperCase()) {
+      case 'ALTA':
+        return 'prioridad-alta';
+      case 'MEDIA':
+        return 'prioridad-media';
+      case 'BAJA':
+        return 'prioridad-baja';
+      default:
+        return 'prioridad-media';
+    }
+  }
+
+  obtenerTipoEvento(tipo: string): string {
+    const tipos: { [key: string]: string } = {
+      'VENCIMIENTO': 'Vencimiento',
+      'PLAZO_FINAL': 'Plazo Final',
+      'REUNION': 'Reunión',
+      'AUDITORIA': 'Auditoría',
+      'INSPECCION': 'Inspección',
+      'RENOVACION': 'Renovación',
+      'REGISTRO_SANITARIO': 'Registro Sanitario',
+      'TRAMITE': 'Trámite',
+      'SEGUIMIENTO': 'Seguimiento'
+    };
+    return tipos[tipo] || tipo;
+  }
+
+  formatearFecha(fecha: string): string {
+    const fechaObj = new Date(fecha);
+    const opciones: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return fechaObj.toLocaleDateString('es-ES', opciones);
+  }
+  // Método auxiliar para obtener días restantes
+  obtenerDiasRestantes(fecha: string): number {
+    const fechaEvento = new Date(fecha);
+    const fechaActual = new Date();
+    const diferencia = fechaEvento.getTime() - fechaActual.getTime();
+    return Math.ceil(diferencia / (1000 * 3600 * 24));
+  }
+
+// Métodos auxiliares adicionales para el template
+  obtenerClaseDiasRestantes(dias: number): string {
+    if (dias < 0) return 'dias-vencido';
+    if (dias <= 3) return 'dias-critico';
+    if (dias <= 7) return 'dias-proximo';
+    return 'dias-normal';
+  }
+
+  obtenerTextoDiasRestantes(dias: number): string {
+    if (dias < 0) return `Vencido hace ${Math.abs(dias)} día${Math.abs(dias) > 1 ? 's' : ''}`;
+    if (dias === 0) return 'Hoy';
+    if (dias === 1) return 'Mañana';
+    return `En ${dias} días`;
+  }
+
 }
