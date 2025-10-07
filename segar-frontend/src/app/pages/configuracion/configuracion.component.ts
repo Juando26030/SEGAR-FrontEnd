@@ -10,17 +10,17 @@ interface UserConfig {
   dateFormat: string;
   timeFormat: string;
   language: string;
-  
+
   // Configuración de Notificaciones
   emailNotifications: boolean;
   smsNotifications: boolean;
   pushNotifications: boolean;
   notificationSound: boolean;
-  
+
   // Configuración de Sesión
   sessionTimeout: number; // en minutos
   rememberSession: boolean;
-  
+
   // Cambio de Contraseña
   currentPassword: string;
   newPassword: string;
@@ -35,7 +35,7 @@ interface UserConfig {
   styleUrl: './configuracion.component.css'
 })
 export class ConfiguracionComponent {
-  
+
   // Usuario actual simulado (en una app real vendría de un servicio de auth)
   currentUser = {
     id: '1',
@@ -51,17 +51,17 @@ export class ConfiguracionComponent {
     dateFormat: 'DD/MM/YYYY',
     timeFormat: '24h',
     language: 'es',
-    
+
     // Configuración de Notificaciones
     emailNotifications: true,
     smsNotifications: false,
     pushNotifications: true,
     notificationSound: true,
-    
+
     // Configuración de Sesión
     sessionTimeout: 30,
     rememberSession: false,
-    
+
     // Cambio de Contraseña
     currentPassword: '',
     newPassword: '',
@@ -74,27 +74,27 @@ export class ConfiguracionComponent {
   showCurrentPassword = false;
   showNewPassword = false;
   showConfirmPassword = false;
-  
+
   tabs = [
-    { 
-      id: 'preferences', 
-      name: 'Preferencias', 
-      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' 
+    {
+      id: 'preferences',
+      name: 'Preferencias',
+      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'
     },
-    { 
-      id: 'notifications', 
-      name: 'Notificaciones', 
-      icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' 
+    {
+      id: 'notifications',
+      name: 'Notificaciones',
+      icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'
     },
-    { 
-      id: 'session', 
-      name: 'Sesión', 
-      icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' 
+    {
+      id: 'session',
+      name: 'Sesión',
+      icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
     },
-    { 
-      id: 'password', 
-      name: 'Contraseña', 
-      icon: 'M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2h-2m0 0H9m6 0v2a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6' 
+    {
+      id: 'password',
+      name: 'Contraseña',
+      icon: 'M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2h-2m0 0H9m6 0v2a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6'
     }
   ];
 
@@ -142,9 +142,7 @@ export class ConfiguracionComponent {
   constructor(
     private router: Router,
     private notificationService: NotificationService
-  ) {
-    this.checkForChanges();
-  }
+  ) {}
 
   get isCurrentUserAdmin(): boolean {
     return this.currentUser.isAdmin;
@@ -181,12 +179,12 @@ export class ConfiguracionComponent {
   getPasswordStrength(): { score: number; text: string; color: string } {
     const password = this.config.newPassword || '';
     let score = 0;
-    
+
     if (password.length >= 8) score += 25;
     if (/[A-Z]/.test(password)) score += 25;
     if (/[0-9]/.test(password)) score += 25;
     if (/[!@#$%^&*]/.test(password)) score += 25;
-    
+
     if (score < 50) return { score, text: 'Débil', color: 'bg-red-500' };
     if (score < 100) return { score, text: 'Moderada', color: 'bg-yellow-500' };
     return { score, text: 'Fuerte', color: 'bg-green-500' };
@@ -205,7 +203,7 @@ export class ConfiguracionComponent {
         'Cerrando sesiones',
         'Se están cerrando todas las sesiones activas...'
       );
-      
+
       // Simular cierre de sesiones
       setTimeout(() => {
         this.notificationService.success(
@@ -225,7 +223,7 @@ export class ConfiguracionComponent {
         this.notificationService.error('Error de validación', 'Las contraseñas no coinciden');
         return;
       }
-      
+
       const strength = this.getPasswordStrength();
       if (strength.score < 75) {
         this.notificationService.warning('Contraseña débil', 'Por favor, usa una contraseña más segura');
@@ -237,7 +235,7 @@ export class ConfiguracionComponent {
     setTimeout(() => {
       this.originalConfig = { ...this.config };
       this.hasChanges = false;
-      
+
       this.notificationService.success(
         'Configuración guardada',
         'Tus preferencias han sido actualizadas correctamente'
@@ -248,7 +246,7 @@ export class ConfiguracionComponent {
   resetConfiguration(): void {
     this.config = { ...this.originalConfig };
     this.hasChanges = false;
-    
+
     this.notificationService.info(
       'Configuración restablecida',
       'Se han restaurado los valores anteriores'
@@ -272,9 +270,9 @@ export class ConfiguracionComponent {
         newPassword: '',
         confirmNewPassword: ''
       };
-      
+
       this.hasChanges = true;
-      
+
       this.notificationService.warning(
         'Configuración predeterminada',
         'Se han restaurado los valores predeterminados. Recuerda guardar los cambios.'
