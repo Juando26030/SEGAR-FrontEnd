@@ -1,0 +1,936 @@
+/* Variables CSS */
+:root {
+  --primary-blue: #1a365d;
+  --primary-blue-light: #2d5a87;
+  --secondary-blue: #4299e1;
+  --accent-cyan: #0bc5ea;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --green-500: #10b981;
+  --green-600: #059669;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --yellow-500: #f59e0b;
+  --yellow-600: #d97706;
+  --orange-500: #f97316;
+  --orange-600: #ea580c;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+}
+
+/* Contenedor principal */
+.config-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: white;
+  min-height: 100vh;
+}
+
+/* Header mejorado */
+.config-header {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(26, 54, 93, 0.15);
+}
+
+.config-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(11, 197, 234, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.config-header-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.config-header-left h1 {
+  color: #2c3e50;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-header-left p {
+  color: rgb(44, 62, 80);
+  font-size: 1rem;
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+}
+
+.config-header-icon {
+  color: var(--accent-cyan);
+  animation: pulse-glow 2s infinite;
+}
+
+.config-changes-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Navegación de pestañas */
+.config-tabs {
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.config-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  min-width: max-content;
+}
+
+.config-tab {
+  position: relative;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px 8px 0 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.config-tab:hover {
+  color: var(--primary-blue);
+  background: var(--gray-50);
+}
+
+.config-tab.active {
+  color: var(--primary-blue);
+  background: rgba(26, 54, 93, 0.05);
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+.config-tab svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Contenido de las pestañas */
+.config-content {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.config-section {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.config-section:hover {
+  border-color: var(--gray-300);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.config-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.config-section-icon {
+  color: var(--primary-blue);
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.config-section h3 {
+  color: var(--gray-800);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.config-section p {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin: 0.5rem 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+/* Formularios */
+.config-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.config-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.config-label {
+  display: block;
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.config-select,
+.config-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: rgba(207, 207, 207, 0.09);
+}
+
+.config-select:focus,
+.config-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+}
+
+.config-help-text {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Vista previa */
+.config-preview {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border: 1px solid var(--gray-300);
+  border-left: 4px solid var(--primary-blue);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.config-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.config-preview-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+/* Toggles personalizados */
+.config-toggle-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.config-toggle-item {
+  background: rgba(213, 213, 213, 0.09);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.config-toggle-item:hover {
+  border-color: var(--gray-300);
+}
+
+.config-toggle-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-toggle-info h4 {
+  color: var(--gray-800);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.config-toggle-info p {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Switch personalizado mejorado */
+.config-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px; /* Aumentado para mejor visibilidad */
+  height: 24px; /* Aumentado para mejor visibilidad */
+  flex-shrink: 0;
+}
+
+.config-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.config-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-300);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 28px;
+  border: 2px solid var(--gray-400);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.config-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; /* Aumentado */
+  width: 20px; /* Aumentado */
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Estados activos con colores más notorios */
+.config-switch input:checked + .config-switch-slider {
+  background: linear-gradient(135deg, var(--green-500) 0%, var(--green-600) 100%);
+  border-color: var(--green-600);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+}
+
+.config-switch input:checked + .config-switch-slider:before {
+  transform: translateX(26px); /* Ajustado para el nuevo tamaño */
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Iconos dentro del switch para mayor claridad */
+.config-switch-slider:after {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  color: var(--gray-600);
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.4s ease;
+  opacity: 1;
+}
+
+.config-switch input:checked + .config-switch-slider:after {
+  content: "✓";
+  left: 32px;
+  color: white;
+  opacity: 1;
+}
+
+/* Estados de hover más pronunciados */
+.config-switch input:focus + .config-switch-slider {
+  box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.3);
+}
+
+.config-switch-slider:hover {
+  background-color: var(--gray-400);
+  transform: scale(1.02);
+}
+
+.config-switch input:checked + .config-switch-slider:hover {
+  background: linear-gradient(135deg, var(--green-600) 0%, #059669 100%);
+  transform: scale(1.02);
+}
+
+/* Animación de pulso cuando está activo */
+.config-switch input:checked + .config-switch-slider {
+  animation: pulse-active 2s infinite;
+}
+
+@keyframes pulse-active {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Mejora adicional: indicador de texto al lado */
+.config-toggle-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.config-toggle-status {
+  position: absolute;
+  right: 70px; /* Espacio para el switch */
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  min-width: 60px;
+  text-align: center;
+}
+
+.config-toggle-status.active {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--green-600);
+}
+
+.config-toggle-status.active:before {
+  content: "● ";
+  color: var(--green-500);
+}
+
+.config-toggle-status.inactive {
+  background-color: rgba(107, 114, 128, 0.15);
+  color: var(--gray-600);
+}
+
+.config-toggle-status.inactive:before {
+  content: "○ ";
+  color: var(--gray-400);
+}
+
+/* Efecto de brillo para switches activos */
+.config-switch input:checked + .config-switch-slider:before {
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+/* Transición suave mejorada */
+.config-switch-slider,
+.config-switch-slider:before,
+.config-switch-slider:after {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+
+/* Campos de contraseña */
+.config-password-field {
+  position: relative;
+}
+
+.config-password-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.config-password-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+}
+
+.config-password-input.error {
+  border-color: var(--red-500);
+  animation: shake 0.3s ease-in-out;
+}
+
+.config-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.config-password-toggle:hover {
+  color: var(--gray-600);
+}
+
+/* Indicador de fortaleza de contraseña */
+.config-strength-indicator {
+  margin-top: 0.75rem;
+}
+
+.config-strength-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.config-strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.config-strength-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Clases de fortaleza de contraseña - CORREGIDAS */
+.config-strength-critical .config-strength-fill,
+.strength-critical .config-strength-fill {
+  background: linear-gradient(90deg, var(--red-500), var(--red-600));
+  width: 25%;
+}
+
+.config-strength-critical .config-strength-text,
+.strength-critical .config-strength-text {
+  color: var(--red-600);
+}
+
+.config-strength-moderate .config-strength-fill,
+.strength-moderate .config-strength-fill {
+  background: linear-gradient(90deg, var(--yellow-500), var(--yellow-600));
+  width: 50%;
+}
+
+.config-strength-moderate .config-strength-text,
+.strength-moderate .config-strength-text {
+  color: var(--yellow-600);
+}
+
+.config-strength-strong .config-strength-fill,
+.strength-strong .config-strength-fill {
+  background: linear-gradient(90deg, var(--blue-500), var(--blue-600));
+  width: 75%;
+}
+
+.config-strength-strong .config-strength-text,
+.strength-strong .config-strength-text {
+  color: var(--blue-600);
+}
+
+.config-strength-excellent .config-strength-fill,
+.strength-excellent .config-strength-fill {
+  background: linear-gradient(90deg, var(--green-500), var(--green-600));
+  width: 100%;
+}
+
+.config-strength-excellent .config-strength-text,
+.strength-excellent .config-strength-text {
+  color: var(--green-600);
+}
+
+/* Indicador de fortaleza mejorado */
+.config-strength-indicator {
+  margin-top: 0.75rem;
+}
+
+.config-strength-bar {
+  width: 100%;
+  height: 6px; /* Aumentado para mejor visibilidad */
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.config-strength-fill {
+  height: 100%;
+  transition: all 0.5s ease;
+  border-radius: 3px;
+}
+
+.config-strength-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+
+/* Error messages */
+.config-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--red-600);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Sección de sesiones activas */
+.config-sessions {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.config-sessions-header {
+  background: var(--gray-50);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.config-sessions-header h4 {
+  margin: 0;
+  color: var(--gray-800);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.config-sessions-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.config-session-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.config-session-item:last-child {
+  border-bottom: none;
+}
+
+.config-session-info {
+  flex: 1;
+}
+
+.config-session-device {
+  font-weight: 500;
+  color: var(--gray-800);
+  margin-bottom: 0.25rem;
+}
+
+.config-session-details {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.config-session-current {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--green-600);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Botones de acción */
+.config-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.config-actions-left,
+.config-actions-right {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.config-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.config-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.config-btn-primary {
+  background: var(--primary-blue);
+  color: #000000;
+}
+
+.config-btn-primary:hover:not(:disabled) {
+  background: var(--primary-blue-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 54, 93, 0.3);
+  color: green;
+}
+
+.config-btn-secondary {
+  background: var(--gray-500);
+  color: white;
+}
+
+.config-btn-secondary:hover:not(:disabled) {
+  background: var(--gray-600);
+  transform: translateY(-1px);
+}
+
+.config-btn-outline {
+  background: transparent;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-300);
+}
+
+.config-btn-outline:hover:not(:disabled) {
+  background: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+.config-btn-danger {
+  background: var(--red-500);
+  color: white;
+}
+
+.config-btn-danger:hover:not(:disabled) {
+  background: var(--red-600);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-container {
+    padding: 1rem;
+  }
+
+  .config-header {
+    padding: 1.5rem;
+  }
+
+  .config-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .config-header-left h1 {
+    font-size: 1.75rem;
+  }
+
+  .config-tabs-nav {
+    flex-direction: column;
+  }
+
+  .config-tab {
+    border-radius: 8px;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+
+  .config-tab.active {
+    border-left-color: var(--primary-blue);
+    border-bottom: none;
+  }
+
+  .config-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .config-toggle-group {
+    grid-template-columns: 1fr;
+  }
+
+  .config-actions {
+    flex-direction: column;
+  }
+
+  .config-actions-left,
+  .config-actions-right {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .config-header-left h1 {
+    font-size: 1.5rem;
+  }
+
+  .config-section {
+    padding: 1rem;
+  }
+
+  .config-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Estados de carga */
+.config-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.config-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--gray-300);
+  border-top: 2px solid var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mejoras de accesibilidad */
+.config-tab:focus,
+.config-btn:focus,
+.config-select:focus,
+.config-input:focus,
+.config-password-input:focus {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Tema oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray-50: #1f2937;
+    --gray-100: #374151;
+    --gray-200: #4b5563;
+    --gray-300: #6b7280;
+    --gray-800: #f9fafb;
+    --gray-900: #ffffff;
+  }
+}
+
+/* Utilidades adicionales */
+.config-hidden {
+  display: none !important;
+}
+
+.config-visible {
+  display: block !important;
+}
+
+.config-text-center {
+  text-align: center;
+}
+
+.config-text-right {
+  text-align: right;
+}
+
+.config-mt-0 { margin-top: 0; }
+.config-mt-1 { margin-top: 0.25rem; }
+.config-mt-2 { margin-top: 0.5rem; }
+.config-mt-4 { margin-top: 1rem; }
+
+.config-mb-0 { margin-bottom: 0; }
+.config-mb-1 { margin-bottom: 0.25rem; }
+.config-mb-2 { margin-bottom: 0.5rem; }
+.config-mb-4 { margin-bottom: 1rem; }

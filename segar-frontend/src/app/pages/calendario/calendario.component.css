@@ -14,7 +14,14 @@
    HEADER DEL CALENDARIO
    ========================================================================== */
 .calendario-header {
-  background: linear-gradient(135deg, #667eea 0%, #1a3b6d 100%);
+  background-image:
+    /* Gradiente principal */
+    radial-gradient(ellipse 800px 400px at 50% 0%, rgba(37, 99, 235, 0.51) 0%, transparent 50%),
+      /* Luces laterales */
+    radial-gradient(circle 8000px at 0% 50%, rgb(29, 65, 120) 0%, transparent 50%),
+    radial-gradient(circle 1000px at 100% 50%, rgb(26, 59, 109) 0%, transparent 50%),
+      /* Efectos de profundidad */
+    radial-gradient(ellipse 600px 200px at 50% 100%, rgba(37, 99, 235, 0.05) 0%, transparent 50%);
   color: white;
   padding: 32px;
   border-radius: 16px;
@@ -44,18 +51,18 @@
 }
 
 .titulo-principal {
-  font-size: 2.2rem;
-  font-weight: 400;
+  font-size: 2.5rem;
+  font-weight: 700;
   margin: 0;
   letter-spacing: -0.5px;
   line-height: 1.2;
 }
 
 .subtitulo {
-  font-size: 1rem;
+  font-size: 1.3rem;
   opacity: 0.85;
   margin-top: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.4;
 }
 

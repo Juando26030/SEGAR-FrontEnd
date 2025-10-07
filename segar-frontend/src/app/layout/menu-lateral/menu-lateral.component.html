@@ -1,59 +1,157 @@
-<!-- Sidebar -->
-<aside class="w-64 bg-[#1a3b6d] text-white hidden md:flex flex-col h-full">
-  <div class="h-16 flex items-center justify-center border-b border-[#2a4b7d] px-4">
-    <span class="text-xl font-bold text-white">SEGAR</span>
-  </div>
-  <nav class="flex-1 px-4 py-6 space-y-2">
-    <a routerLink="/main/panel" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Panel Principal</span>
-    </a>
-    <a routerLink="/main/dashboard" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Dashboard</span>
-    </a>
-    <a routerLink="/main/calendario" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Calendario</span>
-    </a>
-    <a routerLink="/main/correos" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d] justify-between">
-      <div class="flex items-center">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-        </svg>
-        <span class="ml-2">Correos</span>
+<!-- Sidebar Mejorado -->
+<aside class="w-64 bg-gradient-to-b from-[#1a3b6d] to-[#152f5a] text-white hidden md:flex flex-col h-full shadow-2xl">
+  <!-- Header del Sidebar -->
+  <div class="h-16 flex items-center justify-center border-b border-[#2a4b7d] px-4 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+    <div class="relative flex items-center gap-2">
+      <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center p-1">
+        <img src="logo simbolo.png" alt="SEGAR Logo" class="w-full h-full object-contain">
       </div>
-      <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center"
-            style="display: none;"
-            id="unread-badge">
-        0
-      </span>
+      <span class="text-xl font-bold text-white tracking-wide">SEGAR</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 px-3 py-6 space-y-1">
+    <!-- Panel Principal -->
+    <a routerLink="/main/panel"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <span class="menu-item-text">Panel Principal</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
-    <a routerLink="/main/nuevo" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Nuevo Trámite</span>
+
+    <!-- Dashboard -->
+    <a routerLink="/main/dashboard"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        <span class="menu-item-text">Dashboard</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
-    <a routerLink="/main/usuarios" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Usuarios</span>
+
+    <!-- Calendario -->
+    <a routerLink="/main/calendario"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <span class="menu-item-text">Calendario</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
-    <a routerLink="/main/perfil" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Perfil</span>
+
+    <!-- Nuevo Trámite -->
+    <a routerLink="/main/nuevo"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-plus-circle"></i>
+        </div>
+        <span class="menu-item-text">Nuevo Trámite</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
-    <a href="#" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Plantillas</span>
+
+    <!-- Usuarios -->
+    <a routerLink="/main/usuarios"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <span class="menu-item-text">Usuarios</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
-    <a routerLink="/main/configuracion" routerLinkActive="bg-[#2a4b7d]" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Configuración</span>
+
+    <!-- Perfil -->
+    <a routerLink="/main/perfil"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <span class="menu-item-text">Perfil</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
-    <a href="#" class="flex items-center px-4 py-2 rounded hover:bg-[#2a4b7d]">
-      <span class="ml-2">Ayuda</span>
+
+    <!-- Plantillas -->
+    <a href="#" class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <span class="menu-item-text">Plantillas</span>
+      </div>
+      <div class="menu-item-indicator"></div>
+    </a>
+
+    <!-- Configuración -->
+    <a routerLink="/main/configuracion"
+       routerLinkActive="menu-item-active"
+       class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-cog"></i>
+        </div>
+        <span class="menu-item-text">Configuración</span>
+      </div>
+      <div class="menu-item-indicator"></div>
+    </a>
+
+    <!-- Ayuda -->
+    <a href="#" class="menu-item group">
+      <div class="menu-item-bg-effect"></div>
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <span class="menu-item-text">Ayuda</span>
+      </div>
+      <div class="menu-item-indicator"></div>
     </a>
   </nav>
 
-  <div class="px-4 py-3 border-t border-[#2a4b7d]">
-    <div class="flex items-center gap-2">
-      <div class="h-8 w-8 rounded-full bg-[#2a4b7d] flex items-center justify-center text-sm font-medium">
-        JD
+  <!-- User Profile Section -->
+  <div class="px-4 py-4 border-t border-[#2a4b7d] relative">
+    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+    <div class="relative flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300 cursor-pointer group">
+      <div class="profile-avatar">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+          JD
+        </div>
+        <div class="profile-status"></div>
       </div>
-      <div>
-        <p class="text-sm font-medium">Juan Díaz</p>
-        <p class="text-xs text-gray-300">Administrador</p>
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-white">Juan Díaz</p>
+        <p class="text-xs text-blue-200">Administrador</p>
+      </div>
+      <div class="text-white/60 group-hover:text-white transition-colors duration-300">
+        <i class="fas fa-chevron-right text-xs"></i>
       </div>
     </div>
   </div>
