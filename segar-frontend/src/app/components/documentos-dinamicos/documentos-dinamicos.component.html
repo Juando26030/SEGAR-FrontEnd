@@ -1,0 +1,286 @@
+<div class="documentos-dinamicos-container">
+  <!-- Header con información del trámite -->
+  <div class="tramite-header" [ngClass]="'tramite-' + resultado.tramite.toLowerCase()">
+    <div class="tramite-info">
+      <div class="tramite-badge">
+        <i class="fas fa-clipboard-check"></i>
+        <span class="tramite-tipo">{{ resultado.tramite }}</span>
+      </div>
+      <h2 class="tramite-titulo">{{ resultado.tramite_descripcion }}</h2>
+      <div class="tramite-detalles">
+        <span class="detalle-item">
+          <i class="far fa-clock"></i>
+          <strong>Tiempo estimado:</strong> {{ resultado.tiempo_estimado }}
+        </span>
+        <span class="detalle-item">
+          <i class="fas fa-dollar-sign"></i>
+          <strong>Costo estimado:</strong> {{ resultado.costo_estimado }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progreso-container">
+      <div class="progreso-info">
+        <span class="progreso-label">Progreso total</span>
+        <span class="progreso-valor">{{ documentosCompletados }}/{{ documentosObligatorios }} documentos obligatorios</span>
+      </div>
+      <div class="progreso-barra">
+        <div class="progreso-fill" [style.width.%]="progresoTotal"></div>
+      </div>
+      <span class="progreso-porcentaje">{{ progresoTotal }}%</span>
+    </div>
+  </div>
+
+  <!-- Advertencias -->
+  <div *ngIf="resultado.advertencias.length > 0" class="advertencias-container">
+    <div class="advertencia" *ngFor="let advertencia of resultado.advertencias">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ advertencia }}</span>
+    </div>
+  </div>
+
+  <!-- Vista Lista de Documentos -->
+  <div *ngIf="vistaActual === 'lista'" class="documentos-lista">
+    <!-- Controles de filtrado y búsqueda -->
+    <div class="controles-container">
+      <div class="filtros">
+        <select [(ngModel)]="filtroCategoria" class="filtro-select">
+          <option value="todos">Todas las categorías</option>
+          <option *ngFor="let cat of categorias" [value]="cat">
+            {{ getCategoriaLabel(cat) }}
+          </option>
+        </select>
+
+        <select [(ngModel)]="filtroTipo" class="filtro-select">
+          <option value="todos">Todos los tipos</option>
+          <option value="autogenerado">Autogenerados</option>
+          <option value="externo">Externos</option>
+        </select>
+      </div>
+
+      <div class="busqueda">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          [(ngModel)]="busqueda"
+          placeholder="Buscar documentos..."
+          class="busqueda-input"
+        />
+      </div>
+    </div>
+
+    <!-- Documentos agrupados por categoría -->
+    <div *ngFor="let categoria of categorias" class="categoria-grupo">
+      <ng-container *ngIf="documentosPorCategoria[categoria].length > 0">
+        <div class="categoria-header" [ngClass]="'categoria-' + getCategoriaColor(categoria)">
+          <h3>{{ getCategoriaLabel(categoria) }}</h3>
+          <span class="categoria-count">
+            {{ documentosPorCategoria[categoria].length }} documento(s)
+          </span>
+        </div>
+
+        <div class="documentos-grid">
+          <div
+            *ngFor="let documento of documentosPorCategoria[categoria]"
+            class="documento-card"
+            [ngClass]="{
+              'documento-completo': estadoDocumentos[documento.id].completo,
+              'documento-obligatorio': documento.obligatorio
+            }"
+            (click)="seleccionarDocumento(documento)"
+          >
+            <!-- Badge de estado -->
+            <div class="documento-badges">
+              <span *ngIf="documento.obligatorio" class="badge badge-obligatorio">
+                Obligatorio
+              </span>
+              <span *ngIf="!documento.obligatorio" class="badge badge-opcional">
+                Opcional
+              </span>
+              <span class="badge" [ngClass]="documento.tipo === 'autogenerado' ? 'badge-autogenerado' : 'badge-externo'">
+                {{ getTipoLabel(documento.tipo) }}
+              </span>
+            </div>
+
+            <!-- Icono y título -->
+            <div class="documento-header">
+              <div class="documento-icono" [ngClass]="'icono-' + getCategoriaColor(documento.categoria)">
+                <i [class]="getIconClass(documento.icono)"></i>
+              </div>
+              <h4 class="documento-titulo">{{ documento.nombre }}</h4>
+            </div>
+
+            <!-- Descripción -->
+            <p class="documento-descripcion">{{ documento.descripcion }}</p>
+
+            <!-- Formato -->
+            <div class="documento-formato">
+              <i class="far fa-file-pdf"></i>
+              <span>Formato: {{ documento.formato }}</span>
+            </div>
+
+            <!-- Estado de progreso -->
+            <div class="documento-progreso">
+              <div class="documento-progreso-barra">
+                <div
+                  class="documento-progreso-fill"
+                  [style.width.%]="estadoDocumentos[documento.id].progreso || 0"
+                ></div>
+              </div>
+              <span class="documento-progreso-texto">
+                <i
+                  class="fas"
+                  [ngClass]="estadoDocumentos[documento.id].completo ? 'fa-check-circle' : 'fa-circle'"
+                ></i>
+                {{ estadoDocumentos[documento.id].progreso || 0 }}%
+              </span>
+            </div>
+
+            <!-- Botón de acción -->
+            <button class="documento-btn" (click)="seleccionarDocumento(documento); $event.stopPropagation()">
+              <i class="fas" [ngClass]="estadoDocumentos[documento.id].completo ? 'fa-edit' : 'fa-plus-circle'"></i>
+              {{ estadoDocumentos[documento.id].completo ? 'Editar' : 'Completar' }}
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Vista de Formulario de Documento -->
+  <div *ngIf="vistaActual === 'formulario' && documentoSeleccionado" class="documento-formulario">
+    <!-- Header del formulario -->
+    <div class="formulario-header">
+      <button class="btn-volver" (click)="volverALista()">
+        <i class="fas fa-arrow-left"></i>
+        Volver a la lista
+      </button>
+
+      <div class="formulario-titulo-container">
+        <div class="formulario-icono" [ngClass]="'icono-' + getCategoriaColor(documentoSeleccionado.categoria)">
+          <i [class]="getIconClass(documentoSeleccionado.icono)"></i>
+        </div>
+        <div>
+          <h3>{{ documentoSeleccionado.nombre }}</h3>
+          <p class="formulario-descripcion">{{ documentoSeleccionado.descripcion }}</p>
+        </div>
+      </div>
+
+      <div class="formulario-metadata">
+        <span class="metadata-item">
+          <strong>Tipo:</strong> {{ getTipoLabel(documentoSeleccionado.tipo) }}
+        </span>
+        <span class="metadata-item">
+          <strong>Formato:</strong> {{ documentoSeleccionado.formato }}
+        </span>
+        <span class="metadata-item">
+          <strong>{{ documentoSeleccionado.obligatorio ? 'Obligatorio' : 'Opcional' }}</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- Descarga de plantilla para autogenerados -->
+    <div *ngIf="documentoSeleccionado.tipo === 'autogenerado'" class="plantilla-container">
+      <div class="plantilla-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Este documento se generará automáticamente con la información que proporcione.</span>
+      </div>
+      <button class="btn-plantilla" (click)="descargarPlantilla(documentoSeleccionado)">
+        <i class="fas fa-download"></i>
+        Vista previa de plantilla
+      </button>
+    </div>
+
+    <!-- Formulario de campos -->
+    <div class="formulario-campos">
+      <div
+        *ngFor="let campo of documentoSeleccionado.campos"
+        class="campo-grupo"
+        [ngClass]="{'campo-requerido': campo.requerido}"
+      >
+        <label class="campo-label">
+          {{ campo.nombre }}
+          <span *ngIf="campo.requerido" class="requerido-asterisco">*</span>
+        </label>
+
+        <p *ngIf="campo.descripcion" class="campo-descripcion">{{ campo.descripcion }}</p>
+
+        <!-- Input según tipo de campo -->
+        <input
+          *ngIf="campo.tipo === 'text'"
+          type="text"
+          [(ngModel)]="datosDocumentos[documentoSeleccionado.id][campo.nombre]"
+          [placeholder]="campo.placeholder || ''"
+          class="campo-input"
+        />
+
+        <input
+          *ngIf="campo.tipo === 'number'"
+          type="number"
+          [(ngModel)]="datosDocumentos[documentoSeleccionado.id][campo.nombre]"
+          [placeholder]="campo.placeholder || ''"
+          class="campo-input"
+        />
+
+        <input
+          *ngIf="campo.tipo === 'date'"
+          type="date"
+          [(ngModel)]="datosDocumentos[documentoSeleccionado.id][campo.nombre]"
+          class="campo-input"
+        />
+
+        <textarea
+          *ngIf="campo.tipo === 'textarea'"
+          [(ngModel)]="datosDocumentos[documentoSeleccionado.id][campo.nombre]"
+          [placeholder]="campo.placeholder || ''"
+          rows="4"
+          class="campo-textarea"
+        ></textarea>
+
+        <select
+          *ngIf="campo.tipo === 'select'"
+          [(ngModel)]="datosDocumentos[documentoSeleccionado.id][campo.nombre]"
+          class="campo-select"
+        >
+          <option value="">Seleccione una opción</option>
+          <option *ngFor="let opcion of campo.opciones" [value]="opcion">
+            {{ opcion }}
+          </option>
+        </select>
+
+        <div *ngIf="campo.tipo === 'file'" class="campo-file">
+          <input
+            type="file"
+            (change)="onArchivoSeleccionado($event, campo.nombre)"
+            [accept]="documentoSeleccionado.formato === 'PDF' ? '.pdf' :
+                      documentoSeleccionado.formato === 'IMAGE' ? 'image/*' : '*/*'"
+            id="file-{{ campo.nombre }}"
+            class="file-input"
+          />
+          <label [for]="'file-' + campo.nombre" class="file-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span *ngIf="!datosDocumentos[documentoSeleccionado.id][campo.nombre]">
+              Seleccionar archivo
+            </span>
+            <span *ngIf="datosDocumentos[documentoSeleccionado.id][campo.nombre]">
+              {{ datosDocumentos[documentoSeleccionado.id][campo.nombre].nombre }}
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="formulario-acciones">
+      <button class="btn-cancelar" (click)="volverALista()">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarDocumento()">
+        <i class="fas fa-save"></i>
+        Guardar documento
+      </button>
+    </div>
+  </div>
+</div>

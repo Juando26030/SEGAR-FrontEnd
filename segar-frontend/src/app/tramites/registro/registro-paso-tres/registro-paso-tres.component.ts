@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 // Importar componente del sistema de documentos dinámicos
 import { DocumentMenuComponent } from '../../../shared/document/document-menu/document-menu.component';
+import { DocumentosDinamicosComponent } from '../../../components/documentos-dinamicos/documentos-dinamicos.component';
+import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
 
 interface OptionItem {
   value: string;
@@ -75,7 +77,8 @@ interface SolicitudForm {
     CommonModule,
     FormsModule,
     RouterModule,
-    DocumentMenuComponent
+    DocumentMenuComponent,
+    DocumentosDinamicosComponent
   ],
   templateUrl: './registro-paso-tres.component.html',
   styleUrls: ['./registro-paso-tres.component.css']
@@ -87,7 +90,12 @@ export class RegistroPasoTresComponent {
   tramiteId: number = 1; // TODO: obtener desde ruta o contexto
   currentTramiteType: 'REGISTRO' | 'RENOVACION' | 'MODIFICACION' = 'REGISTRO';
 
-  constructor() {}
+  // Nueva propiedad para el resultado de clasificación
+  resultadoClasificacion: ResultadoClasificacion | null = null;
+  clasificacionCompleta: boolean = false;
+  todosDocumentosCompletos: boolean = false;
+
+  constructor(private tramiteService: TramiteInvimaService) {}
 
   readonly tabs: Tab[] = [
     { id: 'clasificacion', label: 'Clasificación del Producto' },
@@ -251,8 +259,32 @@ export class RegistroPasoTresComponent {
     // Determinar automáticamente el tipo de trámite basado en el riesgo
     this.updateProcedureTypeBasedOnRisk();
 
-    alert('Producto clasificado correctamente. El tipo de trámite ha sido determinado automáticamente.');
+    // Preparar los datos de clasificación para el servicio
+    const clasificacion: ClasificacionProducto = {
+      categoria: this.classificationForm.productCategory,
+      nivel_riesgo: this.classificationForm.riskLevel as 'bajo' | 'medio' | 'alto',
+      poblacion_objetivo: this.classificationForm.targetPopulation,
+      procesamiento: this.classificationForm.processingType,
+      tipo_accion: 'registro',
+      es_importado: this.solicitudForm.isImported
+    };
+
+    // Obtener los documentos requeridos dinámicamente
+    this.resultadoClasificacion = this.tramiteService.clasificarProducto(clasificacion);
+    this.clasificacionCompleta = true;
+
+    alert(`Producto clasificado correctamente.\n\nTipo de trámite: ${this.resultadoClasificacion.tramite}\n${this.resultadoClasificacion.tramite_descripcion}\n\nSe han determinado ${this.resultadoClasificacion.documentos.length} documentos requeridos.`);
     this.setActiveTab('solicitud');
+  }
+
+  onDocumentoCompletado(evento: { documentoId: string; datos: any }): void {
+    console.log('Documento completado:', evento);
+    // Aquí se podría guardar en el backend o en el estado local
+  }
+
+  onTodosDocumentosCompletos(completos: boolean): void {
+    this.todosDocumentosCompletos = completos;
+    console.log('Todos los documentos obligatorios completos:', completos);
   }
 
   onSaveFormulario(): void {
