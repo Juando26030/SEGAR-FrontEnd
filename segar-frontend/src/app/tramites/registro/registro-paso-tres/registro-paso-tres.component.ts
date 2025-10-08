@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 // Importar componente del sistema de documentos dinámicos
-import { DocumentMenuComponent } from '../../../shared/document/document-menu/document-menu.component';
 import { DocumentosDinamicosComponent } from '../../../components/documentos-dinamicos/documentos-dinamicos.component';
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
 
@@ -77,7 +76,6 @@ interface SolicitudForm {
     CommonModule,
     FormsModule,
     RouterModule,
-    DocumentMenuComponent,
     DocumentosDinamicosComponent
   ],
   templateUrl: './registro-paso-tres.component.html',
@@ -99,7 +97,6 @@ export class RegistroPasoTresComponent {
 
   readonly tabs: Tab[] = [
     { id: 'clasificacion', label: 'Clasificación del Producto' },
-    { id: 'solicitud', label: 'Formulario de Solicitud' },
     { id: 'documentacion', label: 'Documentación Técnica' },
     { id: 'radicacion', label: 'Radicación' }
   ];
@@ -110,6 +107,11 @@ export class RegistroPasoTresComponent {
     targetPopulation: '',
     processingType: ''
   };
+
+  // Propiedades para control de reglas de negocio automáticas
+  riskLevelDisabled: boolean = false;
+  riskLevelForzado: string = '';
+  mensajeReglaActiva: string = '';
 
   solicitudForm: SolicitudForm = {
     procedureType: '',
@@ -144,38 +146,53 @@ export class RegistroPasoTresComponent {
 
   readonly productCategories: OptionItem[] = [
     { value: 'bebidas', label: 'Bebidas no alcohólicas' },
-    { value: 'lacteos', label: 'Productos lácteos' },
-    { value: 'carnicos', label: 'Productos cárnicos' },
-    { value: 'panificacion', label: 'Productos de panificación' },
-    { value: 'conservas', label: 'Conservas alimenticias' },
+    { value: 'lacteos', label: '⚠️ Productos lácteos (Riesgo medio mínimo)' },
+    { value: 'carnicos', label: '⚠️ Productos cárnicos (Riesgo medio mínimo)' },
+    { value: 'panificacion', label: 'Productos de panificación (Riesgo bajo)' },
+    { value: 'conservas', label: '🔴 Conservas alimenticias (Riesgo alto)' },
     { value: 'condimentos', label: 'Condimentos y especias' },
     { value: 'snacks', label: 'Snacks y productos de confitería' },
     { value: 'cereales', label: 'Cereales y derivados' },
-    { value: 'aceites', label: 'Aceites y grasas' },
+    { value: 'aceites', label: 'Aceites y grasas (Riesgo medio)' },
+    { value: 'infantiles', label: '🔴 Alimentos infantiles (Riesgo alto automático)' },
+    { value: 'comidas-listas', label: '🔴 Comidas listas (Riesgo alto)' },
     { value: 'otros', label: 'Otros alimentos procesados' }
   ];
 
   readonly riskLevels: OptionItem[] = [
-    { value: 'alto', label: 'Alto riesgo - Requiere Registro Sanitario' },
-    { value: 'medio', label: 'Medio riesgo - Requiere Permiso Sanitario' },
-    { value: 'bajo', label: 'Bajo riesgo - Requiere Notificación Sanitaria' }
+    { value: 'alto', label: 'Alto riesgo - Requiere Registro Sanitario (RSA)' },
+    { value: 'medio', label: 'Medio riesgo - Requiere Permiso Sanitario (PSA)' },
+    { value: 'bajo', label: 'Bajo riesgo - Requiere Notificación Sanitaria (NSO)' }
   ];
 
   readonly targetPopulations: OptionItem[] = [
     { value: 'general', label: 'Población general' },
-    { value: 'infantil', label: 'Alimentación infantil' },
-    { value: 'deportistas', label: 'Nutrición deportiva' },
-    { value: 'tercera-edad', label: 'Tercera edad' },
-    { value: 'especial', label: 'Población con necesidades especiales' }
+    { value: 'infantil', label: '🔴 Alimentación infantil (bebés y niños) - ALTO RIESGO' },
+    { value: 'gestantes', label: '🔴 Mujeres gestantes/lactantes - ALTO RIESGO' },
+    { value: 'adultos mayores', label: '🔴 Adultos mayores - ALTO RIESGO' },
+    { value: 'deportistas', label: '⚠️ Deportistas - MEDIO RIESGO mínimo' },
+    { value: 'dietas especiales', label: '⚠️ Dietas especiales o médicas - MEDIO RIESGO mínimo' }
   ];
 
   readonly processingTypes: OptionItem[] = [
-    { value: 'esterilizado', label: 'Esterilizado comercialmente' },
-    { value: 'pasteurizado', label: 'Pasteurizado' },
-    { value: 'refrigerado', label: 'Refrigerado' },
-    { value: 'congelado', label: 'Congelado' },
-    { value: 'deshidratado', label: 'Deshidratado' },
-    { value: 'fermentado', label: 'Fermentado' },
+    // Riesgo ALTO (automático)
+    { value: 'esterilizado', label: '🔴 Esterilizado comercialmente (ALTO RIESGO)' },
+    { value: 'atmósfera modificada', label: '🔴 Atmósfera modificada (ALTO RIESGO)' },
+    { value: 'congelado', label: '🔴 Congelado (ALTO RIESGO)' },
+    { value: 'vacio', label: '🔴 Envasado al vacío con conservantes (ALTO RIESGO)' },
+    { value: 'combinado', label: '🔴 Proceso combinado térmico (ALTO RIESGO)' },
+
+    // Riesgo MEDIO
+    { value: 'pasteurizado', label: '⚠️ Pasteurizado (MEDIO RIESGO)' },
+    { value: 'refrigerado', label: '⚠️ Refrigerado (MEDIO RIESGO)' },
+    { value: 'cocido', label: '⚠️ Cocido (MEDIO RIESGO)' },
+    { value: 'fermentado', label: '⚠️ Fermentado (MEDIO RIESGO)' },
+
+    // Riesgo BAJO
+    { value: 'horneado', label: 'Horneado (Bajo riesgo)' },
+    { value: 'deshidratado', label: 'Deshidratado (Bajo riesgo)' },
+    { value: 'secado natural', label: 'Secado natural (Bajo riesgo)' },
+
     { value: 'otro', label: 'Otro método' }
   ];
 
@@ -250,11 +267,212 @@ export class RegistroPasoTresComponent {
     this.activeTab = tab;
   }
 
+  /**
+   * Método que se ejecuta cada vez que cambia la población objetivo
+   * Aplica REGLA 1: Población vulnerable → RSA automático
+   */
+  onPoblacionChange(): void {
+    this.aplicarReglasDeNegocio();
+  }
+
+  /**
+   * Método que se ejecuta cada vez que cambia el procesamiento
+   * Aplica REGLA 2: Procesamiento alto riesgo → RSA automático
+   */
+  onProcesamientoChange(): void {
+    this.aplicarReglasDeNegocio();
+  }
+
+  /**
+   * Método que se ejecuta cada vez que cambia la categoría
+   * Aplica REGLA 4: Lácteos/Cárnicos + Riesgo medio → RSA automático
+   */
+  onCategoriaChange(): void {
+    this.aplicarReglasDeNegocio();
+  }
+
+  /**
+   * Aplica todas las reglas de negocio INVIMA de forma automática
+   * IMPLEMENTA TODAS LAS REGLAS DEL DOCUMENTO OFICIAL
+   */
+  private aplicarReglasDeNegocio(): void {
+    const poblacion = this.classificationForm.targetPopulation?.toLowerCase() || '';
+    const procesamiento = this.classificationForm.processingType?.toLowerCase() || '';
+    const categoria = this.classificationForm.productCategory?.toLowerCase() || '';
+    const riesgoActual = this.classificationForm.riskLevel;
+
+    // ============================================
+    // REGLA 1: POBLACIÓN VULNERABLE → ALTO (RSA) AUTOMÁTICO
+    // ============================================
+    const poblacionesVulnerables = [
+      'infantil', 'bebés', 'bebes', 'niños', 'ninos',
+      'gestantes', 'gestante', 'lactantes', 'lactante',
+      'adultos mayores', 'adulto mayor', 'tercera-edad', 'especial'
+    ];
+
+    if (poblacionesVulnerables.some(pob => poblacion.includes(pob))) {
+      this.classificationForm.riskLevel = 'alto';
+      this.riskLevelDisabled = true;
+      this.riskLevelForzado = 'alto';
+      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Población vulnerable requiere Registro Sanitario (RSA) - Riesgo ALTO obligatorio [Res. 719/2015]';
+      return;
+    }
+
+    // ============================================
+    // REGLA ESPECIAL: DEPORTISTAS Y DIETAS ESPECIALES → MEDIO MÍNIMO
+    // ============================================
+    const poblacionesEspeciales = ['deportistas', 'deportista', 'dietas especiales', 'dieta especial', 'dietas médicas'];
+
+    if (poblacionesEspeciales.some(pob => poblacion.includes(pob))) {
+      // Si el riesgo es bajo, lo eleva a medio
+      if (!riesgoActual || riesgoActual === 'bajo') {
+        this.classificationForm.riskLevel = 'medio';
+        this.riskLevelDisabled = true;
+        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Población especial requiere mínimo Permiso Sanitario (PSA) - Riesgo MEDIO mínimo';
+        return;
+      }
+    }
+
+    // ============================================
+    // REGLA 2: CATEGORÍAS DE ALTO RIESGO AUTOMÁTICO
+    // ============================================
+    const categoriasAltoRiesgo = [
+      'infantiles', 'alimentos infantiles', 'formula infantil',
+      'conservas', 'comidas listas', 'comidas-listas',
+      'esterilizados', 'productos esterilizados'
+    ];
+
+    if (categoriasAltoRiesgo.some(cat => categoria.includes(cat))) {
+      this.classificationForm.riskLevel = 'alto';
+      this.riskLevelDisabled = true;
+      this.riskLevelForzado = 'alto';
+      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Esta categoría requiere Registro Sanitario (RSA) - Riesgo ALTO por complejidad sanitaria';
+      return;
+    }
+
+    // ============================================
+    // REGLA 3: PROCESAMIENTO DE ALTO RIESGO → ALTO AUTOMÁTICO
+    // ============================================
+    const procesamientosAltoRiesgo = [
+      'esterilizado', 'esterilización', 'esterilizacion',
+      'atmósfera modificada', 'atmosfera modificada', 'map',
+      'congelado', 'congelación', 'congelacion', 'ultra congelado', 'ultracongelado',
+      'vacio', 'vacío', 'al vacio', 'al vacío',
+      'combinado', 'proceso combinado', 'térmico combinado'
+    ];
+
+    if (procesamientosAltoRiesgo.some(proc => procesamiento.includes(proc))) {
+      this.classificationForm.riskLevel = 'alto';
+      this.riskLevelDisabled = true;
+      this.riskLevelForzado = 'alto';
+      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Procesamiento de alto riesgo requiere Registro Sanitario (RSA) - Riesgo ALTO obligatorio';
+      return;
+    }
+
+    // ============================================
+    // REGLA 4: PROCESAMIENTOS DE RIESGO MEDIO → MEDIO MÍNIMO
+    // ============================================
+    const procesamientosMedioRiesgo = [
+      'pasteurizado', 'pasteurización',
+      'refrigerado', 'refrigeración',
+      'cocido', 'cocción',
+      'fermentado', 'fermentación'
+    ];
+
+    if (procesamientosMedioRiesgo.some(proc => procesamiento.includes(proc))) {
+      // Si el riesgo es bajo, lo eleva a medio
+      if (!riesgoActual || riesgoActual === 'bajo') {
+        this.classificationForm.riskLevel = 'medio';
+        this.riskLevelDisabled = true;
+        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Este procesamiento requiere mínimo Permiso Sanitario (PSA) - Riesgo MEDIO mínimo';
+        return;
+      }
+    }
+
+    // ============================================
+    // REGLA 5: CATEGORÍAS CON RIESGO MEDIO MÍNIMO
+    // ============================================
+    const categoriasMedioRiesgo = [
+      'lacteos', 'lácteos', 'derivados lácteos', 'derivados lacteos',
+      'carnicos', 'cárnicos', 'productos cárnicos', 'productos carnicos',
+      'aceites', 'grasas', 'aceites y grasas'
+    ];
+
+    const esCategoriaMediaRiesgo = categoriasMedioRiesgo.some(cat => categoria.includes(cat));
+
+    if (esCategoriaMediaRiesgo) {
+      // No pueden ser de riesgo bajo
+      if (riesgoActual === 'bajo') {
+        this.classificationForm.riskLevel = 'medio';
+        this.riskLevelDisabled = true;
+        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Esta categoría NO puede ser de riesgo bajo - Riesgo MEDIO mínimo obligatorio';
+        return;
+      }
+
+      // Si es riesgo medio, se eleva a alto
+      if (riesgoActual === 'medio') {
+        this.classificationForm.riskLevel = 'alto';
+        this.riskLevelDisabled = true;
+        this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Lácteos/Cárnicos con riesgo medio se elevan a Registro Sanitario (RSA) - Riesgo ALTO';
+        return;
+      }
+    }
+
+    // ============================================
+    // REGLA 6: CATEGORÍAS DE RIESGO BAJO PREDEFINIDO
+    // ============================================
+    const categoriasRiesgoBajo = [
+      'panificacion', 'panificación', 'panadería', 'panaderia',
+      'galletería', 'galleteria', 'confitería', 'confiteria'
+    ];
+
+    if (categoriasRiesgoBajo.some(cat => categoria.includes(cat))) {
+      // Solo si no hay otras reglas que lo eleven
+      if (!riesgoActual && poblacion === 'general' &&
+          (procesamiento === 'horneado' || procesamiento === 'deshidratado' || procesamiento === 'secado natural')) {
+        this.classificationForm.riskLevel = 'bajo';
+        this.riskLevelDisabled = false;
+        this.mensajeReglaActiva = '';
+        return;
+      }
+    }
+
+    // ============================================
+    // SI NO APLICA NINGUNA REGLA AUTOMÁTICA
+    // ============================================
+    this.riskLevelDisabled = false;
+    this.riskLevelForzado = '';
+    this.mensajeReglaActiva = '';
+
+    // Pero validar coherencia si ya hay un valor seleccionado
+    if (riesgoActual) {
+      this.validarCoherenciaRiesgo();
+    }
+  }
+
+  /**
+   * Valida que el riesgo seleccionado manualmente sea coherente con la categoría
+   */
+  private validarCoherenciaRiesgo(): void {
+    const categoria = this.classificationForm.productCategory?.toLowerCase() || '';
+    const riesgo = this.classificationForm.riskLevel;
+
+    // Lácteos y cárnicos no pueden ser bajo riesgo
+    const categoriasSensibles = ['lacteos', 'lácteos', 'carnicos', 'cárnicos'];
+    if (categoriasSensibles.some(cat => categoria.includes(cat)) && riesgo === 'bajo') {
+      this.classificationForm.riskLevel = 'medio';
+      this.mensajeReglaActiva = '⚠️ ADVERTENCIA: Esta categoría no puede ser de riesgo bajo. Se ajustó a riesgo MEDIO.';
+    }
+  }
+
   onClasificarProducto(): void {
     if (!this.isClassificationComplete()) {
       alert('Por favor complete todos los campos de clasificación.');
       return;
     }
+
+    // Aplicar reglas de negocio antes de clasificar
+    this.aplicarReglasDeNegocio();
 
     // Determinar automáticamente el tipo de trámite basado en el riesgo
     this.updateProcedureTypeBasedOnRisk();
@@ -273,8 +491,21 @@ export class RegistroPasoTresComponent {
     this.resultadoClasificacion = this.tramiteService.clasificarProducto(clasificacion);
     this.clasificacionCompleta = true;
 
-    alert(`Producto clasificado correctamente.\n\nTipo de trámite: ${this.resultadoClasificacion.tramite}\n${this.resultadoClasificacion.tramite_descripcion}\n\nSe han determinado ${this.resultadoClasificacion.documentos.length} documentos requeridos.`);
-    this.setActiveTab('solicitud');
+    // Mostrar alerta con información detallada
+    let mensajeDetalle = `Producto clasificado correctamente.\n\n`;
+    mensajeDetalle += `Tipo de trámite: ${this.resultadoClasificacion.tramite}\n`;
+    mensajeDetalle += `${this.resultadoClasificacion.tramite_descripcion}\n\n`;
+    mensajeDetalle += `Se han determinado ${this.resultadoClasificacion.documentos.length} documentos requeridos.\n\n`;
+
+    if (this.mensajeReglaActiva) {
+      mensajeDetalle += `${this.mensajeReglaActiva}\n\n`;
+    }
+
+    mensajeDetalle += `Tiempo estimado: ${this.resultadoClasificacion.tiempo_estimado}\n`;
+    mensajeDetalle += `Costo estimado: ${this.resultadoClasificacion.costo_estimado}`;
+
+    alert(mensajeDetalle);
+    this.setActiveTab('documentacion');
   }
 
   onDocumentoCompletado(evento: { documentoId: string; datos: any }): void {

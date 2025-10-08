@@ -32,6 +32,7 @@
                 name="productCategory"
                 class="form-select"
                 required
+                (ngModelChange)="onCategoriaChange()"
                 #productCategory="ngModel">
                 <option value="">Seleccione una categoría</option>
                 <option *ngFor="let category of productCategories; trackBy: trackByValue"
@@ -54,7 +55,10 @@
                 [(ngModel)]="classificationForm.riskLevel"
                 name="riskLevel"
                 class="form-select"
+                [class.bg-gray-100]="riskLevelDisabled"
+                [class.cursor-not-allowed]="riskLevelDisabled"
                 required
+                [disabled]="riskLevelDisabled"
                 #riskLevel="ngModel">
                 <option value="">Seleccione el nivel de riesgo</option>
                 <option *ngFor="let risk of riskLevels; trackBy: trackByValue"
@@ -65,7 +69,13 @@
               <div *ngIf="riskLevel.invalid && riskLevel.touched" class="text-red-500 text-xs mt-1">
                 El nivel de riesgo es requerido
               </div>
-              <p class="text-xs text-gray-500 mt-1">
+              <div *ngIf="riskLevelDisabled && mensajeReglaActiva" class="mt-2 p-3 bg-red-50 border-l-4 border-red-500 rounded">
+                <p class="text-xs text-red-800 font-semibold">
+                  <i class="fas fa-lock mr-1"></i>
+                  {{ mensajeReglaActiva }}
+                </p>
+              </div>
+              <p *ngIf="!riskLevelDisabled" class="text-xs text-gray-500 mt-1">
                 El riesgo se determina según la composición y proceso de fabricación
               </p>
             </div>
@@ -81,6 +91,7 @@
                 name="targetPopulation"
                 class="form-select"
                 required
+                (ngModelChange)="onPoblacionChange()"
                 #targetPopulation="ngModel">
                 <option value="">Seleccione la población</option>
                 <option *ngFor="let population of targetPopulations; trackBy: trackByValue"
@@ -91,6 +102,10 @@
               <div *ngIf="targetPopulation.invalid && targetPopulation.touched" class="text-red-500 text-xs mt-1">
                 La población objetivo es requerida
               </div>
+              <p class="text-xs text-orange-600 mt-1 font-medium">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                Si selecciona población vulnerable (infantil, gestantes, adultos mayores), el nivel de riesgo se establecerá automáticamente en ALTO
+              </p>
             </div>
 
             <div class="classification-item">
@@ -104,6 +119,7 @@
                 name="processingType"
                 class="form-select"
                 required
+                (ngModelChange)="onProcesamientoChange()"
                 #processingType="ngModel">
                 <option value="">Seleccione el tipo</option>
                 <option *ngFor="let processing of processingTypes; trackBy: trackByValue"
@@ -114,6 +130,10 @@
               <div *ngIf="processingType.invalid && processingType.touched" class="text-red-500 text-xs mt-1">
                 El tipo de procesamiento es requerido
               </div>
+              <p class="text-xs text-orange-600 mt-1 font-medium">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                Los procesamientos marcados con ⚠️ establecerán automáticamente el nivel de riesgo en ALTO
+              </p>
             </div>
           </div>
 
@@ -130,21 +150,6 @@
             </button>
           </div>
         </form>
-      </div>
-    </div>
-
-    <!-- FORMULARIO DE SOLICITUD -->
-    <div class="tab-content" *ngIf="activeTab === 'solicitud'" role="tabpanel">
-      <div class="section-card">
-        <h3 class="text-xl font-semibold mb-4 text-gray-800">Formulario de Solicitud</h3>
-        <p class="text-gray-700 mb-6">Complete la información requerida para la solicitud de registro sanitario.</p>
-
-        <!-- Componente dinámico de documentos - Formulario de Solicitud -->
-        <app-document-menu
-          [tramiteId]="tramiteId"
-          [tramiteType]="currentTramiteType"
-          [currentStep]="'2'">
-        </app-document-menu>
       </div>
     </div>
 

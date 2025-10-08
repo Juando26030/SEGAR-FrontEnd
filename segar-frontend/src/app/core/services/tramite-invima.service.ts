@@ -67,23 +67,84 @@ export class TramiteInvimaService {
   }
 
   /**
-   * Determina el tipo de trámite según las reglas INVIMA
+   * Determina el tipo de trámite según las reglas INVIMA COMPLETAS
+   * Implementa TODAS las reglas de negocio en orden de prioridad
    */
   private determinarTipoTramite(clasificacion: ClasificacionProducto): 'NSO' | 'PSA' | 'RSA' {
-    // Regla 1: Población vulnerable siempre requiere RSA
-    const poblacionesVulnerables = ['infantil', 'gestantes', 'adultos mayores', 'tercera-edad', 'especial'];
-    if (poblacionesVulnerables.includes(clasificacion.poblacion_objetivo.toLowerCase())) {
+    const categoria = clasificacion.categoria.toLowerCase();
+    const poblacion = clasificacion.poblacion_objetivo.toLowerCase();
+    const procesamiento = clasificacion.procesamiento.toLowerCase();
+    const riesgo = clasificacion.nivel_riesgo.toUpperCase();
+
+    // REGLA 1: POBLACIÓN VULNERABLE → RSA (MÁXIMA PRIORIDAD)
+    // Si el producto es para población infantil, gestantes, adultos mayores
+    const poblacionesVulnerables = [
+      'infantil', 'bebés', 'bebes', 'niños', 'ninos',
+      'gestantes', 'gestante',
+      'adultos mayores', 'adulto mayor', 'tercera-edad', 'especial'
+    ];
+
+    if (poblacionesVulnerables.some(pob => poblacion.includes(pob))) {
+      console.log('🔴 REGLA 1: Población vulnerable detectada → RSA');
       return 'RSA';
     }
 
-    // Regla 2: Según nivel de riesgo
-    if (clasificacion.nivel_riesgo === 'alto') {
+    // REGLA 2: PROCESAMIENTO DE ALTO RIESGO → RSA
+    // Esterilizado, atmósfera modificada, congelado
+    const procesamientosAltoRiesgo = [
+      'esterilizado', 'esterilización', 'esterilizacion',
+      'atmósfera modificada', 'atmosfera modificada',
+      'congelado', 'congelación', 'congelacion', 'ultra congelado', 'ultracongelado'
+    ];
+
+    if (procesamientosAltoRiesgo.some(proc => procesamiento.includes(proc))) {
+      console.log('🔴 REGLA 2: Procesamiento de alto riesgo detectado → RSA');
       return 'RSA';
-    } else if (clasificacion.nivel_riesgo === 'medio') {
+    }
+
+    // REGLA 3: RIESGO ALTO EXPLÍCITO → RSA
+    if (riesgo === 'ALTO') {
+      console.log('🔴 REGLA 3: Riesgo alto explícito → RSA');
+      return 'RSA';
+    }
+
+    // REGLA 4: CATEGORÍA DE RIESGO INHERENTE ALTO + RIESGO MEDIO → RSA
+    // Lácteos y cárnicos con riesgo medio se elevan a RSA
+    const categoriasRiesgoInherente = [
+      'lácteos', 'lacteos', 'derivados lácteos', 'derivados lacteos',
+      'cárnicos', 'carnicos', 'productos cárnicos', 'productos carnicos',
+      'derivados cárnicos', 'derivados carnicos'
+    ];
+
+    const esCategoriaAltoRiesgo = categoriasRiesgoInherente.some(cat => categoria.includes(cat));
+
+    if (esCategoriaAltoRiesgo && riesgo === 'MEDIO') {
+      console.log('🔴 REGLA 4: Categoría de riesgo inherente alto con riesgo medio → RSA');
+      return 'RSA';
+    }
+
+    // REGLA 5: PRODUCTO IMPORTADO + RIESGO MEDIO → MÍNIMO PSA
+    if (clasificacion.es_importado && riesgo === 'MEDIO') {
+      console.log('🟡 REGLA 5: Producto importado con riesgo medio → Mínimo PSA');
+      // Continúa evaluando, podría ser RSA por otras reglas
+      // pero garantiza que no sea NSO
+    }
+
+    // REGLA 6: RIESGO MEDIO → PSA
+    if (riesgo === 'MEDIO') {
+      console.log('🟡 REGLA 6: Riesgo medio → PSA');
       return 'PSA';
-    } else {
+    }
+
+    // REGLA 7: RIESGO BAJO + POBLACIÓN GENERAL → NSO
+    if (riesgo === 'BAJO' && poblacion.includes('general')) {
+      console.log('🟢 REGLA 7: Riesgo bajo y población general → NSO');
       return 'NSO';
     }
+
+    // REGLA POR DEFECTO → NSO
+    console.log('🟢 REGLA DEFAULT: Ninguna regla específica aplicó → NSO');
+    return 'NSO';
   }
 
   /**
@@ -643,4 +704,3 @@ export class TramiteInvimaService {
     return Math.round((completados.length / obligatorios.length) * 100);
   }
 }
-
