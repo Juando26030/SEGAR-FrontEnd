@@ -19,6 +19,11 @@ export class CorreosComponent implements OnInit, OnDestroy {
   loading = false;
   unreadCount = 0;
 
+  // 🎬 Animación de carga
+  loadingProgress = 0;
+  loadingMessage = 'Sincronizando sus correos...';
+  private progressInterval: any;
+
   // Filtros avanzados
   searchFilters: EmailSearchFilters = {
     searchText: '',
@@ -70,11 +75,61 @@ export class CorreosComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.clearProgressAnimation();
+  }
+
+  // 🎬 Métodos para la animación de progreso
+  private startProgressAnimation() {
+    this.loadingProgress = 0;
+    this.clearProgressAnimation();
+
+    const messages = [
+      'Sincronizando sus correos...',
+      'Conectando con el servidor...',
+      'Recuperando mensajes...',
+      'Cargando correos...',
+      'Casi listo...'
+    ];
+
+    let messageIndex = 0;
+
+    this.progressInterval = setInterval(() => {
+      if (this.loadingProgress < 90) {
+        // Progreso más rápido al inicio, más lento al final
+        const increment = this.loadingProgress < 50 ? 8 : this.loadingProgress < 70 ? 4 : 2;
+        this.loadingProgress = Math.min(90, this.loadingProgress + increment);
+
+        // Cambiar mensaje cada 25%
+        const newMessageIndex = Math.floor(this.loadingProgress / 20);
+        if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
+          messageIndex = newMessageIndex;
+          this.loadingMessage = messages[messageIndex];
+        }
+      }
+    }, 150);
+  }
+
+  private completeProgressAnimation() {
+    this.loadingProgress = 100;
+    this.loadingMessage = '¡Correos cargados!';
+
+    // Limpiar después de un pequeño delay para mostrar el 100%
+    setTimeout(() => {
+      this.clearProgressAnimation();
+    }, 300);
+  }
+
+  private clearProgressAnimation() {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
   }
 
   // 🆕 MÉTODO PRINCIPAL DE BÚSQUEDA AVANZADA
   async performSearch() {
     this.loading = true;
+    this.startProgressAnimation();
     this.addTestLog('🔍 Iniciando performSearch()');
     console.log('🔍 Realizando búsqueda con filtros:', this.searchFilters);
 
@@ -108,6 +163,8 @@ export class CorreosComponent implements OnInit, OnDestroy {
         });
       }
 
+      this.completeProgressAnimation();
+
     } catch (error: any) {
       this.lastError = error;
       this.addTestLog(`❌ Error en performSearch: ${error.message} (${error.status})`);
@@ -119,6 +176,7 @@ export class CorreosComponent implements OnInit, OnDestroy {
         url: error?.url
       });
 
+      this.clearProgressAnimation();
       alert(`Error al buscar correos: ${error?.message || 'Error desconocido'}`);
     } finally {
       this.loading = false;
@@ -314,10 +372,31 @@ export class CorreosComponent implements OnInit, OnDestroy {
       this.currentPage = 0;
       await this.performSearch();
     } else if (tab === 'sent') {
-      // Cargar correos enviados
-      this.searchFilters.type = 'OUTBOUND';
-      this.currentPage = 0;
-      await this.performSearch();
+      // Cargar correos enviados usando el endpoint específico /sent
+      this.loading = true;
+      this.startProgressAnimation();
+      try {
+        const response = await this.emailService.getSentEmails({
+          page: this.currentPage,
+          size: this.pageSize,
+          sortBy: 'sentDate',
+          sortDirection: 'DESC'
+        });
+
+        this.emails = response.content || [];
+        this.filteredEmails = this.emails;
+        this.totalPages = response.totalPages || 0;
+        this.totalElements = response.totalElements || 0;
+
+        console.log('✅ Correos enviados cargados:', this.emails.length);
+        this.completeProgressAnimation();
+      } catch (error) {
+        console.error('❌ Error cargando correos enviados:', error);
+        this.clearProgressAnimation();
+        alert('Error al cargar correos enviados');
+      } finally {
+        this.loading = false;
+      }
     } else if (tab === 'compose') {
       // Resetear formulario de composición
       this.composeForm = {

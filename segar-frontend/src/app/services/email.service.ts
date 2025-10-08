@@ -233,82 +233,119 @@ export class EmailService {
     await firstValueFrom(response);
   }
 
-  // 🆕 BÚSQUEDA AVANZADA - Endpoint principal unificado con fallback
+  // 🆕 BÚSQUEDA AVANZADA - Endpoint principal unificado con fallback mejorado
   async searchEmails(filters: Partial<EmailSearchFilters> = {}): Promise<EmailPage> {
     console.log('🔍 EmailService.searchEmails() - Filtros:', filters);
 
     try {
-      // Preparar el body de la búsqueda
-      const searchBody: any = {
-        page: filters.page || 0,
-        size: filters.size || 15,
-        sortBy: filters.sortBy || 'receivedDate',
-        sortDirection: filters.sortDirection || 'DESC'
-      };
+      // Preparar parámetros comunes
+      const page = filters.page || 0;
+      const size = filters.size || 15;
+      const sortBy = filters.sortBy || 'receivedDate';
+      const sortDirection = filters.sortDirection || 'DESC';
 
-      // Agregar filtros solo si tienen valores válidos
+      // ESTRATEGIA 1: Intentar con GET /inbox primero (más compatible)
+      console.log('📡 Intentando GET /inbox con parámetros...');
+
+      let params = new HttpParams()
+        .set('page', page.toString())
+        .set('size', size.toString())
+        .set('sortBy', sortBy)
+        .set('sortDirection', sortDirection);
+
+      // Agregar filtros opcionales como query params
       if (filters.searchText?.trim()) {
-        searchBody.searchText = filters.searchText.trim();
+        params = params.set('searchText', filters.searchText.trim());
       }
       if (filters.fromAddress?.trim()) {
-        searchBody.fromAddress = filters.fromAddress.trim();
+        params = params.set('fromAddress', filters.fromAddress.trim());
       }
       if (filters.subject?.trim()) {
-        searchBody.subject = filters.subject.trim();
+        params = params.set('subject', filters.subject.trim());
       }
       if (filters.isRead !== null && filters.isRead !== undefined) {
-        searchBody.isRead = filters.isRead;
+        params = params.set('isRead', filters.isRead.toString());
       }
       if (filters.startDate?.trim()) {
-        searchBody.startDate = filters.startDate;
+        params = params.set('startDate', filters.startDate);
       }
       if (filters.endDate?.trim()) {
-        searchBody.endDate = filters.endDate;
+        params = params.set('endDate', filters.endDate);
       }
       if (filters.type) {
-        searchBody.type = filters.type;
+        params = params.set('type', filters.type);
       }
       if (filters.hasAttachments !== null && filters.hasAttachments !== undefined) {
-        searchBody.hasAttachments = filters.hasAttachments;
+        params = params.set('hasAttachments', filters.hasAttachments.toString());
       }
 
-      console.log('📡 Haciendo POST request a:', `${this.API_BASE_URL}/search`);
-      console.log('📡 Body:', searchBody);
-
       try {
-        // INTENTAR NUEVO ENDPOINT PRIMERO
-        const response = this.http.post<EmailPage>(`${this.API_BASE_URL}/search`, searchBody, {
-          headers: this.getAuthHeaders().set('Content-Type', 'application/json')
+        const response = this.http.get<EmailPage>(`${this.API_BASE_URL}/inbox`, {
+          headers: this.getAuthHeaders(),
+          params
         });
 
         const result = await firstValueFrom(response);
-        console.log('✅ Respuesta de búsqueda exitosa (NUEVO ENDPOINT):', result);
+        console.log('✅ Respuesta GET /inbox exitosa:', result);
         return result;
 
-      } catch (searchError: any) {
-        console.warn('⚠️ Nuevo endpoint /search falló, intentando fallback...', searchError);
+      } catch (getError: any) {
+        console.warn('⚠️ GET /inbox falló, intentando POST /search...', getError);
 
-        // FALLBACK AL ENDPOINT ANTERIOR
-        if (searchError.status === 404 || searchError.status === 0) {
-          console.log('🔄 Usando endpoint /inbox como fallback...');
-
-          // Usar el endpoint anterior que sabemos que funciona
-          const fallbackFilters: Partial<EmailFilter> = {
-            page: searchBody.page,
-            size: searchBody.size,
-            sortBy: searchBody.sortBy,
-            sortDirection: searchBody.sortDirection,
-            fromAddress: filters.fromAddress,
-            subject: filters.subject,
-            isRead: filters.isRead !== null ? filters.isRead : undefined, // Convertir null a undefined
-            startDate: filters.startDate,
-            endDate: filters.endDate,
-            type: filters.type
+        // ESTRATEGIA 2: Intentar con POST /search (nuevo endpoint)
+        if (getError.status !== 405) { // Si no es método no permitido, intentar POST
+          const searchBody: any = {
+            page,
+            size,
+            sortBy,
+            sortDirection
           };
 
-          return this.getInbox(fallbackFilters);
+          // Agregar filtros solo si tienen valores válidos
+          if (filters.searchText?.trim()) {
+            searchBody.searchText = filters.searchText.trim();
+          }
+          if (filters.fromAddress?.trim()) {
+            searchBody.fromAddress = filters.fromAddress.trim();
+          }
+          if (filters.subject?.trim()) {
+            searchBody.subject = filters.subject.trim();
+          }
+          if (filters.isRead !== null && filters.isRead !== undefined) {
+            searchBody.isRead = filters.isRead;
+          }
+          if (filters.startDate?.trim()) {
+            searchBody.startDate = filters.startDate;
+          }
+          if (filters.endDate?.trim()) {
+            searchBody.endDate = filters.endDate;
+          }
+          if (filters.type) {
+            searchBody.type = filters.type;
+          }
+          if (filters.hasAttachments !== null && filters.hasAttachments !== undefined) {
+            searchBody.hasAttachments = filters.hasAttachments;
+          }
+
+          console.log('📡 Haciendo POST request a:', `${this.API_BASE_URL}/search`);
+          console.log('📡 Body:', searchBody);
+
+          try {
+            const postResponse = this.http.post<EmailPage>(`${this.API_BASE_URL}/search`, searchBody, {
+              headers: this.getAuthHeaders().set('Content-Type', 'application/json')
+            });
+
+            const postResult = await firstValueFrom(postResponse);
+            console.log('✅ Respuesta POST /search exitosa:', postResult);
+            return postResult;
+
+          } catch (postError: any) {
+            console.error('❌ POST /search también falló:', postError);
+            throw postError;
+          }
         } else {
-          throw searchError;
+          // Si es 405 en GET, no tiene sentido intentar POST
+          throw getError;
         }
       }
 
@@ -316,6 +353,21 @@ export class EmailService {
       console.error('❌ Error en EmailService.searchEmails():', error);
       console.error('🔍 Status:', error.status);
       console.error('🔍 Message:', error.message);
+
+      // Si todo falla, intentar el método más básico
+      if (error.status === 405 || error.status === 404) {
+        console.log('🔄 Usando método básico de fallback...');
+        try {
+          return await this.getInbox({
+            page: filters.page || 0,
+            size: filters.size || 15
+          });
+        } catch (fallbackError) {
+          console.error('❌ Fallback también falló:', fallbackError);
+          throw error; // Lanzar el error original
+        }
+      }
+
       throw error;
     }
   }

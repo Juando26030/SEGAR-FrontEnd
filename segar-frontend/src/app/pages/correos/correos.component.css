@@ -39,7 +39,7 @@
   font-size: 0.875rem;
 }
 
-/* Animaciones y transiciones mejoradas */
+/* 🎬 Animaciones mejoradas para la carga de correos */
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -55,10 +55,35 @@
   }
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
+/* Animación de slide down para filtros */
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+
+/* Animación de bounce personalizada para el icono */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Animación de spin suave */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -68,14 +93,130 @@
   }
 }
 
-/* Hover effects mejorados */
-.email-item {
-  transition: all 0.2s ease-in-out;
+/* Animación de pulse para el texto */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
-.email-item:hover {
-  transform: translateX(2px);
-  box-shadow: 0 2px 8px rgba(26, 59, 109, 0.1);
+/* Efecto de shimmer para la barra de progreso */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Gradiente animado para estado de carga */
+.loading-gradient {
+  background: linear-gradient(
+    90deg,
+    rgba(26, 59, 109, 0.1) 0%,
+    rgba(59, 130, 246, 0.2) 50%,
+    rgba(26, 59, 109, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Scroll personalizado */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Estilos para el contenido HTML de correos */
+.prose a {
+  color: #1a3b6d;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #2a4b7d;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: #111827;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .w-2\/5 {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .w-2\/5 {
+    width: 100%;
+  }
+
+  .w-96 {
+    width: 100%;
+    max-width: 24rem;
+  }
+}
+
+/* Estados hover mejorados */
+.hover\:bg-gray-50:hover {
+  background-color: #f9fafb;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: #f3f4f6;
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Efectos de carga */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 /* Efectos de filtros */
@@ -111,35 +252,6 @@
 .attachment-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(26, 59, 109, 0.15);
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .w-80 {
-    width: 300px;
-  }
-
-  .w-2\/5 {
-    width: 45%;
-  }
-}
-
-@media (max-width: 768px) {
-  .flex.h-screen {
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .w-80 {
-    width: 100%;
-    max-height: 50vh;
-    overflow-y: auto;
-  }
-
-  .w-2\/5 {
-    width: 100%;
-  }
 }
 
 /* Estados de loading mejorados */
@@ -191,22 +303,6 @@
   color: #6b7280;
 }
 
-/* Mejoras visuales para el contenido HTML */
-.prose h1, .prose h2, .prose h3 {
-  color: #1a3b6d;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.prose a {
-  color: #1a3b6d;
-  text-decoration: underline;
-}
-
-.prose a:hover {
-  color: #2a4b7d;
-}
-
 /* Animación para el contador de filtros activos */
 .filter-count {
   animation: bounce 0.5s ease-in-out;
@@ -219,4 +315,16 @@
   50% {
     transform: scale(1.1);
   }
+}
+
+/* Optimización de rendimiento para animaciones */
+.animate-spin,
+.animate-bounce,
+.animate-pulse {
+  will-change: transform, opacity;
+}
+
+/* Mejora visual del progreso */
+.progress-bar-glow {
+  box-shadow: 0 0 20px rgba(26, 59, 109, 0.5);
 }
