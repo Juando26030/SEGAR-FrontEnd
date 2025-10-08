@@ -139,8 +139,8 @@
 
             <!-- Botón de acción -->
             <button class="documento-btn" (click)="seleccionarDocumento(documento); $event.stopPropagation()">
-              <i class="fas" [ngClass]="estadoDocumentos[documento.id].completo ? 'fa-edit' : 'fa-plus-circle'"></i>
-              {{ estadoDocumentos[documento.id].completo ? 'Editar' : 'Completar' }}
+              <i class="fas" [ngClass]="estadoDocumentos[documento.id].completo ? 'fa-edit' : (documento.tipo === 'externo' ? 'fa-paperclip' : 'fa-plus-circle')"></i>
+              {{ estadoDocumentos[documento.id].completo ? 'Editar' : (documento.tipo === 'externo' ? 'Adjuntar' : 'Completar') }}
             </button>
           </div>
         </div>
@@ -280,6 +280,132 @@
       <button class="btn-guardar" (click)="guardarDocumento()">
         <i class="fas fa-save"></i>
         Guardar documento
+      </button>
+    </div>
+  </div>
+
+  <!-- Vista de Subida de Archivo (Documentos Externos) -->
+  <div *ngIf="vistaActual === 'upload' && documentoSeleccionado" class="documento-upload">
+    <!-- Header del upload -->
+    <div class="formulario-header">
+      <button class="btn-volver" (click)="volverALista()">
+        <i class="fas fa-arrow-left"></i>
+        Volver a la lista
+      </button>
+
+      <div class="formulario-titulo-container">
+        <div class="formulario-icono" [ngClass]="'icono-' + getCategoriaColor(documentoSeleccionado.categoria)">
+          <i [class]="getIconClass(documentoSeleccionado.icono)"></i>
+        </div>
+        <div>
+          <h3>{{ documentoSeleccionado.nombre }}</h3>
+          <p class="formulario-descripcion">{{ documentoSeleccionado.descripcion }}</p>
+        </div>
+      </div>
+
+      <div class="formulario-metadata">
+        <span class="metadata-item">
+          <strong>Tipo:</strong> Documento externo
+        </span>
+        <span class="metadata-item">
+          <strong>Formato requerido:</strong> {{ documentoSeleccionado.formato }}
+        </span>
+        <span class="metadata-item">
+          <strong>{{ documentoSeleccionado.obligatorio ? 'Obligatorio' : 'Opcional' }}</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- Información sobre el documento externo -->
+    <div class="info-externo-container">
+      <div class="info-externo">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong>Documento externo</strong>
+          <p>Este documento debe ser proporcionado por su empresa. Asegúrese de que cumpla con todos los requisitos legales y esté firmado por las autoridades correspondientes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zona de carga de archivo -->
+    <div *ngIf="!archivosSubidos[documentoSeleccionado.id]" class="upload-container">
+      <div
+        class="dropzone"
+        [ngClass]="{'dropzone-active': isDragging}"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+
+        <div class="dropzone-content">
+          <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
+          <h4 class="dropzone-title">Arrastra y suelta el archivo aquí</h4>
+          <p class="dropzone-subtitle">o</p>
+
+          <input
+            type="file"
+            id="upload-file-{{ documentoSeleccionado.id }}"
+            class="upload-input"
+            (change)="onArchivoExternoSeleccionado($event)"
+            [accept]="documentoSeleccionado.formato === 'PDF' ? '.pdf' :
+                      documentoSeleccionado.formato === 'IMAGE' ? 'image/*' : '*/*'"
+          />
+          <label [for]="'upload-file-' + documentoSeleccionado.id" class="upload-button">
+            <i class="fas fa-folder-open"></i>
+            Seleccionar archivo
+          </label>
+
+          <p class="dropzone-info">
+            <i class="fas fa-exclamation-circle"></i>
+            Formato: {{ documentoSeleccionado.formato }} | Tamaño máximo: 10 MB
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista previa del archivo cargado -->
+    <div *ngIf="archivosSubidos[documentoSeleccionado.id]" class="archivo-cargado">
+      <div class="archivo-card">
+        <div class="archivo-icon">
+          <i class="fas fa-file-pdf" *ngIf="datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('pdf')"></i>
+          <i class="fas fa-file-image" *ngIf="datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('image')"></i>
+          <i class="fas fa-file-word" *ngIf="datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('word')"></i>
+          <i class="fas fa-file-excel" *ngIf="datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('excel')"></i>
+          <i class="fas fa-file" *ngIf="!datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('pdf') &&
+                                        !datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('image') &&
+                                        !datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('word') &&
+                                        !datosDocumentos[documentoSeleccionado.id].tipoArchivo?.includes('excel')"></i>
+        </div>
+
+        <div class="archivo-info">
+          <h4 class="archivo-nombre">{{ datosDocumentos[documentoSeleccionado.id].nombreArchivo }}</h4>
+          <p class="archivo-detalles">
+            <span>{{ formatearTamanioArchivo(datosDocumentos[documentoSeleccionado.id].tamanioArchivo) }}</span>
+            <span>•</span>
+            <span>Cargado {{ datosDocumentos[documentoSeleccionado.id].fechaCarga | date:'short' }}</span>
+          </p>
+        </div>
+
+        <div class="archivo-acciones">
+          <button class="btn-icono btn-success" title="Archivo cargado correctamente">
+            <i class="fas fa-check-circle"></i>
+          </button>
+          <button class="btn-icono btn-danger" (click)="eliminarArchivo()" title="Eliminar archivo">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="archivo-success">
+        <i class="fas fa-check-circle"></i>
+        <span>Archivo cargado exitosamente. Puede continuar con otros documentos o volver a la lista.</span>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="formulario-acciones">
+      <button class="btn-cancelar" (click)="volverALista()">
+        <i class="fas fa-arrow-left"></i>
+        Volver a la lista
       </button>
     </div>
   </div>

@@ -18,12 +18,16 @@ export class DocumentosDinamicosComponent implements OnInit {
   documentoSeleccionado: DocumentoRequerido | null = null;
   datosDocumentos: { [key: string]: any } = {};
   estadoDocumentos: { [key: string]: { completo: boolean; progreso: number } } = {};
-  vistaActual: 'lista' | 'formulario' = 'lista';
+  archivosSubidos: { [key: string]: File | null } = {}; // Para documentos externos
+  vistaActual: 'lista' | 'formulario' | 'upload' = 'lista';
 
   // Filtros
   filtroCategoria: string = 'todos';
   filtroTipo: string = 'todos';
   busqueda: string = '';
+
+  // Drag and drop
+  isDragging: boolean = false;
 
   ngOnInit() {
     this.inicializarEstados();
@@ -36,6 +40,7 @@ export class DocumentosDinamicosComponent implements OnInit {
         progreso: 0
       };
       this.datosDocumentos[doc.id] = {};
+      this.archivosSubidos[doc.id] = null;
     });
   }
 
@@ -85,16 +90,19 @@ export class DocumentosDinamicosComponent implements OnInit {
 
   seleccionarDocumento(documento: DocumentoRequerido) {
     this.documentoSeleccionado = documento;
-    this.vistaActual = 'formulario';
+    // Si es externo, mostrar vista de upload, si es autogenerado mostrar formulario
+    this.vistaActual = documento.tipo === 'externo' ? 'upload' : 'formulario';
   }
 
   volverALista() {
     this.vistaActual = 'lista';
     this.documentoSeleccionado = null;
+    this.isDragging = false;
   }
 
+  // Para documentos AUTOGENERADOS (con formulario)
   guardarDocumento() {
-    if (!this.documentoSeleccionado) return;
+    if (!this.documentoSeleccionado || this.documentoSeleccionado.tipo !== 'autogenerado') return;
 
     const docId = this.documentoSeleccionado.id;
     const datos = this.datosDocumentos[docId];
@@ -116,9 +124,127 @@ export class DocumentosDinamicosComponent implements OnInit {
     // Verificar si todos los obligatorios están completos
     this.verificarCompletitudTotal();
 
-    alert(completo ? '✅ Documento guardado correctamente' : '⚠️ Complete todos los campos obligatorios');
-
     if (completo) {
+      alert('✅ Documento guardado correctamente. Se generará automáticamente cuando radique la solicitud.');
+      this.volverALista();
+    } else {
+      alert('⚠️ Complete todos los campos obligatorios marcados con *');
+    }
+  }
+
+  // Para documentos EXTERNOS (subir archivo)
+  onArchivoExternoSeleccionado(event: any) {
+    if (!this.documentoSeleccionado || this.documentoSeleccionado.tipo !== 'externo') return;
+
+    const file = event.target.files[0];
+    if (file) {
+      this.procesarArchivoExterno(file);
+    }
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    if (!this.documentoSeleccionado || this.documentoSeleccionado.tipo !== 'externo') return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.procesarArchivoExterno(files[0]);
+    }
+  }
+
+  private procesarArchivoExterno(file: File) {
+    if (!this.documentoSeleccionado) return;
+
+    const docId = this.documentoSeleccionado.id;
+
+    // Validar formato
+    const formatoPermitido = this.validarFormatoArchivo(file, this.documentoSeleccionado.formato);
+    if (!formatoPermitido) {
+      alert(`⚠️ Formato de archivo no válido. Se requiere: ${this.documentoSeleccionado.formato}`);
+      return;
+    }
+
+    // Validar tamaño (máximo 10MB)
+    const tamanioMaximo = 10 * 1024 * 1024; // 10MB
+    if (file.size > tamanioMaximo) {
+      alert('⚠️ El archivo excede el tamaño máximo permitido (10MB)');
+      return;
+    }
+
+    // Guardar archivo
+    this.archivosSubidos[docId] = file;
+    this.datosDocumentos[docId] = {
+      nombreArchivo: file.name,
+      tipoArchivo: file.type,
+      tamanioArchivo: file.size,
+      fechaCarga: new Date()
+    };
+
+    // Marcar como completo
+    this.estadoDocumentos[docId] = {
+      completo: true,
+      progreso: 100
+    };
+
+    this.documentoCompletado.emit({
+      documentoId: docId,
+      datos: { archivo: file, metadata: this.datosDocumentos[docId] }
+    });
+
+    this.verificarCompletitudTotal();
+
+    alert('✅ Archivo cargado exitosamente');
+    this.volverALista();
+  }
+
+  private validarFormatoArchivo(file: File, formatoRequerido: string): boolean {
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    const tipo = file.type.toLowerCase();
+
+    switch (formatoRequerido.toUpperCase()) {
+      case 'PDF':
+        return tipo === 'application/pdf' || extension === 'pdf';
+      case 'IMAGE':
+        return tipo.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+      case 'WORD':
+        return tipo.includes('word') || ['doc', 'docx'].includes(extension);
+      case 'EXCEL':
+        return tipo.includes('excel') || tipo.includes('spreadsheet') || ['xls', 'xlsx'].includes(extension);
+      default:
+        return true; // Permitir cualquier formato si no se especifica
+    }
+  }
+
+  eliminarArchivo() {
+    if (!this.documentoSeleccionado) return;
+
+    const docId = this.documentoSeleccionado.id;
+
+    if (confirm('¿Está seguro de eliminar este archivo?')) {
+      this.archivosSubidos[docId] = null;
+      this.datosDocumentos[docId] = {};
+      this.estadoDocumentos[docId] = {
+        completo: false,
+        progreso: 0
+      };
+
+      this.verificarCompletitudTotal();
+      alert('Archivo eliminado');
       this.volverALista();
     }
   }
@@ -141,6 +267,14 @@ export class DocumentosDinamicosComponent implements OnInit {
         archivo: file
       };
     }
+  }
+
+  formatearTamanioArchivo(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   }
 
   getIconClass(icono?: string): string {
