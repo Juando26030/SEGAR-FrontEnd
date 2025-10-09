@@ -17,7 +17,6 @@ import { ConfiguracionComponent } from './pages/configuracion/configuracion.comp
 import {RegistroPasoTresComponent} from './tramites/registro/registro-paso-tres/registro-paso-tres.component';
 import { RegistroPasoCuatroComponent } from './tramites/registro/registro-paso-cuatro/registro-paso-cuatro.component';
 import { RegistroPasoCincoComponent } from './tramites/registro/registro-paso-cinco/registro-paso-cinco.component';
-import { AuthGuard } from './auth/guard/auth.guard';
 import {BusquedaGlobalComponent} from './pages/busqueda-global/busqueda-global.component';  // <- IMPORTAR EL GUARD
 import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
 import { CorreosComponent } from './pages/correos/correos.component';  // <- IMPORTAR COMPONENTE DE CORREOS
