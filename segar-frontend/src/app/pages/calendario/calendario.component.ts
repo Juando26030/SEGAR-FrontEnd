@@ -69,12 +69,15 @@ export class CalendarioComponent implements OnInit {
 
     // Cargar eventos del mes actual
     this.cargarEventosPorMes();
-
+    console.log(this.eventos);
     // Cargar estadísticas
     this.cargarEstadisticas();
+    console.log(this.estadisticas);
 
     // Cargar tipos y categorías
     this.cargarTiposYCategorias();
+    console.log(this.tiposEvento);
+    console.log(this.categoriasEvento);
   }
 
   cargarEventosPorMes(): void {

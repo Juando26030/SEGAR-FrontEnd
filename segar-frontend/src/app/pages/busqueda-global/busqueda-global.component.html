@@ -1,0 +1,144 @@
+<div class="panel-principal modern-professional">
+  <div class="main-container">
+    <!-- Header -->
+    <div class="panel-header enhanced">
+      <div class="header-background-pattern"></div>
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="panel-title animated">
+            <span class="title-main">Búsqueda Global</span>
+          </h1>
+          <p class="panel-subtitle animated">
+            Busca trámites, documentos y usuarios en todo el sistema
+          </p>
+          <div class="title-indicator pulse"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Search Box -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <div class="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="onSearch()"
+            class="search-input"
+            placeholder="Buscar trámites, documentos o usuarios...">
+          <div class="search-actions">
+            <button (click)="toggleFilters()" class="filter-button">
+              <span>Filtros</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <button type="button" (click)="onSearch()" class="search-button">
+              <span>Buscar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Filters -->
+        <div [class.hidden]="!showFilters" class="filters-container">
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label class="filter-label">Tipo</label>
+              <div class="checkbox-group">
+                <label class="checkbox-item" *ngFor="let tipo of tiposFiltro">
+                  <input type="checkbox" [(ngModel)]="tipo.selected" class="checkbox">
+                  <span class="checkbox-label">{{tipo.label}}</span>
+                </label>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Fecha</label>
+              <select [(ngModel)]="filtroFecha" class="select-input">
+                <option value="">Cualquier fecha</option>
+                <option value="semana">Última semana</option>
+                <option value="mes">Último mes</option>
+                <option value="ano">Último año</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Estado</label>
+              <select [(ngModel)]="filtroEstado" class="select-input">
+                <option value="">Todos</option>
+                <option value="activo">Activo</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="completado">Completado</option>
+                <option value="archivado">Archivado</option>
+              </select>
+            </div>
+          </div>
+          <div class="filters-actions">
+            <button type="button" (click)="limpiarFiltros()" class="clear-filters-button">
+              Limpiar filtros
+            </button>
+            <button type="button" (click)="aplicarFiltros()" class="apply-filters-button">
+              Aplicar filtros
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      <div class="results-section" *ngIf="resultados.length > 0">
+        <div class="results-header">
+          <h2 class="results-title">Resultados de búsqueda</h2>
+          <div class="results-count">Mostrando {{resultados.length}} de {{totalResultados}} resultados</div>
+        </div>
+
+        <!-- Results Tabs -->
+        <div class="tabs-container">
+          <nav class="tabs-nav">
+            <button
+              *ngFor="let tab of tabs"
+              (click)="cambiarTab(tab.key)"
+              [class.active]="tabActual === tab.key"
+              class="tab-button">
+              {{tab.label}} ({{tab.count}})
+            </button>
+          </nav>
+        </div>
+
+        <!-- Results List -->
+        <div class="results-list">
+          <div *ngFor="let resultado of resultadosFiltrados" class="result-item">
+            <div class="result-content">
+              <div class="result-icon" [ngClass]="getIconClass(resultado.tipo)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getIconPath(resultado.tipo)" />
+                </svg>
+              </div>
+              <div class="result-details">
+                <div class="result-header-row">
+                  <h3 class="result-type">{{resultado.tipo}}</h3>
+                  <span class="result-status" [ngClass]="getStatusClass(resultado.estado)">
+                    {{resultado.estado}}
+                  </span>
+                </div>
+                <a href="#" class="result-title-link">
+                  <p class="result-title" [innerHTML]="highlightText(resultado.titulo)"></p>
+                </a>
+                <p class="result-description" [innerHTML]="highlightText(resultado.descripcion)"></p>
+                <div class="result-meta">
+                  <span>{{resultado.responsable}}</span>
+                  <span class="meta-separator">•</span>
+                  <span>{{resultado.fecha | date:'dd/MM/yyyy'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -11,11 +11,11 @@
         <div class="title-indicator pulse"></div>
       </div>
       <div class="header-actions enhanced">
-        <button class="btn-refresh modern-btn" (click)="cargarDatos()">
+        <button class="btn-refresh modern-btn" (click)="actualizarDatos()" [disabled]="isRefreshing" [class.loading]="isRefreshing">
           <div class="btn-bg-effect"></div>
           <div class="btn-content">
-            <i class="fas fa-sync-alt"></i>
-            <span>Actualizar</span>
+            <i class="fas fa-sync-alt" [class.fa-spin]="isRefreshing"></i>
+            <span>{{ isRefreshing ? 'Actualizando...' : 'Actualizar' }}</span>
           </div>
         </button>
         <div class="last-update-card glass-effect">
@@ -24,8 +24,7 @@
           </div>
           <div class="update-text">
             <span class="update-label">Última actualización</span>
-            <span class="update-time">{{ fechaActual | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
+            <span class="update-time">{{ ultimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>          </div>
         </div>
       </div>
     </div>
@@ -73,7 +72,7 @@
           <span class="kpi-label">Pendientes de Revisión</span>
         </div>
         <div class="kpi-value-section">
-          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.pendientes }}</div>
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.pendientes">{{ estadisticas.pendientes }}</div>
           <div class="kpi-trend neutral enhanced">
             <div class="trend-icon">
               <i class="fas fa-minus"></i>
@@ -99,7 +98,7 @@
           <span class="kpi-label">Vencimientos Próximos</span>
         </div>
         <div class="kpi-value-section">
-          <div class="kpi-value counter urgent" [attr.data-target]="estadisticas.activos">{{ estadisticas.vencimientos }}</div>
+          <div class="kpi-value counter urgent" [attr.data-target]="estadisticas.vencimientos">{{ estadisticas.vencimientos }}</div>
           <div class="kpi-trend negative enhanced">
             <div class="trend-icon">
               <i class="fas fa-exclamation-triangle"></i>
@@ -122,10 +121,10 @@
             <i class="fas fa-check-circle kpi-icon"></i>
             <div class="icon-ripple"></div>
           </div>
-          <span class="kpi-label">Completados</span>
+          <span class="kpi-label">Aprobados</span>
         </div>
         <div class="kpi-value-section">
-          <div class="kpi-value counter" [attr.data-target]="estadisticas.activos">{{ estadisticas.completados }}</div>
+          <div class="kpi-value counter" [attr.data-target]="estadisticas.completados">{{ estadisticas.completados }}</div>
           <div class="kpi-trend positive enhanced">
             <div class="trend-icon">
               <i class="fas fa-rocket"></i>
@@ -146,7 +145,7 @@
         <div class="section-accent-line"></div>
         <span class="section-subtitle">
           <i class="fas fa-chart-bar"></i>
-          Últimas 10 actividades
+          Últimas 5 actividades
         </span>
       </div>
       <div class="section-actions modern">
@@ -172,37 +171,40 @@
       <table class="data-table enhanced">
         <thead class="table-header-modern">
         <tr>
-          <th class="sortable enhanced">
+          <th class="sortable enhanced" [class]="getSortClass('numero')" (click)="ordenarTabla('numero')">
             <div class="th-content">
               <span>Número de Trámite</span>
-              <i class="fas fa-sort sort-icon"></i>
+              <i [class]="getSortIcon('numero')" class="sort-icon"></i>
             </div>
           </th>
-          <th class="sortable enhanced">
+          <th class="sortable enhanced" [class]="getSortClass('tipo')" (click)="ordenarTabla('tipo')">
             <div class="th-content">
               <span>Tipo de Proceso</span>
-              <i class="fas fa-sort sort-icon"></i>
+              <i [class]="getSortIcon('tipo')" class="sort-icon"></i>
             </div>
           </th>
-          <th class="enhanced">
+          <th class="sortable enhanced" [class]="getSortClass('producto')" (click)="ordenarTabla('producto')">
             <div class="th-content">
-              <span>Cliente</span>
+              <span>Producto</span>
+              <i [class]="getSortIcon('producto')" class="sort-icon"></i>
             </div>
           </th>
-          <th class="enhanced">
+          <th class="sortable enhanced" [class]="getSortClass('riesgo')" (click)="ordenarTabla('riesgo')">
+            <div class="th-content">
+              <span>Riesgo</span>
+              <i [class]="getSortIcon('riesgo')" class="sort-icon"></i>
+            </div>
+          </th>
+          <th class="sortable enhanced" [class]="getSortClass('ultimaActualizacion')" (click)="ordenarTabla('ultimaActualizacion')">
+            <div class="th-content">
+              <span>Última Actualización</span>
+              <i [class]="getSortIcon('ultimaActualizacion')" class="sort-icon"></i>
+            </div>
+          </th>
+          <th class="sortable enhanced" [class]="getSortClass('estado')" (click)="ordenarTabla('estado')">
             <div class="th-content">
               <span>Estado</span>
-            </div>
-          </th>
-          <th class="sortable enhanced">
-            <div class="th-content">
-              <span>Fecha Vencimiento</span>
-              <i class="fas fa-sort sort-icon"></i>
-            </div>
-          </th>
-          <th class="enhanced">
-            <div class="th-content">
-              <span>Prioridad</span>
+              <i [class]="getSortIcon('estado')" class="sort-icon"></i>
             </div>
           </th>
           <th class="actions-column enhanced">
@@ -212,6 +214,7 @@
           </th>
         </tr>
         </thead>
+
         <tbody>
         <tr *ngFor="let tramite of tramitesRecientes; let i = index"
             class="data-row modern-row"
@@ -231,17 +234,17 @@
             <div class="cell-content">
               <div class="client-info">
                 <div class="client-avatar">
-                  <i class="fas fa-user"></i>
+                  <i class="fas fa-box"></i>
                 </div>
-                <span class="client-name">{{ tramite.cliente }}</span>
+                <span class="client-name">{{ tramite.producto }}</span>
               </div>
             </div>
           </td>
           <td class="status-column enhanced">
             <div class="cell-content">
-              <div class="status-indicator modern" [class]="getEstadoClass(tramite.estado)">
+              <div class="status-indicator modern" [class]="getRiesgoClass(tramite.riesgo)">
                 <span class="status-dot pulse-dot"></span>
-                <span class="status-text">{{ tramite.estado }}</span>
+                <span class="status-text">{{ tramite.riesgo }}</span>
               </div>
             </div>
           </td>
@@ -249,15 +252,15 @@
             <div class="cell-content">
               <div class="date-info">
                 <i class="fas fa-calendar-alt date-icon"></i>
-                <span class="date-text">{{ tramite.fechaVencimiento | date:'dd/MM/yyyy' }}</span>
+                <span class="date-text">{{ tramite.ultimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>
               </div>
             </div>
           </td>
           <td class="priority-column enhanced">
             <div class="cell-content">
-              <span class="priority-tag modern" [class]="getPrioridadClass(tramite.prioridad)">
+              <span class="priority-tag modern" [class]="getEstadoClass(tramite.estado)">
                 <span class="priority-dot"></span>
-                {{ tramite.prioridad | uppercase }}
+                {{ tramite.estado }}
               </span>
             </div>
           </td>
@@ -280,4 +283,11 @@
       </table>
     </div>
   </div>
+  <!-- Agregar al final del archivo, justo antes del </div> de cierre -->
+  <app-tramite-detalle-modal
+    [tramiteId]="tramiteSeleccionadoId"
+    [isVisible]="modalVisible"
+    (cerrar)="cerrarModal()">
+  </app-tramite-detalle-modal>
+
 </div>

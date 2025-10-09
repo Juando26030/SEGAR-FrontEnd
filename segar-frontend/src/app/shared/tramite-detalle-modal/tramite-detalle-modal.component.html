@@ -1,0 +1,230 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="cerrarModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Detalle del Trámite</h2>
+      <button class="btn-close" (click)="cerrarModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Cargando información del trámite...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="error && !isLoading">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h3>Error al cargar</h3>
+      <p>{{ error }}</p>
+      <button class="btn-retry" (click)="cargarDetalle()">Reintentar</button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-body" *ngIf="detalle && !isLoading && !error">
+      <!-- Información General -->
+      <div class="section">
+        <h3 class="section-title">Información General</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Número de Radicado:</label>
+            <span>{{ detalle.radicadoNumber }}</span>
+          </div>
+          <div class="info-item">
+            <label>Tipo de Proceso:</label>
+            <span>{{ extraerTipoProceso(detalle.procedureType) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Producto:</label>
+            <span>{{ detalle.productName }}</span>
+          </div>
+          <div class="info-item">
+            <label>Riesgo:</label>
+            <span>{{ extraerRiesgoAlimento(detalle.procedureType) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Radicado:</label>
+            <span>{{ formatearFecha(detalle.submissionDate) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado Actual:</label>
+            <span class="estado-badge" [ngClass]="getEstadoClass(detalle.currentStatus)">
+              {{ mapearEstado(detalle.currentStatus) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="section">
+        <h3 class="section-title">Resumen de Progreso</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon primary">
+              <i class="fas fa-calendar-days"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ detalle.estadisticas.diasTranscurridos }}</div>
+              <div class="stat-label">Días transcurridos</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ detalle.estadisticas.eventosCompletados }}/{{ detalle.estadisticas.totalEventos }}</div>
+              <div class="stat-label">Eventos completados</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ detalle.estadisticas.requerimientosPendientes }}</div>
+              <div class="stat-label">Requerimientos pendientes</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ detalle.estadisticas.notificacionesNoLeidas }}</div>
+              <div class="stat-label">Notificaciones no leídas</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso -->
+        <div class="progress-container">
+          <div class="progress-text">
+            <span>Progreso del trámite</span>
+            <span>{{ detalle.estadisticas.porcentajeProgreso }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="detalle.estadisticas.porcentajeProgreso"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs de Información Detallada -->
+      <div class="section">
+        <div class="tabs-header">
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'eventos'"
+            (click)="cambiarTab('eventos')">
+            Eventos ({{ detalle.eventos.length || 0 }})
+          </button>
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'requerimientos'"
+            (click)="cambiarTab('requerimientos')">
+            Requerimientos ({{ detalle.requerimientos.length || 0 }})
+          </button>
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'notificaciones'"
+            (click)="cambiarTab('notificaciones')">
+            Notificaciones ({{ detalle.notificaciones.length || 0 }})
+          </button>
+        </div>
+
+        <!-- Tab Content: Eventos -->
+        <div class="tab-content" *ngIf="activeTab === 'eventos'">
+          <div class="timeline" *ngIf="detalle.eventos.length > 0">
+            <div class="timeline-item"
+                 *ngFor="let evento of detalle.eventos"
+                 [class.completed]="evento.completed"
+                 [class.current]="evento.currentEvent">
+              <div class="timeline-marker">
+                <i class="fas fa-circle" *ngIf="!evento.completed"></i>
+                <i class="fas fa-check-circle" *ngIf="evento.completed"></i>
+              </div>
+              <div class="timeline-content">
+                <h4>{{ evento.title }}</h4>
+                <p>{{ evento.description }}</p>
+                <div class="timeline-date" *ngIf="evento.date">
+                  <i class="fas fa-calendar"></i>
+                  {{ formatearFecha(evento.date) }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="detalle.eventos.length === 0">
+            <i class="fas fa-calendar-times"></i>
+            <p>No hay eventos registrados</p>
+          </div>
+        </div>
+
+        <!-- Tab Content: Requerimientos -->
+        <div class="tab-content" *ngIf="activeTab === 'requerimientos'">
+          <div class="requirements-list" *ngIf="detalle.requerimientos.length > 0">
+            <div class="requirement-item" *ngFor="let req of detalle.requerimientos">
+              <div class="req-header">
+                <div class="req-number">{{ req.number }}</div>
+                <div class="req-status" [ngClass]="'estado-' + req.status.toLowerCase()">
+                  {{ req.status }}
+                </div>
+              </div>
+              <h4>{{ req.title }}</h4>
+              <p>{{ req.description }}</p>
+              <div class="req-footer" *ngIf="req.deadline">
+                <div class="req-deadline">
+                  <i class="fas fa-clock"></i>
+                  Vence: {{ formatearFecha(req.deadline) }}
+                  <span class="days-remaining" [ngClass]="getDaysRemainingClass(req.diasRestantes)">
+                    ({{ req.diasRestantes }} días restantes)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="detalle.requerimientos.length === 0">
+            <i class="fas fa-clipboard-check"></i>
+            <p>No hay requerimientos pendientes</p>
+          </div>
+        </div>
+
+        <!-- Tab Content: Notificaciones -->
+        <div class="tab-content" *ngIf="activeTab === 'notificaciones'">
+          <div class="notifications-list" *ngIf="detalle.notificaciones.length > 0">
+            <div class="notification-item" *ngFor="let notif of detalle.notificaciones" [class.unread]="!notif.read">
+              <div class="notif-icon" [ngClass]="'type-' + notif.type.toLowerCase()">
+                <i class="fas fa-info-circle" *ngIf="notif.type === 'INFO'"></i>
+                <i class="fas fa-exclamation-triangle" *ngIf="notif.type === 'WARNING'"></i>
+                <i class="fas fa-times-circle" *ngIf="notif.type === 'ERROR'"></i>
+              </div>
+              <div class="notif-content">
+                <h4>{{ notif.title }}</h4>
+                <p>{{ notif.message }}</p>
+                <div class="notif-date">
+                  <i class="fas fa-clock"></i>
+                  {{ formatearFecha(notif.date) }}
+                </div>
+              </div>
+              <div class="notif-status">
+                <span class="read-indicator" *ngIf="!notif.read">NUEVA</span>
+              </div>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="detalle.notificaciones.length === 0">
+            <i class="fas fa-bell-slash"></i>
+            <p>No hay notificaciones</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer" *ngIf="detalle && !isLoading">
+      <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+      <button class="btn-primary">Descargar PDF</button>
+    </div>
+  </div>
+</div>
