@@ -59,4 +59,9 @@ export class CalendarioService {
   obtenerPrioridadesEvento(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/prioridades`);
   }
+
+  obtenerEventosProximos(): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/proximos`);
+  }
+
 }

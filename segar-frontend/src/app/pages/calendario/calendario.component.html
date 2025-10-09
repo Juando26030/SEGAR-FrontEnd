@@ -1,8 +1,11 @@
 <div class="calendario-container">
-  <!-- Loading Indicator -->
+  <!-- Loading Overlay para Calendario -->
   <div class="loading-overlay" *ngIf="cargando">
-    <div class="spinner"></div>
-    <p>Cargando...</p>
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h3 class="loading-text">Cargando Calendario<span class="loading-dots"></span></h3>
+      <p class="loading-subtitle">Sincronizando eventos y recordatorios</p>
+    </div>
   </div>
 
   <!-- Header del Calendario -->
