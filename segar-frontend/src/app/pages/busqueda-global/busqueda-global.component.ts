@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 interface ResultadoBusqueda {
   id: string;
-  tipo: 'Trámite' | 'Documento' | 'Usuario';
+  tipo: 'Trámite' | 'Documento' | 'Usuario' | 'Registro Sanitario';
   titulo: string;
   descripcion: string;
   estado: string;
@@ -41,7 +41,8 @@ export class BusquedaGlobalComponent implements OnInit {
   tiposFiltro: FiltroTipo[] = [
     { key: 'tramites', label: 'Trámites', selected: true },
     { key: 'documentos', label: 'Documentos', selected: true },
-    { key: 'usuarios', label: 'Usuarios', selected: true }
+    { key: 'usuarios', label: 'Usuarios', selected: true },
+    { key: 'registros-sanitarios', label: 'Registros Sanitarios', selected: true }
   ];
 
   resultados: ResultadoBusqueda[] = [];
@@ -52,11 +53,34 @@ export class BusquedaGlobalComponent implements OnInit {
     { key: 'todos', label: 'Todos', count: 0 },
     { key: 'tramites', label: 'Trámites', count: 0 },
     { key: 'documentos', label: 'Documentos', count: 0 },
-    { key: 'usuarios', label: 'Usuarios', count: 0 }
+    { key: 'usuarios', label: 'Usuarios', count: 0 },
+    { key: 'registros-sanitarios', label: 'Registros Sanitarios', count: 0 }
   ];
 
   ngOnInit(): void {
     this.cargarDatosPrueba();
+  }
+
+  // Método para normalizar texto (quitar tildes y caracteres especiales)
+  private normalizarTexto(texto: string): string {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '');
+  }
+
+  // Método para mapear tipo a clave de filtro
+  private tipoAClave(tipo: string): string {
+    const mapeo: { [key: string]: string } = {
+      'tramite': 'tramites',
+      'documento': 'documentos',
+      'usuario': 'usuarios',
+      'registro sanitario': 'registros-sanitarios'
+    };
+
+    const tipoNormalizado = this.normalizarTexto(tipo);
+    return mapeo[tipoNormalizado] || tipoNormalizado;
   }
 
   private cargarDatosPrueba(): void {
@@ -132,6 +156,52 @@ export class BusquedaGlobalComponent implements OnInit {
         estado: 'pendiente',
         responsable: 'Departamento Ambiental',
         fecha: new Date('2024-01-20')
+      },
+      // Nuevos datos para Registros Sanitarios
+      {
+        id: '9',
+        tipo: 'Registro Sanitario',
+        titulo: 'Registro Sanitario - Medicamento Genérico ABC',
+        descripcion: 'Registro sanitario para medicamento genérico con principio activo paracetamol',
+        estado: 'vigente',
+        responsable: 'Dr. Roberto Castillo',
+        fecha: new Date('2024-01-18')
+      },
+      {
+        id: '10',
+        tipo: 'Registro Sanitario',
+        titulo: 'Registro Sanitario - Dispositivo Médico XYZ',
+        descripcion: 'Registro para dispositivo médico clase II - monitor de presión arterial',
+        estado: 'por-vencer',
+        responsable: 'Ing. Patricia Vega',
+        fecha: new Date('2023-11-15')
+      },
+      {
+        id: '11',
+        tipo: 'Registro Sanitario',
+        titulo: 'Registro Sanitario - Producto Biológico',
+        descripcion: 'Registro sanitario para vacuna contra hepatitis B recombinante',
+        estado: 'vigente',
+        responsable: 'Dr. Miguel Herrera',
+        fecha: new Date('2024-01-22')
+      },
+      {
+        id: '12',
+        tipo: 'Registro Sanitario',
+        titulo: 'Registro Sanitario - Suplemento Nutricional',
+        descripcion: 'Registro para suplemento vitamínico con minerales esenciales',
+        estado: 'vencido',
+        responsable: 'Dra. Laura Mendez',
+        fecha: new Date('2023-06-10')
+      },
+      {
+        id: '13',
+        tipo: 'Registro Sanitario',
+        titulo: 'Registro Sanitario - Equipo Médico',
+        descripcion: 'Registro sanitario para equipo de rayos X portátil uso hospitalario',
+        estado: 'en-evaluacion',
+        responsable: 'Ing. Carlos Ramírez',
+        fecha: new Date('2024-01-25')
       }
     ];
 
@@ -152,17 +222,22 @@ export class BusquedaGlobalComponent implements OnInit {
       {
         key: 'tramites',
         label: 'Trámites',
-        count: this.resultados.filter(r => r.tipo === 'Trámite').length
+        count: this.resultados.filter(r => this.tipoAClave(r.tipo) === 'tramites').length
       },
       {
         key: 'documentos',
         label: 'Documentos',
-        count: this.resultados.filter(r => r.tipo === 'Documento').length
+        count: this.resultados.filter(r => this.tipoAClave(r.tipo) === 'documentos').length
       },
       {
         key: 'usuarios',
         label: 'Usuarios',
-        count: this.resultados.filter(r => r.tipo === 'Usuario').length
+        count: this.resultados.filter(r => this.tipoAClave(r.tipo) === 'usuarios').length
+      },
+      {
+        key: 'registros-sanitarios',
+        label: 'Registros Sanitarios',
+        count: this.resultados.filter(r => this.tipoAClave(r.tipo) === 'registros-sanitarios').length
       }
     ];
   }
@@ -171,10 +246,7 @@ export class BusquedaGlobalComponent implements OnInit {
     if (this.tabActual === 'todos') {
       return this.resultados;
     }
-    return this.resultados.filter(r => {
-      const tipoSingular = this.tabActual.slice(0, -1);
-      return r.tipo.toLowerCase().includes(tipoSingular);
-    });
+    return this.resultados.filter(r => this.tipoAClave(r.tipo) === this.tabActual);
   }
 
   toggleFilters(): void {
@@ -185,26 +257,24 @@ export class BusquedaGlobalComponent implements OnInit {
     if (this.searchQuery.trim()) {
       this.buscarEnResultados(this.searchQuery.trim());
     } else {
-      // Si no hay término de búsqueda, mostrar todos los resultados
       this.resultados = [...this.resultadosOriginales];
       this.actualizarContadores();
     }
   }
 
   private buscarEnResultados(termino: string): void {
-    const terminoLower = termino.toLowerCase();
+    const terminoNormalizado = this.normalizarTexto(termino);
 
     this.resultados = this.resultadosOriginales.filter(resultado => {
       return (
-        resultado.titulo.toLowerCase().includes(terminoLower) ||
-        resultado.descripcion.toLowerCase().includes(terminoLower) ||
-        resultado.responsable.toLowerCase().includes(terminoLower) ||
-        resultado.tipo.toLowerCase().includes(terminoLower) ||
-        resultado.estado.toLowerCase().includes(terminoLower)
+        this.normalizarTexto(resultado.titulo).includes(terminoNormalizado) ||
+        this.normalizarTexto(resultado.descripcion).includes(terminoNormalizado) ||
+        this.normalizarTexto(resultado.responsable).includes(terminoNormalizado) ||
+        this.normalizarTexto(resultado.tipo).includes(terminoNormalizado) ||
+        this.normalizarTexto(resultado.estado).includes(terminoNormalizado)
       );
     });
 
-    // Aplicar filtros adicionales si están activos
     this.aplicarFiltrosActivos();
     this.actualizarContadores();
   }
@@ -219,7 +289,7 @@ export class BusquedaGlobalComponent implements OnInit {
 
     if (tiposSeleccionados.length < this.tiposFiltro.length) {
       resultadosFiltrados = resultadosFiltrados.filter(r => {
-        const tipoKey = r.tipo.toLowerCase() + 's';
+        const tipoKey = this.tipoAClave(r.tipo);
         return tiposSeleccionados.includes(tipoKey);
       });
     }
@@ -227,7 +297,7 @@ export class BusquedaGlobalComponent implements OnInit {
     // Filtrar por estado
     if (this.filtroEstado) {
       resultadosFiltrados = resultadosFiltrados.filter(r =>
-        r.estado.toLowerCase() === this.filtroEstado.toLowerCase()
+        this.normalizarTexto(r.estado) === this.normalizarTexto(this.filtroEstado)
       );
     }
 
@@ -278,41 +348,51 @@ export class BusquedaGlobalComponent implements OnInit {
   }
 
   getIconClass(tipo: string): string {
-    switch (tipo) {
-      case 'Trámite':
+    switch (this.tipoAClave(tipo)) {
+      case 'tramites':
         return 'icon-tramite';
-      case 'Documento':
+      case 'documentos':
         return 'icon-documento';
-      case 'Usuario':
+      case 'usuarios':
         return 'icon-usuario';
+      case 'registros-sanitarios':
+        return 'icon-registro-sanitario';
       default:
         return 'icon-usuario';
     }
   }
 
   getIconPath(tipo: string): string {
-    switch (tipo) {
-      case 'Trámite':
+    switch (this.tipoAClave(tipo)) {
+      case 'tramites':
         return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z';
-      case 'Documento':
+      case 'documentos':
         return 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z';
-      case 'Usuario':
+      case 'usuarios':
         return 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z';
+      case 'registros-sanitarios':
+        return 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z';
       default:
         return 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z';
     }
   }
 
   getStatusClass(estado: string): string {
-    switch (estado.toLowerCase()) {
+    const estadoNormalizado = this.normalizarTexto(estado);
+    switch (estadoNormalizado) {
       case 'activo':
+      case 'vigente':
         return 'status-activo';
       case 'pendiente':
+      case 'en-evaluacion':
         return 'status-pendiente';
       case 'completado':
         return 'status-completado';
       case 'archivado':
+      case 'vencido':
         return 'status-archivado';
+      case 'por-vencer':
+        return 'status-warning';
       default:
         return 'status-archivado';
     }
