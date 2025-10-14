@@ -1,6 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import {
+  DashboardService,
+  BusquedaGlobalResponseDTO,
+  TramiteBusquedaDTO,
+  RegistroBusquedaDTO
+} from '../../core/services/dashboard.service';
 
 interface ResultadoBusqueda {
   id: string;
@@ -10,6 +18,8 @@ interface ResultadoBusqueda {
   estado: string;
   responsable: string;
   fecha: Date;
+  radicadoNumber?: string;
+  numeroRegistro?: string;
 }
 
 interface FiltroTipo {
@@ -31,12 +41,23 @@ interface Tab {
   templateUrl: './busqueda-global.component.html',
   styleUrls: ['./busqueda-global.component.css']
 })
-export class BusquedaGlobalComponent implements OnInit {
+export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   showFilters: boolean = false;
   filtroFecha: string = '';
   filtroEstado: string = '';
   tabActual: string = 'todos';
+  isLoading: boolean = false;
+  hasSearched: boolean = false;
+  itemsPorPagina: number = 5;
+  paginaActual: number = 1;
+  loadingMore: boolean = false;
+
+  // Subject para debouncing
+  private searchSubject = new Subject<string>();
+  private searchSubscription?: Subscription;
+
+
 
   tiposFiltro: FiltroTipo[] = [
     { key: 'tramites', label: 'Trámites', selected: true },
@@ -45,9 +66,64 @@ export class BusquedaGlobalComponent implements OnInit {
     { key: 'registros-sanitarios', label: 'Registros Sanitarios', selected: true }
   ];
 
+  private todosLosResultados: ResultadoBusqueda[] = [];
   resultados: ResultadoBusqueda[] = [];
-  resultadosOriginales: ResultadoBusqueda[] = [];
   totalResultados: number = 0;
+
+  totalTramitesBackend: number = 0;
+  totalRegistrosBackend: number = 0;
+
+  // Datos quemados para documentos y usuarios
+  private datosQuemadosDocumentos: ResultadoBusqueda[] = [
+    {
+      id: '2',
+      tipo: 'Documento',
+      titulo: 'Certificado de Zonificación Municipal',
+      descripcion: 'Documento oficial que certifica el uso de suelo permitido según plan regulador',
+      estado: 'completado',
+      responsable: 'María García López',
+      fecha: new Date('2024-01-10')
+    },
+    {
+      id: '5',
+      tipo: 'Documento',
+      titulo: 'Planos Arquitectónicos Aprobados',
+      descripcion: 'Conjunto de planos técnicos aprobados para proyecto residencial',
+      estado: 'archivado',
+      responsable: 'Pedro Martínez Torres',
+      fecha: new Date('2023-12-20')
+    },
+    {
+      id: '8',
+      tipo: 'Documento',
+      titulo: 'Estudio de Impacto Ambiental',
+      descripcion: 'Evaluación ambiental para proyecto de construcción mayor',
+      estado: 'pendiente',
+      responsable: 'Departamento Ambiental',
+      fecha: new Date('2024-01-20')
+    }
+  ];
+
+  private datosQuemadosUsuarios: ResultadoBusqueda[] = [
+    {
+      id: '3',
+      tipo: 'Usuario',
+      titulo: 'Carlos Rodríguez Mendoza',
+      descripcion: 'Arquitecto profesional registrado en el sistema municipal',
+      estado: 'activo',
+      responsable: 'Sistema Administrativo',
+      fecha: new Date('2024-01-08')
+    },
+    {
+      id: '7',
+      tipo: 'Usuario',
+      titulo: 'Ana María Sánchez',
+      descripcion: 'Ingeniero civil especialista en proyectos urbanos',
+      estado: 'activo',
+      responsable: 'Recursos Humanos',
+      fecha: new Date('2024-01-03')
+    }
+  ];
 
   tabs: Tab[] = [
     { key: 'todos', label: 'Todos', count: 0 },
@@ -57,10 +133,226 @@ export class BusquedaGlobalComponent implements OnInit {
     { key: 'registros-sanitarios', label: 'Registros Sanitarios', count: 0 }
   ];
 
+  constructor(private dashboardService: DashboardService) {}
+
   ngOnInit(): void {
-    this.cargarDatosPrueba();
+
+    // Cargar datos iniciales al inicializar el componente
+    this.cargarDatosIniciales();
+
+    // Configurar búsqueda con debouncing
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap(query => {
+        if (query.trim().length >= 2) {
+          this.isLoading = true;
+          return this.dashboardService.busquedaGlobal(query, 10, 10);
+        } else {
+          this.isLoading = false;
+          this.hasSearched = false;
+          this.resultados = [];
+          this.actualizarContadores();
+          return [];
+        }
+      })
+    ).subscribe({
+      next: (response: BusquedaGlobalResponseDTO) => {
+        this.procesarResultadosBackend(response);
+        this.isLoading = false;
+        this.hasSearched = true;
+      },
+      error: (error) => {
+        console.error('Error en búsqueda:', error);
+        this.isLoading = false;
+        this.hasSearched = true;
+        this.resultados = [];
+        this.actualizarContadores();
+      }
+    });
   }
 
+  ngOnDestroy(): void {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+  }
+
+  private cargarDatosIniciales(): void {
+    this.isLoading = true;
+    this.paginaActual = 1;
+
+    this.dashboardService.busquedaGlobal('', this.itemsPorPagina, this.itemsPorPagina).subscribe({
+      next: (response: BusquedaGlobalResponseDTO) => {
+        this.totalTramitesBackend = response.totalTramites || 0;
+        this.totalRegistrosBackend = response.totalRegistros || 0;
+
+        if (!response.tramites?.length && !response.registros?.length) {
+          this.cargarDatosMuestra();
+        } else {
+          this.procesarResultadosIniciales(response);
+        }
+        this.isLoading = false;
+        this.hasSearched = true;
+      },
+      error: (error) => {
+        console.error('Error cargando datos iniciales:', error);
+        this.cargarDatosMuestra();
+        this.isLoading = false;
+        this.hasSearched = true;
+      }
+    });
+  }
+
+  private procesarResultadosIniciales(response: BusquedaGlobalResponseDTO): void {
+    const resultadosBackend: ResultadoBusqueda[] = [];
+
+    // Procesar trámites del backend
+    response.tramites.forEach(tramite => {
+      resultadosBackend.push({
+        id: tramite.id.toString(),
+        tipo: 'Trámite',
+        titulo: `${tramite.radicadoNumber} - ${tramite.productName}`,
+        descripcion: `Tipo: ${this.mapearTipoProcedimiento(tramite.procedureType)}`,
+        estado: this.mapearEstadoTramite(tramite.currentStatus),
+        responsable: 'Sistema INVIMA',
+        fecha: new Date(tramite.lastUpdate),
+        radicadoNumber: tramite.radicadoNumber
+      });
+    });
+
+    // Procesar registros sanitarios del backend
+    response.registros.forEach(registro => {
+      resultadosBackend.push({
+        id: registro.id.toString(),
+        tipo: 'Registro Sanitario',
+        titulo: `${registro.numeroRegistro} - ${registro.productName}`,
+        descripcion: `Estado: ${this.mapearEstadoRegistro(registro.estado)} | Vence: ${this.formatearFecha(registro.fechaVencimiento)}`,
+        estado: this.mapearEstadoRegistro(registro.estado),
+        responsable: 'INVIMA',
+        fecha: new Date(registro.fechaExpedicion),
+        numeroRegistro: registro.numeroRegistro
+      });
+    });
+
+    // Siempre agregar algunos datos quemados para tener contenido
+    this.resultados = [...resultadosBackend, ...this.datosQuemadosDocumentos.slice(0, 2), ...this.datosQuemadosUsuarios.slice(0, 2)];
+    this.actualizarContadores();
+  }
+
+  private cargarDatosMuestra(): void {
+    // Si no hay datos del backend, mostrar solo datos quemados
+    this.resultados = [...this.datosQuemadosDocumentos, ...this.datosQuemadosUsuarios];
+    this.actualizarContadores();
+  }
+
+  private procesarResultadosBackend(response: BusquedaGlobalResponseDTO): void {
+    this.totalTramitesBackend = response.totalTramites || 0;
+    this.totalRegistrosBackend = response.totalRegistros || 0;
+
+    const resultadosBackend: ResultadoBusqueda[] = [];
+
+    // Procesar trámites del backend
+    response.tramites.forEach(tramite => {
+      resultadosBackend.push({
+        id: tramite.id.toString(),
+        tipo: 'Trámite',
+        titulo: `${tramite.radicadoNumber} - ${tramite.productName}`,
+        descripcion: `Tipo: ${this.mapearTipoProcedimiento(tramite.procedureType)}`,
+        estado: this.mapearEstadoTramite(tramite.currentStatus),
+        responsable: 'Sistema INVIMA',
+        fecha: new Date(tramite.lastUpdate),
+        radicadoNumber: tramite.radicadoNumber
+      });
+    });
+
+    // Procesar registros sanitarios del backend
+    response.registros.forEach(registro => {
+      resultadosBackend.push({
+        id: registro.id.toString(),
+        tipo: 'Registro Sanitario',
+        titulo: `${registro.numeroRegistro} - ${registro.productName}`,
+        descripcion: `Estado: ${this.mapearEstadoRegistro(registro.estado)} | Vence: ${this.formatearFecha(registro.fechaVencimiento)}`,
+        estado: this.mapearEstadoRegistro(registro.estado),
+        responsable: 'INVIMA',
+        fecha: new Date(registro.fechaExpedicion),
+        numeroRegistro: registro.numeroRegistro
+      });
+    });
+
+    // Si es la primera página, incluir datos quemados
+    if (this.paginaActual === 1) {
+      const terminoNormalizado = this.normalizarTexto(this.searchQuery);
+      const documentosFiltrados = this.filtrarDatosQuemados(this.datosQuemadosDocumentos, terminoNormalizado);
+      const usuariosFiltrados = this.filtrarDatosQuemados(this.datosQuemadosUsuarios, terminoNormalizado);
+
+      if (this.paginaActual === 1) {
+        // Primera carga: reemplazar todos los resultados
+        this.todosLosResultados = [...resultadosBackend, ...documentosFiltrados, ...usuariosFiltrados];
+      } else {
+        // Cargar más: agregar a los existentes
+        this.todosLosResultados = [...this.todosLosResultados, ...resultadosBackend];
+      }
+    } else {
+      // Páginas siguientes: solo datos del backend
+      this.todosLosResultados = [...this.todosLosResultados, ...resultadosBackend];
+    }
+
+    this.aplicarFiltrosYPaginacion();
+  }
+
+  private formatearFecha(fecha: string): string {
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  private filtrarDatosQuemados(datos: ResultadoBusqueda[], termino: string): ResultadoBusqueda[] {
+    return datos.filter(item => {
+      return (
+        this.normalizarTexto(item.titulo).includes(termino) ||
+        this.normalizarTexto(item.descripcion).includes(termino) ||
+        this.normalizarTexto(item.responsable).includes(termino)
+      );
+    });
+  }
+
+  private mapearTipoProcedimiento(tipo: string): string {
+    const mapeo: { [key: string]: string } = {
+      'REGISTRO_SANITARIO': 'Registro Sanitario',
+      'MODIFICACION': 'Modificación',
+      'RENOVACION': 'Renovación',
+      'CANCELACION': 'Cancelación'
+    };
+    return mapeo[tipo] || tipo;
+  }
+
+  private mapearEstadoTramite(estado: string): string {
+    const mapeo: { [key: string]: string } = {
+      'EN_REVISION': 'pendiente',
+      'EN_EVALUACION': 'pendiente',
+      'APROBADO': 'completado',
+      'RECHAZADO': 'archivado',
+      'EN_EVALUACION_TECNICA': 'pendiente',
+      'REQUIERE_INFORMACION': 'pendiente',
+      'RADICADO': 'pendiente'
+    };
+    return mapeo[estado] || 'pendiente';
+  }
+
+  private mapearEstadoRegistro(estado: string): string {
+    const mapeo: { [key: string]: string } = {
+      'VIGENTE': 'activo',
+      'VENCIDO': 'archivado',
+      'POR_VENCER': 'pendiente',
+      'SUSPENDIDO': 'archivado',
+      'CANCELADO': 'archivado'
+    };
+    return mapeo[estado] || 'activo';
+  }
   // Método para normalizar texto (quitar tildes y caracteres especiales)
   private normalizarTexto(texto: string): string {
     return texto
@@ -83,136 +375,9 @@ export class BusquedaGlobalComponent implements OnInit {
     return mapeo[tipoNormalizado] || tipoNormalizado;
   }
 
-  private cargarDatosPrueba(): void {
-    this.resultadosOriginales = [
-      {
-        id: '1',
-        tipo: 'Trámite',
-        titulo: 'Solicitud de Licencia de Construcción',
-        descripcion: 'Trámite para obtener permiso de construcción de vivienda unifamiliar en sector residencial',
-        estado: 'pendiente',
-        responsable: 'Juan Pérez García',
-        fecha: new Date('2024-01-15')
-      },
-      {
-        id: '2',
-        tipo: 'Documento',
-        titulo: 'Certificado de Zonificación Municipal',
-        descripcion: 'Documento oficial que certifica el uso de suelo permitido según plan regulador',
-        estado: 'completado',
-        responsable: 'María García López',
-        fecha: new Date('2024-01-10')
-      },
-      {
-        id: '3',
-        tipo: 'Usuario',
-        titulo: 'Carlos Rodríguez Mendoza',
-        descripcion: 'Arquitecto profesional registrado en el sistema municipal',
-        estado: 'activo',
-        responsable: 'Sistema Administrativo',
-        fecha: new Date('2024-01-08')
-      },
-      {
-        id: '4',
-        tipo: 'Trámite',
-        titulo: 'Renovación de Patente Comercial',
-        descripcion: 'Proceso de renovación anual de patente para actividad comercial',
-        estado: 'activo',
-        responsable: 'Ana López Silva',
-        fecha: new Date('2024-01-12')
-      },
-      {
-        id: '5',
-        tipo: 'Documento',
-        titulo: 'Planos Arquitectónicos Aprobados',
-        descripcion: 'Conjunto de planos técnicos aprobados para proyecto residencial',
-        estado: 'archivado',
-        responsable: 'Pedro Martínez Torres',
-        fecha: new Date('2023-12-20')
-      },
-      {
-        id: '6',
-        tipo: 'Trámite',
-        titulo: 'Permiso de Funcionamiento',
-        descripcion: 'Autorización municipal para funcionamiento de establecimiento comercial',
-        estado: 'completado',
-        responsable: 'Luis Hernández',
-        fecha: new Date('2024-01-05')
-      },
-      {
-        id: '7',
-        tipo: 'Usuario',
-        titulo: 'Ana María Sánchez',
-        descripcion: 'Ingeniero civil especialista en proyectos urbanos',
-        estado: 'activo',
-        responsable: 'Recursos Humanos',
-        fecha: new Date('2024-01-03')
-      },
-      {
-        id: '8',
-        tipo: 'Documento',
-        titulo: 'Estudio de Impacto Ambiental',
-        descripcion: 'Evaluación ambiental para proyecto de construcción mayor',
-        estado: 'pendiente',
-        responsable: 'Departamento Ambiental',
-        fecha: new Date('2024-01-20')
-      },
-      // Nuevos datos para Registros Sanitarios
-      {
-        id: '9',
-        tipo: 'Registro Sanitario',
-        titulo: 'Registro Sanitario - Medicamento Genérico ABC',
-        descripcion: 'Registro sanitario para medicamento genérico con principio activo paracetamol',
-        estado: 'vigente',
-        responsable: 'Dr. Roberto Castillo',
-        fecha: new Date('2024-01-18')
-      },
-      {
-        id: '10',
-        tipo: 'Registro Sanitario',
-        titulo: 'Registro Sanitario - Dispositivo Médico XYZ',
-        descripcion: 'Registro para dispositivo médico clase II - monitor de presión arterial',
-        estado: 'por-vencer',
-        responsable: 'Ing. Patricia Vega',
-        fecha: new Date('2023-11-15')
-      },
-      {
-        id: '11',
-        tipo: 'Registro Sanitario',
-        titulo: 'Registro Sanitario - Producto Biológico',
-        descripcion: 'Registro sanitario para vacuna contra hepatitis B recombinante',
-        estado: 'vigente',
-        responsable: 'Dr. Miguel Herrera',
-        fecha: new Date('2024-01-22')
-      },
-      {
-        id: '12',
-        tipo: 'Registro Sanitario',
-        titulo: 'Registro Sanitario - Suplemento Nutricional',
-        descripcion: 'Registro para suplemento vitamínico con minerales esenciales',
-        estado: 'vencido',
-        responsable: 'Dra. Laura Mendez',
-        fecha: new Date('2023-06-10')
-      },
-      {
-        id: '13',
-        tipo: 'Registro Sanitario',
-        titulo: 'Registro Sanitario - Equipo Médico',
-        descripcion: 'Registro sanitario para equipo de rayos X portátil uso hospitalario',
-        estado: 'en-evaluacion',
-        responsable: 'Ing. Carlos Ramírez',
-        fecha: new Date('2024-01-25')
-      }
-    ];
-
-    this.resultados = [...this.resultadosOriginales];
-    this.actualizarContadores();
-  }
-
   private actualizarContadores(): void {
     this.totalResultados = this.resultados.length;
 
-    // Actualizar contadores de tabs
     this.tabs = [
       {
         key: 'todos',
@@ -254,57 +419,41 @@ export class BusquedaGlobalComponent implements OnInit {
   }
 
   onSearch(): void {
-    if (this.searchQuery.trim()) {
-      this.buscarEnResultados(this.searchQuery.trim());
-    } else {
-      this.resultados = [...this.resultadosOriginales];
-      this.actualizarContadores();
+    const query = this.searchQuery.trim();
+    this.paginaActual = 1;
+    this.todosLosResultados = [];
+
+    if (query.length >= 2) {
+      this.searchSubject.next(query);
+    } else if (query.length === 0) {
+      this.cargarDatosIniciales();
     }
   }
 
-  private buscarEnResultados(termino: string): void {
-    const terminoNormalizado = this.normalizarTexto(termino);
-
-    this.resultados = this.resultadosOriginales.filter(resultado => {
-      return (
-        this.normalizarTexto(resultado.titulo).includes(terminoNormalizado) ||
-        this.normalizarTexto(resultado.descripcion).includes(terminoNormalizado) ||
-        this.normalizarTexto(resultado.responsable).includes(terminoNormalizado) ||
-        this.normalizarTexto(resultado.tipo).includes(terminoNormalizado) ||
-        this.normalizarTexto(resultado.estado).includes(terminoNormalizado)
-      );
-    });
-
-    this.aplicarFiltrosActivos();
-    this.actualizarContadores();
-  }
-
   private aplicarFiltrosActivos(): void {
-    let resultadosFiltrados = [...this.resultados];
-
-    // Filtrar por tipos seleccionados
+    // Aplicar filtros de tipo
     const tiposSeleccionados = this.tiposFiltro
       .filter(t => t.selected)
       .map(t => t.key);
 
     if (tiposSeleccionados.length < this.tiposFiltro.length) {
-      resultadosFiltrados = resultadosFiltrados.filter(r => {
+      this.resultados = this.resultados.filter(r => {
         const tipoKey = this.tipoAClave(r.tipo);
         return tiposSeleccionados.includes(tipoKey);
       });
     }
 
-    // Filtrar por estado
+    // Aplicar filtro de estado
     if (this.filtroEstado) {
-      resultadosFiltrados = resultadosFiltrados.filter(r =>
+      this.resultados = this.resultados.filter(r =>
         this.normalizarTexto(r.estado) === this.normalizarTexto(this.filtroEstado)
       );
     }
 
-    // Filtrar por fecha
+    // Aplicar filtro de fecha
     if (this.filtroFecha) {
       const ahora = new Date();
-      resultadosFiltrados = resultadosFiltrados.filter(r => {
+      this.resultados = this.resultados.filter(r => {
         const fechaResultado = new Date(r.fecha);
         switch (this.filtroFecha) {
           case 'semana':
@@ -321,8 +470,6 @@ export class BusquedaGlobalComponent implements OnInit {
         }
       });
     }
-
-    this.resultados = resultadosFiltrados;
   }
 
   cambiarTab(tab: string): void {
@@ -333,20 +480,21 @@ export class BusquedaGlobalComponent implements OnInit {
     this.filtroFecha = '';
     this.filtroEstado = '';
     this.searchQuery = '';
+    this.paginaActual = 1;
     this.tiposFiltro.forEach(tipo => tipo.selected = true);
-    this.cargarDatosPrueba();
+    this.todosLosResultados = [];
+    this.resultados = [];
+    this.hasSearched = false;
+    this.cargarDatosIniciales();
   }
 
   aplicarFiltros(): void {
-    if (this.searchQuery.trim()) {
-      this.onSearch();
-    } else {
-      this.resultados = [...this.resultadosOriginales];
-      this.aplicarFiltrosActivos();
-      this.actualizarContadores();
+    if (this.searchQuery.trim().length >= 2) {
+      this.searchSubject.next(this.searchQuery.trim());
     }
   }
 
+  // Métodos de utilidad mantenidos igual...
   getIconClass(tipo: string): string {
     switch (this.tipoAClave(tipo)) {
       case 'tramites':
@@ -402,5 +550,140 @@ export class BusquedaGlobalComponent implements OnInit {
     if (!this.searchQuery) return text;
     const regex = new RegExp(`(${this.searchQuery})`, 'gi');
     return text.replace(regex, '<span class="search-highlight">$1</span>');
+  }
+
+  // Getter para mostrar mensaje cuando no hay resultados
+  get mostrarMensajeSinResultados(): boolean {
+    return this.hasSearched && this.resultados.length === 0 && !this.isLoading;
+  }
+
+  // Getter para mostrar mensaje de búsqueda mínima
+  get mostrarMensajeBusquedaMinima(): boolean {
+    return !this.hasSearched && this.searchQuery.trim().length > 0 && this.searchQuery.trim().length < 2;
+  }
+
+
+  private aplicarFiltrosYPaginacion(): void {
+    let resultadosFiltrados = [...this.todosLosResultados];
+
+    // Aplicar filtros de tipo
+    const tiposSeleccionados = this.tiposFiltro
+      .filter(t => t.selected)
+      .map(t => t.key);
+
+    if (tiposSeleccionados.length < this.tiposFiltro.length) {
+      resultadosFiltrados = resultadosFiltrados.filter(r => {
+        const claveTipo = this.tipoAClave(r.tipo);
+        return tiposSeleccionados.includes(claveTipo);
+      });
+    }
+
+    // Aplicar filtro de estado
+    if (this.filtroEstado) {
+      resultadosFiltrados = resultadosFiltrados.filter(r =>
+        this.normalizarTexto(r.estado) === this.normalizarTexto(this.filtroEstado)
+      );
+    }
+
+    // Aplicar filtro de fecha
+    if (this.filtroFecha) {
+      const ahora = new Date();
+      resultadosFiltrados = resultadosFiltrados.filter(r => {
+        const diasDiferencia = Math.floor((ahora.getTime() - r.fecha.getTime()) / (1000 * 60 * 60 * 24));
+
+        switch (this.filtroFecha) {
+          case 'hoy': return diasDiferencia === 0;
+          case 'semana': return diasDiferencia <= 7;
+          case 'mes': return diasDiferencia <= 30;
+          default: return true;
+        }
+      });
+    }
+
+    // Mostrar solo los primeros elementos según la página actual
+    const elementosAMostrar = this.paginaActual * this.itemsPorPagina;
+    this.resultados = resultadosFiltrados.slice(0, elementosAMostrar);
+    this.totalResultados = resultadosFiltrados.length;
+
+    this.actualizarContadores();
+  }
+
+  // Método para cargar más resultados
+  cargarMasResultados(): void {
+    if (this.loadingMore) return;
+
+    const hayMasTramitesEnBackend = this.contarTipoEnResultados('Trámite') < this.totalTramitesBackend;
+    const hayMasRegistrosEnBackend = this.contarTipoEnResultados('Registro Sanitario') < this.totalRegistrosBackend;
+
+    if (hayMasTramitesEnBackend || hayMasRegistrosEnBackend) {
+      // Cargar más datos del backend
+      this.cargarMasDelBackend();
+    } else {
+      // Solo mostrar más de los datos que ya tenemos
+      this.paginaActual++;
+      this.aplicarFiltrosYPaginacion();
+    }
+  }
+
+  private cargarMasDelBackend(): void {
+    this.loadingMore = true;
+
+    const tramitesActuales = this.contarTipoEnResultados('Trámite');
+    const registrosActuales = this.contarTipoEnResultados('Registro Sanitario');
+
+    // Calcular cuántos elementos necesitamos del backend
+    const tramitesSkip = Math.max(0, tramitesActuales);
+    const registrosSkip = Math.max(0, registrosActuales);
+
+    const query = this.searchQuery.trim() || '';
+
+    this.dashboardService.busquedaGlobal(
+      query,
+      this.itemsPorPagina,
+      this.itemsPorPagina
+    ).subscribe({
+      next: (response: BusquedaGlobalResponseDTO) => {
+        this.paginaActual++;
+
+        // Filtrar solo los elementos nuevos que no están ya en nuestros resultados
+        const tramitesNuevos = response.tramites.filter(tramite =>
+          !this.todosLosResultados.some(r => r.id === tramite.id.toString() && r.tipo === 'Trámite')
+        );
+
+        const registrosNuevos = response.registros.filter(registro =>
+          !this.todosLosResultados.some(r => r.id === registro.id.toString() && r.tipo === 'Registro Sanitario')
+        );
+
+        // Crear un objeto de respuesta solo con los nuevos
+        const responseNuevos: BusquedaGlobalResponseDTO = {
+          tramites: tramitesNuevos,
+          registros: registrosNuevos,
+          totalTramites: response.totalTramites,
+          totalRegistros: response.totalRegistros
+        };
+
+        this.procesarResultadosBackend(responseNuevos);
+        this.loadingMore = false;
+      },
+      error: (error) => {
+        console.error('Error cargando más resultados:', error);
+        this.loadingMore = false;
+      }
+    });
+  }
+
+  // Método auxiliar para contar tipos en resultados actuales
+  private contarTipoEnResultados(tipo: string): number {
+    return this.todosLosResultados.filter(r => r.tipo === tipo).length;
+  }
+
+  // Getter para saber si hay más resultados disponibles
+  get hayMasResultados(): boolean {
+    const resultadosVisibles = this.resultados.length;
+    const totalDisponible = this.todosLosResultados.length;
+    const hayMasEnBackend = this.contarTipoEnResultados('Trámite') < this.totalTramitesBackend ||
+      this.contarTipoEnResultados('Registro Sanitario') < this.totalRegistrosBackend;
+
+    return resultadosVisibles < totalDisponible || hayMasEnBackend;
   }
 }

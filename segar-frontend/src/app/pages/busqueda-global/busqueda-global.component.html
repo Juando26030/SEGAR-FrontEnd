@@ -6,14 +6,61 @@
       <div class="header-content">
         <div class="title-section">
           <h1 class="panel-title animated">
-            <span class="title-main">Búsqueda Global</span>
+            <i class="fas fa-search icon-glow mr-3"></i>
+            Búsqueda Global
           </h1>
           <p class="panel-subtitle animated">
-            Busca trámites, documentos y usuarios en todo el sistema
+            Encuentra trámites, registros sanitarios, documentos y usuarios
           </p>
           <div class="title-indicator pulse"></div>
         </div>
       </div>
+    </div>
+
+    <!-- Indicador de carga inicial -->
+    <div *ngIf="isLoading && !hasSearched" class="text-center py-12">
+      <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-blue-500 bg-blue-100">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Cargando datos...
+      </div>
+    </div>
+
+    <!-- Indicador de carga durante búsqueda -->
+    <div *ngIf="isLoading && hasSearched" class="text-center py-8">
+      <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-blue-500 bg-blue-100">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Buscando...
+      </div>
+    </div>
+
+    <!-- Mensaje de bienvenida cuando no hay búsqueda activa -->
+    <div *ngIf="!hasSearched && !isLoading" class="text-center py-12">
+      <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Búsqueda Global</h3>
+      <p class="text-gray-500 mb-4">Busca trámites, registros sanitarios, documentos y usuarios</p>
+      <p class="text-sm text-gray-400">Ingresa un término de búsqueda para comenzar</p>
+    </div>
+
+    <!-- Mensaje para búsqueda muy corta -->
+    <div *ngIf="mostrarMensajeBusquedaMinima" class="text-center py-8 text-gray-500">
+      <p>Ingresa al menos 2 caracteres para buscar</p>
+    </div>
+
+    <!-- Mensaje sin resultados -->
+    <div *ngIf="mostrarMensajeSinResultados" class="text-center py-8 text-gray-500">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <p class="mt-2">No se encontraron resultados para "{{searchQuery}}"</p>
+      <p class="text-sm">Intenta con otros términos de búsqueda</p>
     </div>
 
     <!-- Main Content -->
@@ -29,18 +76,19 @@
           <input
             type="text"
             [(ngModel)]="searchQuery"
-            (keyup.enter)="onSearch()"
+            (input)="onSearch()"
+            placeholder="Buscar trámites, registros, documentos..."
             class="search-input"
-            placeholder="Buscar trámites, documentos o usuarios...">
+            autocomplete="off">
           <div class="search-actions">
-            <button (click)="toggleFilters()" class="filter-button">
-              <span>Filtros</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            <button
+              type="button"
+              (click)="toggleFilters()"
+              class="filter-button"
+              [class.active]="showFilters">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
               </svg>
-            </button>
-            <button type="button" (click)="onSearch()" class="search-button">
-              <span>Buscar</span>
             </button>
           </div>
         </div>
@@ -48,56 +96,69 @@
         <!-- Search Filters -->
         <div [class.hidden]="!showFilters" class="filters-container">
           <div class="filters-grid">
+            <!-- Filtro por tipo -->
             <div class="filter-group">
               <label class="filter-label">Tipo</label>
-              <div class="checkbox-group">
-                <label class="checkbox-item" *ngFor="let tipo of tiposFiltro">
-                  <input type="checkbox" [(ngModel)]="tipo.selected" class="checkbox">
-                  <span class="checkbox-label">{{tipo.label}}</span>
+              <div class="filter-checkboxes">
+                <label *ngFor="let tipo of tiposFiltro" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="tipo.selected"
+                    (change)="aplicarFiltros()"
+                    class="checkbox-input">
+                  <span class="checkbox-text">{{tipo.label}}</span>
                 </label>
               </div>
             </div>
-            <div class="filter-group">
-              <label class="filter-label">Fecha</label>
-              <select [(ngModel)]="filtroFecha" class="select-input">
-                <option value="">Cualquier fecha</option>
-                <option value="semana">Última semana</option>
-                <option value="mes">Último mes</option>
-                <option value="ano">Último año</option>
-                <option value="custom">Personalizado</option>
-              </select>
-            </div>
+
+            <!-- Filtro por estado -->
             <div class="filter-group">
               <label class="filter-label">Estado</label>
-              <select [(ngModel)]="filtroEstado" class="select-input">
-                <option value="">Todos</option>
+              <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()" class="filter-select">
+                <option value="">Todos los estados</option>
                 <option value="activo">Activo</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="completado">Completado</option>
                 <option value="archivado">Archivado</option>
               </select>
             </div>
+
+            <!-- Filtro por fecha -->
+            <div class="filter-group">
+              <label class="filter-label">Período</label>
+              <select [(ngModel)]="filtroFecha" (change)="aplicarFiltros()" class="filter-select">
+                <option value="">Todo el período</option>
+                <option value="hoy">Hoy</option>
+                <option value="semana">Esta semana</option>
+                <option value="mes">Este mes</option>
+              </select>
+            </div>
           </div>
+
           <div class="filters-actions">
             <button type="button" (click)="limpiarFiltros()" class="clear-filters-button">
               Limpiar filtros
-            </button>
-            <button type="button" (click)="aplicarFiltros()" class="apply-filters-button">
-              Aplicar filtros
             </button>
           </div>
         </div>
       </div>
 
       <!-- Search Results -->
-      <div class="results-section" *ngIf="resultados.length > 0">
-        <div class="results-header">
+      <div class="results-section" *ngIf="hasSearched && !isLoading">
+        <div class="results-header" *ngIf="resultados.length > 0">
           <h2 class="results-title">Resultados de búsqueda</h2>
-          <div class="results-count">Mostrando {{resultados.length}} de {{totalResultados}} resultados</div>
+          <div class="results-count">
+            Mostrando {{resultados.length}}
+            <span *ngIf="totalResultados > resultados.length">de {{totalResultados}}</span>
+            resultados
+            <span *ngIf="totalTramitesBackend > 0 || totalRegistrosBackend > 0" class="text-sm text-gray-500 ml-2">
+              ({{totalTramitesBackend}} trámites, {{totalRegistrosBackend}} registros en total)
+            </span>
+          </div>
         </div>
 
         <!-- Results Tabs -->
-        <div class="tabs-container">
+        <div class="tabs-container" *ngIf="resultados.length > 0">
           <nav class="tabs-nav">
             <button
               *ngFor="let tab of tabs"
@@ -110,7 +171,7 @@
         </div>
 
         <!-- Results List -->
-        <div class="results-list">
+        <div class="results-list" *ngIf="resultados.length > 0">
           <div *ngFor="let resultado of resultadosFiltrados" class="result-item">
             <div class="result-content">
               <div class="result-icon" [ngClass]="getIconClass(resultado.tipo)">
@@ -137,6 +198,41 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Botón Ver más resultados -->
+        <div *ngIf="hayMasResultados && !isLoading && resultados.length > 0" class="text-center mt-8 mb-4">
+          <button
+            (click)="cargarMasResultados()"
+            [disabled]="loadingMore"
+            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl">
+
+            <span *ngIf="!loadingMore" class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+              Ver más resultados
+            </span>
+
+            <span *ngIf="loadingMore" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Cargando más...
+            </span>
+          </button>
+        </div>
+
+        <!-- Información de resultados -->
+        <div *ngIf="hasSearched && resultados.length > 0" class="text-center mt-4 pb-6">
+          <p class="text-sm text-gray-500">
+            Mostrando <span class="font-semibold">{{resultados.length}}</span>
+            de <span class="font-semibold">{{totalResultados}}</span> resultados
+          </p>
+          <p *ngIf="totalTramitesBackend > 0 || totalRegistrosBackend > 0" class="text-xs text-gray-400 mt-1">
+            Total disponible: {{totalTramitesBackend}} trámites y {{totalRegistrosBackend}} registros sanitarios
+          </p>
         </div>
       </div>
     </main>
