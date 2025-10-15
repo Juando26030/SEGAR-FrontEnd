@@ -13,7 +13,7 @@ import {
   providedIn: 'root'
 })
 export class DocumentGeneratorService {
-  private readonly API_URL = 'http://localhost:8080/api';
+  private readonly API_URL = 'http://localhost:8090/api';
 
   // Estado del componente
   private documentosDisponiblesSubject = new BehaviorSubject<TipoDocumentoInvimaDTO[]>([]);

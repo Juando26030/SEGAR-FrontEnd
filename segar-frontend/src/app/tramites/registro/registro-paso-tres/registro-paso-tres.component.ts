@@ -487,25 +487,50 @@ export class RegistroPasoTresComponent {
       es_importado: this.solicitudForm.isImported
     };
 
-    // Obtener los documentos requeridos dinámicamente
-    this.resultadoClasificacion = this.tramiteService.clasificarProducto(clasificacion);
-    this.clasificacionCompleta = true;
+    // ✅ AHORA USA EL BACKEND - Obtener los documentos requeridos dinámicamente
+    this.tramiteService.clasificarProducto(clasificacion).subscribe({
+      next: (resultado) => {
+        this.resultadoClasificacion = resultado;
+        this.clasificacionCompleta = true;
 
-    // Mostrar alerta con información detallada
-    let mensajeDetalle = `Producto clasificado correctamente.\n\n`;
-    mensajeDetalle += `Tipo de trámite: ${this.resultadoClasificacion.tramite}\n`;
-    mensajeDetalle += `${this.resultadoClasificacion.tramite_descripcion}\n\n`;
-    mensajeDetalle += `Se han determinado ${this.resultadoClasificacion.documentos.length} documentos requeridos.\n\n`;
+        // Mostrar alerta con información detallada
+        let mensajeDetalle = `Producto clasificado correctamente.\n\n`;
+        mensajeDetalle += `Tipo de trámite: ${resultado.tramite}\n`;
+        mensajeDetalle += `${resultado.tramite_descripcion}\n\n`;
+        mensajeDetalle += `Se han determinado ${resultado.documentos.length} documentos requeridos.\n\n`;
 
-    if (this.mensajeReglaActiva) {
-      mensajeDetalle += `${this.mensajeReglaActiva}\n\n`;
-    }
+        if (this.mensajeReglaActiva) {
+          mensajeDetalle += `${this.mensajeReglaActiva}\n\n`;
+        }
 
-    mensajeDetalle += `Tiempo estimado: ${this.resultadoClasificacion.tiempo_estimado}\n`;
-    mensajeDetalle += `Costo estimado: ${this.resultadoClasificacion.costo_estimado}`;
+        mensajeDetalle += `Tiempo estimado: ${resultado.tiempo_estimado}\n`;
+        mensajeDetalle += `Costo estimado: ${resultado.costo_estimado}`;
 
-    alert(mensajeDetalle);
-    this.setActiveTab('documentacion');
+        alert(mensajeDetalle);
+        this.setActiveTab('documentacion');
+      },
+      error: (error) => {
+        console.error('❌ Error al clasificar producto:', error);
+        console.error('❌ Status Code:', error.status);
+        console.error('❌ Error Message:', error.message);
+        console.error('❌ Error Details:', error.error);
+        console.error('❌ Full Error Object:', JSON.stringify(error, null, 2));
+
+        let errorMessage = 'Error al obtener los documentos requeridos del servidor.';
+
+        if (error.status === 0) {
+          errorMessage += '\n\nNo se pudo conectar con el servidor. Verifique su conexión a internet.';
+        } else if (error.status === 404) {
+          errorMessage += '\n\nEndpoint no encontrado. Verifique que el backend esté corriendo.';
+        } else if (error.status === 500) {
+          errorMessage += '\n\nError interno del servidor.';
+        } else if (error.error && error.error.message) {
+          errorMessage += '\n\nDetalle: ' + error.error.message;
+        }
+
+        alert(errorMessage + '\n\nPor favor intente nuevamente.');
+      }
+    });
   }
 
   onDocumentoCompletado(evento: { documentoId: string; datos: any }): void {
