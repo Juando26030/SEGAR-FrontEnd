@@ -5,9 +5,7 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import {
   DashboardService,
-  BusquedaGlobalResponseDTO,
-  TramiteBusquedaDTO,
-  RegistroBusquedaDTO
+  BusquedaGlobalResponseDTO
 } from '../../core/services/dashboard.service';
 
 interface ResultadoBusqueda {
@@ -49,7 +47,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   tabActual: string = 'todos';
   isLoading: boolean = false;
   hasSearched: boolean = false;
-  itemsPorPagina: number = 5;
+  itemsPorPagina: number = 10;
   paginaActual: number = 1;
   loadingMore: boolean = false;
 
@@ -57,7 +55,14 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private searchSubscription?: Subscription;
 
-
+  // Nuevo: Contador de resultados mostrados por pestaña
+  resultadosMostradosPorTab: { [key: string]: number } = {
+    'todos': 10,
+    'tramites': 10,
+    'documentos': 10,
+    'usuarios': 10,
+    'registros-sanitarios': 10
+  };
 
   tiposFiltro: FiltroTipo[] = [
     { key: 'tramites', label: 'Trámites', selected: true },
@@ -409,9 +414,48 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
 
   get resultadosFiltrados(): ResultadoBusqueda[] {
     if (this.tabActual === 'todos') {
-      return this.resultados;
+      return this.resultados.slice(0, this.resultadosMostradosPorTab[this.tabActual]);
     }
-    return this.resultados.filter(r => this.tipoAClave(r.tipo) === this.tabActual);
+
+    const filtrados = this.resultados.filter(r => this.tipoAClave(r.tipo) === this.tabActual);
+    return filtrados.slice(0, this.resultadosMostradosPorTab[this.tabActual]);
+  }
+
+  // Getter para saber cuántos resultados hay en total para la tab actual
+  get totalResultadosTabActual(): number {
+    if (this.tabActual === 'todos') {
+      return this.resultados.length;
+    }
+    return this.resultados.filter(r => this.tipoAClave(r.tipo) === this.tabActual).length;
+  }
+
+  // Nuevo getter para verificar si hay más resultados en la tab actual
+  get hayMasResultadosEnTab(): boolean {
+    const totalEnTab = this.totalResultadosTabActual;
+    const mostrados = this.resultadosMostradosPorTab[this.tabActual];
+
+    // Si los resultados mostrados ya son iguales o mayores al total en la tab, verificar backend
+    if (mostrados < totalEnTab) {
+      return true;
+    }
+
+    // Ya mostramos todos los resultados locales de esta tab
+    // Ahora verificar si hay más en el backend según la tab actual
+    if (this.tabActual === 'tramites') {
+      const tramitesTotalesBackend = this.contarTipoEnResultados('Trámite');
+      return tramitesTotalesBackend < this.totalTramitesBackend;
+    } else if (this.tabActual === 'registros-sanitarios') {
+      const registrosTotalesBackend = this.contarTipoEnResultados('Registro Sanitario');
+      return registrosTotalesBackend < this.totalRegistrosBackend;
+    } else if (this.tabActual === 'todos') {
+      // Para "todos", verificar si hay más de cualquier tipo en backend
+      const tramitesTotales = this.contarTipoEnResultados('Trámite');
+      const registrosTotales = this.contarTipoEnResultados('Registro Sanitario');
+      return tramitesTotales < this.totalTramitesBackend || registrosTotales < this.totalRegistrosBackend;
+    }
+
+    // Para documentos y usuarios (datos quemados), no hay más que cargar
+    return false;
   }
 
   toggleFilters(): void {
@@ -485,6 +529,16 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     this.todosLosResultados = [];
     this.resultados = [];
     this.hasSearched = false;
+
+    // Resetear contadores de resultados mostrados por pestaña
+    this.resultadosMostradosPorTab = {
+      'todos': 10,
+      'tramites': 10,
+      'documentos': 10,
+      'usuarios': 10,
+      'registros-sanitarios': 10
+    };
+
     this.cargarDatosIniciales();
   }
 
@@ -600,30 +654,37 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Mostrar solo los primeros elementos según la página actual
-    const elementosAMostrar = this.paginaActual * this.itemsPorPagina;
-    this.resultados = resultadosFiltrados.slice(0, elementosAMostrar);
+    // CAMBIO: Guardar TODOS los resultados filtrados (sin paginación)
+    // La paginación se maneja por pestaña en el getter resultadosFiltrados
+    this.resultados = resultadosFiltrados;
     this.totalResultados = resultadosFiltrados.length;
 
     this.actualizarContadores();
   }
 
+
   // Método para cargar más resultados
   cargarMasResultados(): void {
     if (this.loadingMore) return;
 
+    const totalEnTab = this.totalResultadosTabActual;
+    const mostrados = this.resultadosMostradosPorTab[this.tabActual];
+
+    // Si hay más resultados locales para mostrar en esta pestaña
+    if (mostrados < totalEnTab) {
+      this.resultadosMostradosPorTab[this.tabActual] += 10;
+      return;
+    }
+
+    // Si no hay más resultados locales, intentar cargar del backend
     const hayMasTramitesEnBackend = this.contarTipoEnResultados('Trámite') < this.totalTramitesBackend;
     const hayMasRegistrosEnBackend = this.contarTipoEnResultados('Registro Sanitario') < this.totalRegistrosBackend;
 
     if (hayMasTramitesEnBackend || hayMasRegistrosEnBackend) {
-      // Cargar más datos del backend
       this.cargarMasDelBackend();
-    } else {
-      // Solo mostrar más de los datos que ya tenemos
-      this.paginaActual++;
-      this.aplicarFiltrosYPaginacion();
     }
   }
+
 
   private cargarMasDelBackend(): void {
     this.loadingMore = true;
@@ -679,11 +740,12 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
 
   // Getter para saber si hay más resultados disponibles
   get hayMasResultados(): boolean {
-    const resultadosVisibles = this.resultados.length;
-    const totalDisponible = this.todosLosResultados.length;
+    const totalElementosMostrados = this.paginaActual * this.itemsPorPagina;
+    const totalDisponibleLocal = this.todosLosResultados.length;
     const hayMasEnBackend = this.contarTipoEnResultados('Trámite') < this.totalTramitesBackend ||
       this.contarTipoEnResultados('Registro Sanitario') < this.totalRegistrosBackend;
 
-    return resultadosVisibles < totalDisponible || hayMasEnBackend;
+    return totalElementosMostrados < totalDisponibleLocal || hayMasEnBackend;
   }
+
 }

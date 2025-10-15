@@ -201,7 +201,7 @@
         </div>
 
         <!-- Botón Ver más resultados -->
-        <div *ngIf="hayMasResultados && !isLoading && resultados.length > 0" class="text-center mt-8 mb-4">
+        <div *ngIf="hayMasResultadosEnTab && !isLoading && resultados.length > 0" class="text-center mt-8 mb-4">
           <button
             (click)="cargarMasResultados()"
             [disabled]="loadingMore"
@@ -227,11 +227,8 @@
         <!-- Información de resultados -->
         <div *ngIf="hasSearched && resultados.length > 0" class="text-center mt-4 pb-6">
           <p class="text-sm text-gray-500">
-            Mostrando <span class="font-semibold">{{resultados.length}}</span>
-            de <span class="font-semibold">{{totalResultados}}</span> resultados
-          </p>
-          <p *ngIf="totalTramitesBackend > 0 || totalRegistrosBackend > 0" class="text-xs text-gray-400 mt-1">
-            Total disponible: {{totalTramitesBackend}} trámites y {{totalRegistrosBackend}} registros sanitarios
+            Mostrando <span class="font-semibold">{{resultadosFiltrados.length}}</span>
+            de <span class="font-semibold">{{totalResultadosTabActual}}</span> resultados en esta pestaña
           </p>
         </div>
       </div>
