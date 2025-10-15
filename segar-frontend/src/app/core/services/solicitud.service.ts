@@ -15,7 +15,7 @@ import {
   providedIn: 'root'
 })
 export class SolicitudService {
-  private readonly baseUrl = 'http://localhost:8090/api/solicitudes';
+  private readonly baseUrl = 'http://35.238.19.224:8090/api/solicitudes';
 
   constructor(private http: HttpClient) {}
 

@@ -47,7 +47,7 @@ export interface SolicitudResponse {
   providedIn: 'root'
 })
 export class RadicacionService {
-  private apiUrl = 'http://localhost:8090/api/radicacion';
+  private apiUrl = 'http://35.238.19.224:8090/api/radicacion';
 
   private httpOptions = {
     headers: new HttpHeaders({

@@ -54,7 +54,7 @@ export interface TramiteCompleto {
   providedIn: 'root'
 })
 export class ResolucionService {
-  private apiUrl = 'http://localhost:8090/api/tramites';
+  private apiUrl = 'http://35.238.19.224:8090/api/tramites';
 
   private httpOptions = {
     headers: new HttpHeaders({

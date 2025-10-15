@@ -7,11 +7,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.getToken();
 
   // Solo agregar el token si la request es a nuestro backend
-  if (token && req.url.includes('localhost:8090')) {
+  if (token && req.url.includes('35.238.19.224:8090')) {
     const authReq = req.clone({
       headers: req.headers.set('Authorization', `Bearer ${token}`)
     });
-    
+
     console.log('Adding auth header to request:', req.url);
     return next(authReq);
   }
