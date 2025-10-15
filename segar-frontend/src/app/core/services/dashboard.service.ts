@@ -3,6 +3,33 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+
+export interface BusquedaGlobalResponseDTO {
+  tramites: TramiteBusquedaDTO[];
+  registros: RegistroBusquedaDTO[];
+  totalTramites: number;
+  totalRegistros: number;
+}
+
+export interface TramiteBusquedaDTO {
+  id: number;
+  radicadoNumber: string;
+  productName: string;
+  procedureType: string;
+  currentStatus: string;
+  submissionDate: string;
+  lastUpdate: string;
+}
+
+export interface RegistroBusquedaDTO {
+  id: number;
+  numeroRegistro: string;
+  productName: string;
+  estado: string;
+  fechaExpedicion: string;
+  fechaVencimiento: string;
+}
+
 // DTOs para las respuestas de la API
 export interface DashboardResumenDTO {
   totalTramites: number;
@@ -176,5 +203,23 @@ export class DashboardService {
 
   getTramiteDetalle(id: number): Observable<TramiteDetalleDTO> {
     return this.http.get<TramiteDetalleDTO>(`${this.basePath}/tramite/${id}`);
+  }
+
+  busquedaGlobal(
+    query: string,
+    limitTramites?: number,
+    limitRegistros?: number
+  ): Observable<BusquedaGlobalResponseDTO> {
+    let params = new HttpParams().set('q', query);
+
+    if (limitTramites) {
+      params = params.set('limitTramites', limitTramites.toString());
+    }
+
+    if (limitRegistros) {
+      params = params.set('limitRegistros', limitRegistros.toString());
+    }
+
+    return this.http.get<BusquedaGlobalResponseDTO>(`${this.basePath}/busqueda`, { params });
   }
 }
