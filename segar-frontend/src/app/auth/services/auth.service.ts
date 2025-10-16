@@ -7,6 +7,9 @@ export interface UserInfo {
   email: string;
   roles: string[];
   fullName: string;
+  createdAt?: Date;
+  firstName?: string;
+  lastName?: string;
 }
 
 @Injectable({
@@ -82,7 +85,7 @@ export class AuthService {
     try {
       console.log('👤 =================================');
       console.log('👤 CARGANDO PERFIL DE USUARIO');
-      
+
       if (!this.keycloak || !this.keycloak.tokenParsed) {
         console.error('❌ No hay token parseado disponible');
         return;
@@ -91,20 +94,27 @@ export class AuthService {
       const tokenParsed = this.keycloak.tokenParsed as any;
       console.log('👤 Token parseado completo:', tokenParsed);
       console.log('👤 Resource access:', tokenParsed?.resource_access);
-      
+
       // Extraer roles de resource_access.segar-backend.roles
       const roles = tokenParsed?.resource_access?.['segar-backend']?.roles || [];
       console.log('👤 Roles extraídos de segar-backend:', roles);
-      
+
       // Usar datos del token en lugar de loadUserProfile() que puede fallar
       const userInfo: UserInfo = {
         username: tokenParsed.preferred_username || '',
         email: tokenParsed.email || '',
         fullName: tokenParsed.name || `${tokenParsed.given_name || ''} ${tokenParsed.family_name || ''}`.trim(),
-        roles: roles
+        roles: roles,
+        firstName: tokenParsed.given_name,
+        lastName: tokenParsed.family_name,
+        // user_created_timestamp viene del mapper personalizado de Keycloak (en milisegundos)
+        createdAt: tokenParsed.user_created_timestamp
+          ? new Date(tokenParsed.user_created_timestamp)
+          : undefined
       };
 
       console.log('👤 UserInfo creado:', userInfo);
+      console.log('👤 Fecha de creación del usuario:', userInfo.createdAt);
       this.userSubject.next(userInfo);
       console.log('✅ PERFIL DE USUARIO CARGADO CORRECTAMENTE');
       console.log('👤 =================================');
@@ -117,7 +127,7 @@ export class AuthService {
   async refreshToken(): Promise<boolean> {
     try {
       if (!this.keycloak) return false;
-      
+
       const refreshed = await this.keycloak.updateToken(30);
       if (refreshed) {
         console.log('Token refreshed');
@@ -143,9 +153,9 @@ export class AuthService {
   hasRole(role: string): boolean {
     const user = this.userSubject.value;
     if (!user?.roles) return false;
-    
+
     // Buscar el rol de forma case-insensitive y con variaciones
-    return user.roles.some(userRole => 
+    return user.roles.some(userRole =>
       userRole.toUpperCase() === role.toUpperCase() ||
       userRole === role ||
       (role === 'ADMIN' && userRole === 'Admin') ||
@@ -172,7 +182,7 @@ export class AuthService {
       console.log('🔐 INICIANDO LOGIN CON CREDENCIALES');
       console.log('🔐 Usuario:', username);
       console.log('🔐 =================================');
-      
+
       // NO llamar initKeycloakSilent() - puede causar bloqueos
       // En su lugar, crear instancia básica si no existe
       if (!this.keycloak) {
@@ -184,7 +194,7 @@ export class AuthService {
         });
         console.log('✅ Instancia de Keycloak creada');
       }
-      
+
       console.log('📡 Haciendo petición al servidor de tokens...');
       const response = await fetch('http://localhost:8080/realms/segar/protocol/openid-connect/token', {
         method: 'POST',
@@ -206,7 +216,7 @@ export class AuthService {
         const tokenData = await response.json();
         console.log('✅ TOKEN OBTENIDO EXITOSAMENTE');
         console.log('🔍 Access token (primeros 50 caracteres):', tokenData.access_token?.substring(0, 50) + '...');
-        
+
         // Configurar Keycloak con el token obtenido
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
@@ -234,7 +244,7 @@ export class AuthService {
         console.log('🔍 Estado final isAuthenticated():', finalAuthState);
         console.log('🔍 Usuario cargado:', this.getUser());
         console.log('🔐 =================================');
-        
+
         return finalAuthState;
       } else {
         const errorText = await response.text();
@@ -268,13 +278,13 @@ export class AuthService {
 
   async logout(): Promise<void> {
     console.log('🚪 Cerrando sesión...');
-    
+
     // Limpiar el estado de autenticación
     this.userSubject.next(null);
-    
+
     // Limpiar localStorage si es necesario
     localStorage.removeItem('userInfo');
-    
+
     // Redirigir al login
     console.log('✅ Sesión cerrada correctamente');
     window.location.href = '/auth/login';
