@@ -51,7 +51,7 @@ export interface FileRules {
   providedIn: 'root'
 })
 export class DocumentTemplateService {
-  private readonly baseUrl = 'http://localhost:8090/api/document-templates';
+  private readonly baseUrl = 'http://35.238.19.224:8090/api/document-templates';
 
   constructor(private http: HttpClient) {}
 

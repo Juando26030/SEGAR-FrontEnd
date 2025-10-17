@@ -28,7 +28,7 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Inicializando Keycloak en modo silencioso...');
         this.keycloak = new Keycloak({
-          url: 'http://localhost:8080',
+          url: 'https://35.238.19.224',
           realm: 'segar',
           clientId: 'segar-frontend'
         });
@@ -50,7 +50,7 @@ export class AuthService {
   async initKeycloak(): Promise<boolean> {
     try {
       this.keycloak = new Keycloak({
-        url: 'http://localhost:8080',
+        url: 'https://35.238.19.224',
         realm: 'segar',
         clientId: 'segar-frontend'
       });
@@ -178,7 +178,7 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Creando instancia básica de Keycloak...');
         this.keycloak = new Keycloak({
-          url: 'http://35.238.19.224:8080',
+          url: 'https://35.238.19.224',
           realm: 'segar',
           clientId: 'segar-frontend'
         });
@@ -186,7 +186,7 @@ export class AuthService {
       }
 
       console.log('📡 Haciendo petición al servidor de tokens...');
-      const response = await fetch('http://35.238.19.224:8080/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch('https://35.238.19.224/realms/segar/protocol/openid-connect/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -211,7 +211,7 @@ export class AuthService {
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
           this.keycloak = new Keycloak({
-            url: 'http://35.238.19.224:8080',
+            url: 'https://35.238.19.224',
             realm: 'segar',
             clientId: 'segar-frontend'
           });

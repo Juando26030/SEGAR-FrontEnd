@@ -38,7 +38,7 @@ export interface UpdateDocumentInstanceRequest {
   providedIn: 'root'
 })
 export class DocumentInstanceService {
-  private readonly baseUrl = 'http://localhost:8090';
+  private readonly baseUrl = 'http://35.238.19.224:8090';
 
   constructor(private http: HttpClient) {}
 
