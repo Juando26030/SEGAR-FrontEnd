@@ -8,7 +8,7 @@ import { AuthPageComponent } from './auth/autenticacion/auth-page/auth-page.comp
 import { LoginFormComponent } from './auth/autenticacion/login-form/login-form.component';
 import { RecoverFormComponent } from './auth/autenticacion/recover-form/recover-form.component';
 import { PaginaRegistroComponent } from './pages/nuevo-usuario/pagina-registro/pagina-registro.component';
-import { UserManagementComponent } from './pages/usuarios/user-management/user-management.component';
+import { UsuariosComponent } from './pages/usuarios/usuarios.component';  // <- COMPONENTE CORRECTO
 import { UserProfileComponent } from './pages/perfil-usuario/user-profile/user-profile.component';
 import { RegistroPasoUnoComponent } from './tramites/registro/registro-paso-uno/registro-paso-uno.component';
 import { RegistroPasoDosComponent } from './tramites/registro/registro-paso-dos/registro-paso-dos.component';
@@ -38,7 +38,7 @@ export const routes: Routes = [
       { path: 'calendario', component: CalendarioComponent },
       { path: 'nuevo', component: NuevoTramiteComponent },
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },
-      { path: 'usuarios', component: UserManagementComponent },
+      { path: 'usuarios', component: UsuariosComponent },  // <- COMPONENTE CORRECTO SIN DATOS QUEMADOS
       { path: 'perfil', component: UserProfileComponent },
       { path: 'configuracion', component: ConfiguracionComponent },
       { path: 'generador-documento', component: GeneradorDocumentoComponent },

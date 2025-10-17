@@ -36,19 +36,31 @@ export class MenuLateralComponent implements OnInit {
       return;
     }
 
-    // Obtener datos completos del backend
+    console.log('👤 Cargando perfil de usuario desde token:', userInfo.username);
+
+    // Usar datos del token de Keycloak directamente (más confiable)
+    this.userProfile.name = userInfo.fullName || `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || userInfo.username;
+    this.userProfile.role = this.getRoleDisplayName(userInfo.roles || []);
+    this.userProfile.initials = this.getInitials(this.userProfile.name);
+
+    console.log('✅ Perfil cargado desde token:', this.userProfile);
+
+    // Intentar obtener datos completos del backend (opcional, solo para enriquecer)
     this.usuarioService.getUsuarioByUsername(userInfo.username).subscribe({
       next: (usuario: Usuario) => {
-        this.userProfile.name = usuario.fullName;
-        this.userProfile.role = this.getRoleDisplayName(usuario.roles || [usuario.role]);
-        this.userProfile.initials = this.getInitials(usuario.fullName);
+        console.log('✅ Datos adicionales del backend obtenidos:', usuario);
+        // Solo actualizar si hay datos más completos
+        if (usuario.fullName) {
+          this.userProfile.name = usuario.fullName;
+          this.userProfile.initials = this.getInitials(usuario.fullName);
+        }
+        if (usuario.role) {
+          this.userProfile.role = this.getRoleDisplayName([usuario.role]);
+        }
       },
       error: (error) => {
-        console.error('❌ Error al cargar usuario:', error);
-        // Fallback: usar datos del token
-        this.userProfile.name = userInfo.fullName || userInfo.username;
-        this.userProfile.role = this.getRoleDisplayName(userInfo.roles);
-        this.userProfile.initials = this.getInitials(userInfo.fullName);
+        // No es crítico, ya tenemos datos del token
+        console.log('ℹ️ No se pudieron obtener datos adicionales del backend (usando datos del token):', error.status);
       }
     });
   }
@@ -59,6 +71,7 @@ export class MenuLateralComponent implements OnInit {
     const role = roles[0].toUpperCase();
     if (role.includes('ADMIN')) return 'Administrador';
     if (role.includes('EMPLEADO') || role.includes('EMPLOYEE')) return 'Empleado';
+    if (role.includes('SUPERVISOR')) return 'Supervisor';
 
     return roles[0];
   }
