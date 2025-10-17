@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../auth/services/auth.service';
+import { UsuarioService } from '../../core/services/usuario.service';
+import { Usuario } from '../../core/DTOs/usuario.dto';
 
 @Component({
   selector: 'app-menu-lateral',
@@ -9,6 +12,63 @@ import { RouterModule } from '@angular/router';
   templateUrl: './menu-lateral.component.html',
   styleUrl: './menu-lateral.component.css'
 })
-export class MenuLateralComponent {
+export class MenuLateralComponent implements OnInit {
+  userProfile = {
+    name: '',
+    role: '',
+    initials: ''
+  };
 
+  constructor(
+    private authService: AuthService,
+    private usuarioService: UsuarioService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadUserProfile();
+  }
+
+  private loadUserProfile(): void {
+    const userInfo = this.authService.getUser();
+
+    if (!userInfo?.username) {
+      console.warn('⚠️ No hay información de usuario');
+      return;
+    }
+
+    // Obtener datos completos del backend
+    this.usuarioService.getUsuarioByUsername(userInfo.username).subscribe({
+      next: (usuario: Usuario) => {
+        this.userProfile.name = usuario.fullName;
+        this.userProfile.role = this.getRoleDisplayName(usuario.roles || [usuario.role]);
+        this.userProfile.initials = this.getInitials(usuario.fullName);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar usuario:', error);
+        // Fallback: usar datos del token
+        this.userProfile.name = userInfo.fullName || userInfo.username;
+        this.userProfile.role = this.getRoleDisplayName(userInfo.roles);
+        this.userProfile.initials = this.getInitials(userInfo.fullName);
+      }
+    });
+  }
+
+  private getRoleDisplayName(roles: string[]): string {
+    if (!roles || roles.length === 0) return 'Usuario';
+
+    const role = roles[0].toUpperCase();
+    if (role.includes('ADMIN')) return 'Administrador';
+    if (role.includes('EMPLEADO') || role.includes('EMPLOYEE')) return 'Empleado';
+
+    return roles[0];
+  }
+
+  private getInitials(fullName: string): string {
+    if (!fullName) return 'U';
+    const names = fullName.trim().split(' ');
+    if (names.length >= 2) {
+      return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+    }
+    return fullName.substring(0, 2).toUpperCase();
+  }
 }
