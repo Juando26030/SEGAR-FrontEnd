@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 // Importar componente del sistema de documentos dinámicos
 import { DocumentosDinamicosComponent } from '../../../components/documentos-dinamicos/documentos-dinamicos.component';
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthService } from '../../../auth/services/auth.service';
 
 interface OptionItem {
   value: string;
@@ -81,9 +83,10 @@ interface SolicitudForm {
   templateUrl: './registro-paso-tres.component.html',
   styleUrls: ['./registro-paso-tres.component.css']
 })
-export class RegistroPasoTresComponent {
+export class RegistroPasoTresComponent implements OnInit {
   activeTab = 'clasificacion';
 
+  
   // Propiedades para el sistema de documentos dinámicos
   tramiteId: number = 1; // TODO: obtener desde ruta o contexto
   currentTramiteType: 'REGISTRO' | 'RENOVACION' | 'MODIFICACION' = 'REGISTRO';
@@ -93,7 +96,37 @@ export class RegistroPasoTresComponent {
   clasificacionCompleta: boolean = false;
   todosDocumentosCompletos: boolean = false;
 
-  constructor(private tramiteService: TramiteInvimaService) {}
+  productos: any[] = [];
+  productoSeleccionado: any = '';
+
+  constructor(private tramiteService: TramiteInvimaService,
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+    this.obtenerProductos();
+  }
+
+  obtenerProductos(): void {
+
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get<any[]>('http://localhost:8090/api/producto/all', { headers })
+      .subscribe({
+        next: (data) => {
+          this.productos = data;
+        },
+        error: (err) => {
+          console.error('Error al obtener productos', err);
+        }
+      });
+  }
+
+  onProductoSeleccionado(): void {
+    console.log('Producto seleccionado:', this.productoSeleccionado);
+  }
 
   readonly tabs: Tab[] = [
     { id: 'clasificacion', label: 'Clasificación del Producto' },
@@ -265,7 +298,20 @@ export class RegistroPasoTresComponent {
 
   setActiveTab(tab: string): void {
     this.activeTab = tab;
+
+    if (tab === 'documentacion') {
+    this.mostrarInfoProductoYClasificacion();
+    }
   }
+
+  mostrarInfoProductoYClasificacion(): void {
+    console.log('📦 Información del producto seleccionado:');
+    console.log(this.productoSeleccionado);
+
+    console.log('🧾 Resultado de la clasificación:');
+    console.log(this.resultadoClasificacion);
+  }
+
 
   /**
    * Método que se ejecuta cada vez que cambia la población objetivo
@@ -530,20 +576,33 @@ export class RegistroPasoTresComponent {
   }
 
   onRadicarSolicitud(): void {
-    if (!this.isFormCompleteForRadication()) {
-      alert('Por favor complete toda la información requerida antes de radicar la solicitud.');
-      return;
-    }
+    console.log("📨 AQUI SE RADICA LA SOLICITUD");
+  console.log("🆔 ID del producto:", this.productoSeleccionado.id);
+  console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
 
-    const numeroRadicado = this.generateRadicationNumber();
+  const token = this.authService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
 
-    alert(`¡Solicitud radicada exitosamente!\n\nNúmero de radicado: ${numeroRadicado}\n\nRecibirá una confirmación por correo electrónico con los detalles del trámite y las instrucciones para el seguimiento.`);
+    const body = {
+      productoId: this.productoSeleccionado.id,
+      procedureType: this.resultadoClasificacion?.tramite_descripcion,
+      radicadoNumber: ''
+    };
 
-    console.log('Solicitud radicada:', {
-      numeroRadicado,
-      clasificacion: this.classificationForm,
-      solicitud: this.solicitudForm,
-      fechaRadicacion: new Date()
+    const url = 'http://localhost:8090/api/tramites/create';
+
+    this.http.post(url, body, { headers }).subscribe({
+      next: (response) => {
+        console.log('✅ Trámite creado exitosamente:', response);
+        alert('✅ Trámite radicado correctamente.');
+      },
+      error: (error) => {
+        console.error('❌ Error al radicar el trámite:', error);
+        alert('❌ Ocurrió un error al radicar el trámite.');
+      }
     });
   }
 
