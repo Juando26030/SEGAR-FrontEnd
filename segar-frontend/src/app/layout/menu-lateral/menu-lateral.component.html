@@ -96,7 +96,7 @@
       </div>
       <div class="menu-item-indicator"></div>
     </a>
-    
+
     <!-- Busqueda Global -->
     <a routerLink="/main/busqueda-global"
        routerLinkActive="menu-item-active"
@@ -144,17 +144,18 @@
     <div class="relative flex items-center gap-3 p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300 cursor-pointer group">
       <div class="profile-avatar">
         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
-          JD
+          {{ userProfile.initials }}
         </div>
         <div class="profile-status"></div>
       </div>
       <div class="flex-1">
-        <p class="text-sm font-semibold text-white">Juan Díaz</p>
-        <p class="text-xs text-blue-200">Administrador</p>
+        <p class="text-sm font-semibold text-white">{{ userProfile.name || 'Cargando...' }}</p>
+        <p class="text-xs text-blue-200">{{ userProfile.role || 'Usuario' }}</p>
       </div>
       <div class="text-white/60 group-hover:text-white transition-colors duration-300">
         <i class="fas fa-chevron-right text-xs"></i>
       </div>
     </div>
   </div>
+
 </aside>

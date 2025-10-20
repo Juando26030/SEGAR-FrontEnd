@@ -7,6 +7,9 @@ export interface UserInfo {
   email: string;
   roles: string[];
   fullName: string;
+  createdAt?: Date;
+  firstName?: string;
+  lastName?: string;
 }
 
 @Injectable({
@@ -101,10 +104,17 @@ export class AuthService {
         username: tokenParsed.preferred_username || '',
         email: tokenParsed.email || '',
         fullName: tokenParsed.name || `${tokenParsed.given_name || ''} ${tokenParsed.family_name || ''}`.trim(),
-        roles: roles
+        roles: roles,
+        firstName: tokenParsed.given_name,
+        lastName: tokenParsed.family_name,
+        // user_created_timestamp viene del mapper personalizado de Keycloak (en milisegundos)
+        createdAt: tokenParsed.user_created_timestamp
+          ? new Date(tokenParsed.user_created_timestamp)
+          : undefined
       };
 
       console.log('👤 UserInfo creado:', userInfo);
+      console.log('👤 Fecha de creación del usuario:', userInfo.createdAt);
       this.userSubject.next(userInfo);
       console.log('✅ PERFIL DE USUARIO CARGADO CORRECTAMENTE');
       console.log('👤 =================================');
