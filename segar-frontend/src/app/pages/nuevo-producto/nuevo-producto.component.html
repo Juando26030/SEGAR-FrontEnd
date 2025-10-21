@@ -1,0 +1,41 @@
+<div class="producto-container">
+  <div class="producto-header">
+    <h2>Nuevo Producto Alimenticio</h2>
+    <p>Registre la información básica del nuevo producto</p>
+  </div>
+
+  <form class="producto-form" (ngSubmit)="guardarProducto()">
+    <div class="form-group">
+      <label for="nombre">Nombre del producto</label>
+      <input type="text" id="nombre" [(ngModel)]="producto.nombre" name="nombre" placeholder="Yogurt Natural Premium" required />
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" [(ngModel)]="producto.descripcion" name="descripcion" placeholder="Descripción del producto" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="especificaciones">Especificaciones</label>
+      <input type="text" id="especificaciones" [(ngModel)]="producto.especificaciones" name="especificaciones" placeholder="Ej: Contenido graso: 3.2%" />
+    </div>
+
+    <div class="form-group">
+      <label for="referencia">Referencia</label>
+      <input type="text" id="referencia" [(ngModel)]="producto.referencia" name="referencia" placeholder="Ej: YNP-2024-001" />
+    </div>
+
+    <div class="form-group">
+      <label for="fabricante">Fabricante</label>
+      <input type="text" id="fabricante" [(ngModel)]="producto.fabricante" name="fabricante" placeholder="Ej: Lácteos Premium S.A.S." />
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="button" class="cancel-btn" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="save-btn">
+        <i class="fas fa-save"></i> Guardar
+      </button>
+    </div>
+  </form>
+</div>

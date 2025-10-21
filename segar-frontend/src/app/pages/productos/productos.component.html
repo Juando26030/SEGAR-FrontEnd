@@ -1,0 +1,38 @@
+<div class="productos-container">
+  <div class="header">
+    <h2 class="titulo">Productos Alimenticios</h2>
+
+    <button class="nuevo-producto-btn" (click)="irANuevoProducto()">
+        <i class="fas fa-utensils"></i>
+        Nuevo Producto
+     </button>
+
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    <i class="fas fa-spinner fa-spin"></i> Cargando productos...
+  </div>
+
+  <div *ngIf="error" class="error">
+    <i class="fas fa-exclamation-circle"></i> {{ error }}
+  </div>
+
+  <div class="grid">
+    <div *ngFor="let producto of productos" class="card group">
+      <div class="menu-item-bg-effect"></div>
+
+      <div class="menu-item-content">
+        <div class="menu-item-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <div class="menu-item-text">
+          <h3>{{ producto.nombre }}</h3>
+          <p class="descripcion">{{ producto.descripcion }}</p>
+          <p><strong>Referencia:</strong> {{ producto.referencia }}</p>
+          <p><strong>Fabricante:</strong> {{ producto.fabricante }}</p>
+          <p><strong>Especificaciones:</strong> {{ producto.especificaciones }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

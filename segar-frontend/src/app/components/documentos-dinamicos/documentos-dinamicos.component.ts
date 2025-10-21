@@ -1,17 +1,21 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { DocumentoRequerido, ResultadoClasificacion } from '../../core/services/tramite-invima.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { Producto } from '../../core/DTOs/solicitud.dto';
 
 @Component({
   selector: 'app-documentos-dinamicos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './documentos-dinamicos.component.html',
   styleUrls: ['./documentos-dinamicos.component.css']
 })
 export class DocumentosDinamicosComponent implements OnInit {
   @Input() resultado!: ResultadoClasificacion;
+  @Input() producto!: Producto;
   @Output() documentoCompletado = new EventEmitter<{ documentoId: string; datos: any }>();
   @Output() todosCompletados = new EventEmitter<boolean>();
 
@@ -29,8 +33,16 @@ export class DocumentosDinamicosComponent implements OnInit {
   // Drag and drop
   isDragging: boolean = false;
 
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+
   ngOnInit() {
     this.inicializarEstados();
+    console.log("Producto recibido en DocumentosDinamicosComponent:");
+    console.log(this.producto);
   }
 
   private inicializarEstados() {
@@ -168,49 +180,94 @@ export class DocumentosDinamicosComponent implements OnInit {
   }
 
   private procesarArchivoExterno(file: File) {
+
+    const token = this.authService.getToken();
+
     if (!this.documentoSeleccionado) return;
 
     const docId = this.documentoSeleccionado.id;
 
-    // Validar formato
+    // Validar formato y tamaño
     const formatoPermitido = this.validarFormatoArchivo(file, this.documentoSeleccionado.formato);
     if (!formatoPermitido) {
       alert(`⚠️ Formato de archivo no válido. Se requiere: ${this.documentoSeleccionado.formato}`);
       return;
     }
-
-    // Validar tamaño (máximo 10MB)
     const tamanioMaximo = 10 * 1024 * 1024; // 10MB
     if (file.size > tamanioMaximo) {
       alert('⚠️ El archivo excede el tamaño máximo permitido (10MB)');
       return;
     }
 
-    // Guardar archivo
-    this.archivosSubidos[docId] = file;
-    this.datosDocumentos[docId] = {
-      nombreArchivo: file.name,
-      tipoArchivo: file.type,
-      tamanioArchivo: file.size,
-      fechaCarga: new Date()
+    var payload = null;
+    if (token) {
+      payload = this.decodeToken(token);
+      console.log(payload);
+
+      console.log('Empresa:', payload.empresa);
+    }
+
+    console.log("Tramite seleccionado:", this.resultado.tramite);
+
+    // 1️⃣ Pedir URL firmada al backend
+    const requestBody = {
+      bucketName: 'segar-documents', 
+      objectName: `${payload.empresa}/${this.producto.nombre}/${file.name}`,
+      contentType: file.type
     };
 
-    // Marcar como completo
-    this.estadoDocumentos[docId] = {
-      completo: true,
-      progreso: 100
-    };
-
-    this.documentoCompletado.emit({
-      documentoId: docId,
-      datos: { archivo: file, metadata: this.datosDocumentos[docId] }
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
     });
 
-    this.verificarCompletitudTotal();
+    this.http.post('http://localhost:8090/api/documentos/signed-url', requestBody, {
+      headers,
+      responseType: 'text' 
+    }).subscribe({
+        next: (signedUrl) => {
+          // 2️⃣ Subir el archivo directamente a GCS
+          fetch(signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file
+          })
+          .then(response => {
+            if (!response.ok) throw new Error('Error al subir el archivo a GCS');
 
-    alert('✅ Archivo cargado exitosamente');
-    this.volverALista();
+            // 3️⃣ Marcar documento como completo
+            this.archivosSubidos[docId] = file;
+            this.datosDocumentos[docId] = {
+              nombreArchivo: file.name,
+              tipoArchivo: file.type,
+              tamanioArchivo: file.size,
+              fechaCarga: new Date()
+            };
+            this.estadoDocumentos[docId] = {
+              completo: true,
+              progreso: 100
+            };
+
+            this.documentoCompletado.emit({
+              documentoId: docId,
+              datos: { archivo: file.name, metadata: this.datosDocumentos[docId] }
+            });
+
+            this.verificarCompletitudTotal();
+            alert('✅ Archivo subido correctamente al servidor.');
+            this.volverALista();
+          })
+          .catch(err => {
+            console.error(err);
+            alert('❌ Error al subir el archivo.');
+          });
+        },
+        error: (err) => {
+          console.error(err);
+          alert('❌ Error al obtener la URL firmada.');
+        }
+      });
   }
+
 
   private validarFormatoArchivo(file: File, formatoRequerido: string): boolean {
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
@@ -229,6 +286,13 @@ export class DocumentosDinamicosComponent implements OnInit {
         return true; // Permitir cualquier formato si no se especifica
     }
   }
+
+  decodeToken(token: string) {
+    const payloadBase64 = token.split('.')[1];
+    const payloadDecoded = atob(payloadBase64); // decodifica Base64
+    return JSON.parse(payloadDecoded);
+  }
+
 
   eliminarArchivo() {
     if (!this.documentoSeleccionado) return;
