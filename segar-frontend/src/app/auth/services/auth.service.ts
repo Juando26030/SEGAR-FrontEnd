@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import Keycloak from 'keycloak-js';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface UserInfo {
   username: string;
@@ -19,6 +19,11 @@ export class AuthService {
   private keycloak: Keycloak | undefined;
   private userSubject = new BehaviorSubject<UserInfo | null>(null);
   public user$ = this.userSubject.asObservable();
+
+  // ========== RENOVACIÓN AUTOMÁTICA DE TOKENS ==========
+  private refreshTokenInterval: any = null;
+  private readonly REFRESH_INTERVAL_MS = 2.5 * 60 * 1000; // 2.5 minutos
+  private readonly TOKEN_MIN_VALIDITY_SECONDS = 70; // Renovar si quedan menos de 70 segundos
 
   constructor() {
     // Exponer métodos de debugging para facilitar el diagnóstico
@@ -140,6 +145,106 @@ export class AuthService {
     }
   }
 
+  // ========== RENOVACIÓN CONTINUA Y SILENCIOSA DE TOKENS ==========
+
+  /**
+   * Inicia la renovación automática de tokens.
+   * Se ejecuta cada 2.5 minutos para mantener la sesión activa.
+   * Esto reinicia el contador de inactividad de 5 minutos en Keycloak.
+   */
+  startTokenRefresh(): void {
+    console.log('🔄 =================================');
+    console.log('🔄 INICIANDO RENOVACIÓN AUTOMÁTICA DE TOKENS');
+    console.log(`🔄 Intervalo: cada ${this.REFRESH_INTERVAL_MS / 1000 / 60} minutos`);
+    console.log(`🔄 Validez mínima del token: ${this.TOKEN_MIN_VALIDITY_SECONDS} segundos`);
+    console.log('🔄 =================================');
+
+    // Limpiar intervalo previo si existe
+    this.stopTokenRefresh();
+
+    // Configurar renovación periódica
+    this.refreshTokenInterval = setInterval(async () => {
+      await this.performTokenRefresh();
+    }, this.REFRESH_INTERVAL_MS);
+
+    console.log('✅ Renovación automática de tokens activada');
+  }
+
+  /**
+   * Detiene la renovación automática de tokens.
+   */
+  stopTokenRefresh(): void {
+    if (this.refreshTokenInterval) {
+      clearInterval(this.refreshTokenInterval);
+      this.refreshTokenInterval = null;
+      console.log('🛑 Renovación automática de tokens detenida');
+    }
+  }
+
+  /**
+   * Ejecuta la renovación del token.
+   * Utiliza updateToken() de Keycloak que usa el Refresh Token.
+   * Cada llamada exitosa reinicia el contador de SSO Session Idle en Keycloak.
+   */
+  private async performTokenRefresh(): Promise<void> {
+    try {
+      if (!this.keycloak || !this.keycloak.authenticated) {
+        console.warn('⚠️ No se puede renovar token: usuario no autenticado');
+        this.stopTokenRefresh();
+        return;
+      }
+
+      console.log('🔄 Verificando vigencia del token...');
+
+      // updateToken(minValidity) intenta renovar el token si expira en menos de minValidity segundos
+      // Retorna true si se renovó, false si aún es válido
+      const refreshed = await this.keycloak.updateToken(this.TOKEN_MIN_VALIDITY_SECONDS);
+
+      if (refreshed) {
+        console.log('✅ Token renovado exitosamente');
+        console.log('🔄 Nuevo token expira en:', new Date((this.keycloak.tokenParsed?.exp || 0) * 1000));
+        console.log('✅ Contador de inactividad de Keycloak reiniciado (SSO Session Idle)');
+
+        // Actualizar el perfil del usuario con los nuevos datos del token
+        await this.loadUserProfile();
+      } else {
+        console.log('ℹ️ Token aún válido, no se requiere renovación');
+      }
+    } catch (error) {
+      console.error('❌ ERROR AL RENOVAR TOKEN:', error);
+      console.error('❌ Probablemente la sesión expiró por inactividad (5 min)');
+      console.log('🚪 Cerrando sesión por expiración del Refresh Token...');
+
+      // Detener la renovación automática
+      this.stopTokenRefresh();
+
+      // Cerrar sesión y redirigir al login
+      await this.logoutOnTokenExpired();
+    }
+  }
+
+  /**
+   * Cierre de sesión especial cuando el token expira por inactividad.
+   * Muestra un mensaje al usuario.
+   */
+  private async logoutOnTokenExpired(): Promise<void> {
+    console.log('🚪 =================================');
+    console.log('🚪 SESIÓN EXPIRADA POR INACTIVIDAD');
+    console.log('🚪 SSO Session Idle Timeout: 5 minutos alcanzados');
+    console.log('🚪 =================================');
+
+    // Limpiar el estado de autenticación
+    this.userSubject.next(null);
+    localStorage.removeItem('userInfo');
+
+    // Opcional: Guardar un mensaje para mostrarlo en la página de login
+    sessionStorage.setItem('session_expired', 'true');
+    sessionStorage.setItem('session_expired_reason', 'Tu sesión expiró por inactividad (5 minutos)');
+
+    // Redirigir al login
+    window.location.href = '/auth/login';
+  }
+
   getToken(): string | undefined {
     return this.keycloak?.token;
   }
@@ -239,6 +344,9 @@ export class AuthService {
         // Cargar perfil del usuario
         await this.loadUserProfile();
 
+        // ✅ INICIAR RENOVACIÓN AUTOMÁTICA DE TOKENS
+        this.startTokenRefresh();
+
         const finalAuthState = this.isAuthenticated();
         console.log('✅ LOGIN CON CREDENCIALES COMPLETADO');
         console.log('🔍 Estado final isAuthenticated():', finalAuthState);
@@ -278,6 +386,9 @@ export class AuthService {
 
   async logout(): Promise<void> {
     console.log('🚪 Cerrando sesión...');
+
+    // ✅ DETENER RENOVACIÓN AUTOMÁTICA DE TOKENS
+    this.stopTokenRefresh();
 
     // Limpiar el estado de autenticación
     this.userSubject.next(null);
