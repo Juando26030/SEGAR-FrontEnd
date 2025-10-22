@@ -323,7 +323,7 @@ import { AuthService } from '../../auth/services/auth.service';
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ usuario.id }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">{{ usuario.username }}</div>
-                    <div class="text-xs text-gray-500">{{ usuario.keycloakId?.substring(0, 8) }}...</div>
+                    <div class="text-xs text-gray-500">{{ usuario.keycloakId.substring(0, 8) }}...</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {{ usuario.fullName || (usuario.firstName + ' ' + usuario.lastName) }}

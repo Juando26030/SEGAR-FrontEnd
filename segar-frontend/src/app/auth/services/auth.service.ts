@@ -25,9 +25,16 @@ export class AuthService {
   private readonly REFRESH_INTERVAL_MS = 2.5 * 60 * 1000; // 2.5 minutos
   private readonly TOKEN_MIN_VALIDITY_SECONDS = 70; // Renovar si quedan menos de 70 segundos
 
+  // ========== PERSISTENCIA DE SESIÓN ==========
+  private readonly STORAGE_KEY_TOKEN = 'segar_access_token';
+  private readonly STORAGE_KEY_REFRESH_TOKEN = 'segar_refresh_token';
+  private readonly STORAGE_KEY_USER_INFO = 'segar_user_info';
+
   constructor() {
     // Exponer métodos de debugging para facilitar el diagnóstico
     this.exposeToWindow();
+    // ✅ RESTAURAR SESIÓN AL INICIAR (si existe)
+    this.restaurarSesionAlIniciar();
   }
 
   // Inicialización manual de Keycloak (sin auto-login)
@@ -205,6 +212,11 @@ export class AuthService {
         console.log('🔄 Nuevo token expira en:', new Date((this.keycloak.tokenParsed?.exp || 0) * 1000));
         console.log('✅ Contador de inactividad de Keycloak reiniciado (SSO Session Idle)');
 
+        // ✅ ACTUALIZAR TOKEN EN LOCALSTORAGE
+        if (this.keycloak.token && this.keycloak.refreshToken) {
+          this.guardarSesionEnStorage(this.keycloak.token, this.keycloak.refreshToken);
+        }
+
         // Actualizar el perfil del usuario con los nuevos datos del token
         await this.loadUserProfile();
       } else {
@@ -235,7 +247,12 @@ export class AuthService {
 
     // Limpiar el estado de autenticación
     this.userSubject.next(null);
-    localStorage.removeItem('userInfo');
+
+    // ✅ LIMPIAR LOCALSTORAGE COMPLETAMENTE
+    localStorage.removeItem(this.STORAGE_KEY_TOKEN);
+    localStorage.removeItem(this.STORAGE_KEY_REFRESH_TOKEN);
+    localStorage.removeItem(this.STORAGE_KEY_USER_INFO);
+    localStorage.removeItem('userInfo'); // Limpiar también el viejo formato
 
     // Opcional: Guardar un mensaje para mostrarlo en la página de login
     sessionStorage.setItem('session_expired', 'true');
@@ -344,6 +361,9 @@ export class AuthService {
         // Cargar perfil del usuario
         await this.loadUserProfile();
 
+        // ✅ GUARDAR SESIÓN EN LOCALSTORAGE
+        this.guardarSesionEnStorage(tokenData.access_token, tokenData.refresh_token);
+
         // ✅ INICIAR RENOVACIÓN AUTOMÁTICA DE TOKENS
         this.startTokenRefresh();
 
@@ -437,5 +457,90 @@ export class AuthService {
     (window as any).debugAuth = () => this.debugAuthState();
     console.log('🔧 AuthService expuesto en window.authService');
     console.log('🔧 Usa debugAuth() para hacer debugging');
+  }
+
+  /**
+   * Restaura la sesión del usuario al iniciar la aplicación.
+   * Intenta recuperar el token y la información del usuario desde el almacenamiento local.
+   * Si se encuentra un token válido, se considera que el usuario está autenticado.
+   */
+  private async restaurarSesionAlIniciar(): Promise<void> {
+    try {
+      console.log('🔄 =================================');
+      console.log('🔄 RESTAURANDO SESIÓN AL INICIAR');
+      console.log('🔄 =================================');
+
+      // Recuperar token de acceso
+      const accessToken = localStorage.getItem(this.STORAGE_KEY_TOKEN);
+      const refreshToken = localStorage.getItem(this.STORAGE_KEY_REFRESH_TOKEN);
+      const userInfoJson = localStorage.getItem(this.STORAGE_KEY_USER_INFO);
+
+      if (accessToken && refreshToken && userInfoJson) {
+        console.log('✅ Token y usuario encontrados en almacenamiento local');
+
+        // Configurar Keycloak con el token recuperado
+        if (!this.keycloak) {
+          console.warn('⚠️ Keycloak no inicializado, creando instancia');
+          this.keycloak = new Keycloak({
+            url: 'http://localhost:8080',
+            realm: 'segar',
+            clientId: 'segar-frontend'
+          });
+        }
+
+        // Simular que Keycloak está autenticado
+        (this.keycloak as any).authenticated = true;
+        (this.keycloak as any).token = accessToken;
+        (this.keycloak as any).refreshToken = refreshToken;
+        (this.keycloak as any).tokenParsed = this.parseJwt(accessToken);
+
+        console.log('🔍 Keycloak.authenticated configurado:', this.keycloak.authenticated);
+        console.log('🔍 Token parseado:', this.keycloak.tokenParsed);
+
+        // Cargar perfil del usuario
+        await this.loadUserProfile();
+
+        // Verificar la validez del token y renovar si es necesario
+        const tokenExpiraEn = (this.keycloak.tokenParsed?.exp || 0) * 1000 - Date.now();
+        console.log('🔄 El token expira en:', tokenExpiraEn, 'ms');
+
+        if (tokenExpiraEn > 0 && tokenExpiraEn < this.REFRESH_INTERVAL_MS) {
+          console.log('🔄 El token es válido, pero expirará pronto. Renovando...');
+          await this.refreshToken();
+        } else {
+          console.log('✅ El token es válido y no requiere renovación');
+        }
+
+        // ✅ INICIAR RENOVACIÓN AUTOMÁTICA DE TOKENS
+        this.startTokenRefresh();
+      } else {
+        console.log('🔄 No se encontró sesión previa, el usuario no está autenticado');
+      }
+    } catch (error) {
+      console.error('❌ ERROR AL RESTAURAR SESIÓN:', error);
+    }
+  }
+
+  /**
+   * Guarda la sesión en el almacenamiento local.
+   * @param accessToken El token de acceso del usuario.
+   * @param refreshToken El token de actualización del usuario.
+   */
+  private guardarSesionEnStorage(accessToken: string, refreshToken: string): void {
+    try {
+      // Guardar en localStorage
+      localStorage.setItem(this.STORAGE_KEY_TOKEN, accessToken);
+      localStorage.setItem(this.STORAGE_KEY_REFRESH_TOKEN, refreshToken);
+
+      // También guardar información del usuario (opcional)
+      const userInfo = this.keycloak?.tokenParsed;
+      if (userInfo) {
+        localStorage.setItem(this.STORAGE_KEY_USER_INFO, JSON.stringify(userInfo));
+      }
+
+      console.log('✅ Sesión guardada en localStorage');
+    } catch (error) {
+      console.error('❌ ERROR AL GUARDAR SESIÓN EN STORAGE:', error);
+    }
   }
 }
