@@ -16,7 +16,7 @@ export class NuevoTramiteComponent {
   seleccionar(tipo: 'registro' | 'renovacion' | 'modificacion') {
     if (tipo === 'registro') {
       // Navegar directamente al paso 3 (ahora el primer paso del proceso de registro)
-      this.router.navigate(['/main/nuevo/registro/paso-3']);
+      this.router.navigate(['/main/nuevo/registro/paso-1']);
     } else {
       // Para otros tipos, mostrar mensaje temporal
       alert(`Has seleccionado: ${tipo}. En la próxima versión se mostrará el formulario correspondiente.`);

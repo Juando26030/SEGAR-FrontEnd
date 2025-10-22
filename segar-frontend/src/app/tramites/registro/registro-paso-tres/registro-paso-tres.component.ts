@@ -86,7 +86,7 @@ interface SolicitudForm {
 export class RegistroPasoTresComponent implements OnInit {
   activeTab = 'clasificacion';
 
-  
+
   // Propiedades para el sistema de documentos dinámicos
   tramiteId: number = 1; // TODO: obtener desde ruta o contexto
   currentTramiteType: 'REGISTRO' | 'RENOVACION' | 'MODIFICACION' = 'REGISTRO';
@@ -296,11 +296,68 @@ export class RegistroPasoTresComponent implements OnInit {
     }
   ];
 
+  /**
+   * Método para validar si una pestaña está bloqueada
+   */
+  isTabDisabled(tabId: string): boolean {
+    switch(tabId) {
+      case 'clasificacion':
+        return false; // Siempre disponible
+      case 'documentacion':
+        return !this.clasificacionCompleta; // Solo si la clasificación está completa
+      case 'radicacion':
+        return !this.clasificacionCompleta || !this.todosDocumentosCompletos; // Solo si todo está completo
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Método para validar si una pestaña está completada
+   */
+  isTabCompleted(tabId: string): boolean {
+    switch(tabId) {
+      case 'clasificacion':
+        return this.clasificacionCompleta;
+      case 'documentacion':
+        return this.todosDocumentosCompletos;
+      case 'radicacion':
+        return false; // La radicación no se marca como completa hasta que se radique
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Método para validar si el formulario de clasificación está válido
+   */
+  isClassificationFormValid(): boolean {
+    return !!(
+      this.productoSeleccionado &&
+      this.classificationForm.productCategory &&
+      this.classificationForm.riskLevel &&
+      this.classificationForm.targetPopulation &&
+      this.classificationForm.processingType
+    );
+  }
+
+  /**
+   * Método que se ejecuta cada vez que cambia un campo
+   * Realiza validación automática
+   */
+  onFieldChange(): void {
+    // Este método se puede usar para triggers adicionales si es necesario
+    // Por ahora, Angular reactivamente actualizará las validaciones
+  }
+
   setActiveTab(tab: string): void {
-    this.activeTab = tab;
+    // Solo permite cambiar si la pestaña no está bloqueada
+    if (!this.isTabDisabled(tab)) {
+      this.activeTab = tab;
+    }
 
     if (tab === 'documentacion') {
-    this.mostrarInfoProductoYClasificacion();
+      this.mostrarInfoProductoYClasificacion();
     }
   }
 
@@ -512,7 +569,7 @@ export class RegistroPasoTresComponent implements OnInit {
   }
 
   onClasificarProducto(): void {
-    if (!this.isClassificationComplete()) {
+    if (!this.isClassificationFormValid()) {
       alert('Por favor complete todos los campos de clasificación.');
       return;
     }

@@ -58,10 +58,10 @@ export const routes: Routes = [
       {
         path: 'nuevo/registro',
         children: [
-          { path: 'paso-3', component: RegistroPasoTresComponent },
+          { path: 'paso-1', component: RegistroPasoTresComponent },
           { path: 'paso-4', component: RegistroPasoCuatroComponent },
           { path: 'paso-5', component: RegistroPasoCincoComponent },
-          { path: '', redirectTo: 'paso-3', pathMatch: 'full' }
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       }
     ]

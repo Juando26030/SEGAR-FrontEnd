@@ -476,7 +476,7 @@ export class RegistroPasoCincoComponent implements OnInit {
 
 	nuevaSolicitud(): void {
 		this.tramiteEstadoService.limpiarTramite();
-		this.router.navigate(['/main/nuevo/registro/paso-3']);
+		this.router.navigate(['/main/nuevo/registro/paso-1']);
 	}
 
 	// Métodos de utilidad
