@@ -405,19 +405,35 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    console.log('🚪 Cerrando sesión...');
+    console.log('🚪 =================================');
+    console.log('🚪 CERRANDO SESIÓN MANUALMENTE');
+    console.log('🚪 =================================');
 
     // ✅ DETENER RENOVACIÓN AUTOMÁTICA DE TOKENS
     this.stopTokenRefresh();
 
-    // Limpiar el estado de autenticación
+    // Limpiar el estado de autenticación en memoria
     this.userSubject.next(null);
 
-    // Limpiar localStorage si es necesario
-    localStorage.removeItem('userInfo');
+    // Limpiar instancia de Keycloak
+    if (this.keycloak) {
+      (this.keycloak as any).authenticated = false;
+      (this.keycloak as any).token = undefined;
+      (this.keycloak as any).refreshToken = undefined;
+      (this.keycloak as any).tokenParsed = undefined;
+    }
+
+    // ✅ LIMPIAR COMPLETAMENTE LOCALSTORAGE
+    localStorage.removeItem(this.STORAGE_KEY_TOKEN);
+    localStorage.removeItem(this.STORAGE_KEY_REFRESH_TOKEN);
+    localStorage.removeItem(this.STORAGE_KEY_USER_INFO);
+    localStorage.removeItem('userInfo'); // Limpiar también el viejo formato
+
+    console.log('✅ Sesión cerrada completamente');
+    console.log('✅ LocalStorage limpiado');
+    console.log('🚪 =================================');
 
     // Redirigir al login
-    console.log('✅ Sesión cerrada correctamente');
     window.location.href = '/auth/login';
   }
 

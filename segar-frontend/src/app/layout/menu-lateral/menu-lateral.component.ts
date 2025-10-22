@@ -84,4 +84,14 @@ export class MenuLateralComponent implements OnInit {
     }
     return fullName.substring(0, 2).toUpperCase();
   }
+
+  /**
+   * Cierra la sesión del usuario completamente
+   */
+  cerrarSesion(): void {
+    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+      console.log('🚪 Cerrando sesión desde menú lateral...');
+      this.authService.logout();
+    }
+  }
 }
