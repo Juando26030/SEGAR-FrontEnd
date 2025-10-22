@@ -49,3 +49,60 @@
 .btn-primary:hover {
   background-color: #1d4ed8;
 }
+
+/* Animaciones para el stepper */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animación del contenedor principal */
+.max-w-5xl {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Animación de los pasos del stepper */
+.w-12.h-12 {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efecto hover en los pasos completados */
+.cursor-pointer:hover .w-12.h-12 {
+  transform: scale(1.1);
+}
+
+/* Animación de la barra de progreso */
+.h-1 {
+  transition: background-color 0.5s ease;
+}
+
+/* Efecto pulse mejorado */
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

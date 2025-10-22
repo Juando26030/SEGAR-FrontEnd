@@ -23,7 +23,7 @@ export class RegistroInfoCuentaComponent {
     console.log('Password match:', this.validatePasswordMatch());
     console.log('Password strength:', this.validatePasswordStrength());
     console.log('Form errors:', this.form.errors);
-    
+
     // Log individual field errors
     Object.keys(this.form.controls).forEach(key => {
       const control = this.form.get(key);
@@ -31,13 +31,13 @@ export class RegistroInfoCuentaComponent {
         console.log(`${key} errors:`, control.errors);
       }
     });
-    
+
     if (this.form.valid && this.validatePasswordMatch() && this.validatePasswordStrength()) {
       this.nextStep.emit();
     } else {
       console.log('Form validation failed, marking fields as touched');
       this.markFormGroupTouched();
-      
+
       // Show specific error messages
       if (!this.validatePasswordMatch()) {
         alert('Las contraseñas no coinciden');
@@ -70,12 +70,12 @@ export class RegistroInfoCuentaComponent {
   private validatePasswordStrength(): boolean {
     const password = this.form.get('password')?.value;
     if (!password) return false;
-    
+
     const hasUpperCase = /[A-Z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecial = /[!@#$%^&*]/.test(password);
     const isLongEnough = password.length >= 8;
-    
+
     return hasUpperCase && hasNumber && hasSpecial && isLongEnough;
   }
 
@@ -92,17 +92,17 @@ export class RegistroInfoCuentaComponent {
     return password === confirmPassword || !confirmPassword;
   }
 
-  getPasswordStrength(): { score: number; text: string; color: string } {
+  getPasswordStrength(): { score: number; text: string; color: string; textColor: string } {
     const password = this.form.get('password')?.value || '';
     let score = 0;
-    
+
     if (password.length >= 8) score += 25;
     if (/[A-Z]/.test(password)) score += 25;
     if (/[0-9]/.test(password)) score += 25;
     if (/[!@#$%^&*]/.test(password)) score += 25;
-    
-    if (score < 50) return { score, text: 'Débil', color: 'bg-red-500' };
-    if (score < 100) return { score, text: 'Moderada', color: 'bg-yellow-500' };
-    return { score, text: 'Fuerte', color: 'bg-green-500' };
+
+    if (score < 50) return { score, text: 'Débil', color: 'bg-red-500', textColor: 'text-red-600' };
+    if (score < 100) return { score, text: 'Moderada', color: 'bg-yellow-500', textColor: 'text-yellow-600' };
+    return { score, text: 'Fuerte', color: 'bg-green-500', textColor: 'text-green-600' };
   }
 }

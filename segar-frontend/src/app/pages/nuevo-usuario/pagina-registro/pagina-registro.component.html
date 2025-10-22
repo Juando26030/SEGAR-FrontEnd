@@ -1,103 +1,191 @@
-<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-  <div class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8 px-6 pt-6">
-      <button 
-        (click)="goBack()"
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-        Volver a Usuarios
-      </button>
-      
-      <div class="text-center flex-1">
-        <h2 class="text-3xl font-extrabold text-gray-900">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Header mejorado -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <button
+          (click)="goBack()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow">
+          <i class="fas fa-arrow-left"></i>
+          <span>Volver a Usuarios</span>
+        </button>
+
+        <div class="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-md border border-blue-100">
+          <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <span class="text-sm font-medium text-gray-600">Paso {{currentStep}} de 4</span>
+        </div>
+      </div>
+
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg mb-4 transform hover:scale-105 transition-transform duration-300">
+          <i class="fas fa-user-plus text-white text-3xl"></i>
+        </div>
+        <h2 class="text-4xl font-bold text-gray-900 mb-3">
           Registro de Nuevo Usuario
         </h2>
-        <p class="mt-2 text-sm text-gray-600">
-          Complete el formulario para crear una nueva cuenta en SEGAR
+        <p class="text-gray-600 text-lg">
+          Complete el formulario paso a paso para crear una nueva cuenta en SEGAR
         </p>
       </div>
-      
-      <div class="w-32"></div> <!-- Spacer para centrar el título -->
     </div>
 
-    <div class="px-6">
+    <!-- Step Indicator mejorado -->
+    <div class="mb-8 px-4">
+      <div class="flex items-center justify-center">
+        <!-- Step 1 -->
+        <div class="flex items-center">
+          <div
+            class="flex flex-col items-center cursor-pointer group"
+            [class.cursor-pointer]="isStepCompleted(1)"
+            (click)="isStepCompleted(1) ? goToStep(1) : null">
+            <div
+              class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 shadow-md"
+              [class.bg-gradient-to-br]="currentStep === 1"
+              [class.from-blue-500]="currentStep === 1"
+              [class.to-blue-600]="currentStep === 1"
+              [class.text-white]="currentStep === 1 || isStepCompleted(1)"
+              [class.bg-blue-500]="isStepCompleted(1) && currentStep !== 1"
+              [class.bg-gray-200]="!isStepCompleted(1) && currentStep !== 1"
+              [class.text-gray-500]="!isStepCompleted(1) && currentStep !== 1"
+              [class.scale-110]="currentStep === 1">
+              <i *ngIf="isStepCompleted(1) && currentStep !== 1" class="fas fa-check"></i>
+              <span *ngIf="!isStepCompleted(1) || currentStep === 1">1</span>
+            </div>
+            <span class="text-xs mt-2 font-medium hidden sm:block" [class.text-blue-600]="currentStep === 1" [class.text-gray-600]="currentStep !== 1">Personal</span>
+          </div>
+          <div class="w-16 sm:w-24 h-1 mx-2 rounded-full transition-all duration-300" [class.bg-blue-500]="currentStep > 1" [class.bg-gray-200]="currentStep <= 1"></div>
+        </div>
 
-    <!-- Step Indicator -->
-    <div class="flex items-center justify-center mb-8">
-      <div class="flex items-center">
-        <div 
-          class="step-indicator {{getStepClass(1)}}" 
-          [class.cursor-pointer]="isStepCompleted(1)"
-          (click)="isStepCompleted(1) ? goToStep(1) : null">
-          1
+        <!-- Step 2 -->
+        <div class="flex items-center">
+          <div
+            class="flex flex-col items-center cursor-pointer group"
+            [class.cursor-pointer]="isStepCompleted(2)"
+            (click)="isStepCompleted(2) ? goToStep(2) : null">
+            <div
+              class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 shadow-md"
+              [class.bg-gradient-to-br]="currentStep === 2"
+              [class.from-green-500]="currentStep === 2"
+              [class.to-green-600]="currentStep === 2"
+              [class.text-white]="currentStep === 2 || isStepCompleted(2)"
+              [class.bg-green-500]="isStepCompleted(2) && currentStep !== 2"
+              [class.bg-gray-200]="!isStepCompleted(2) && currentStep !== 2"
+              [class.text-gray-500]="!isStepCompleted(2) && currentStep !== 2"
+              [class.scale-110]="currentStep === 2">
+              <i *ngIf="isStepCompleted(2) && currentStep !== 2" class="fas fa-check"></i>
+              <span *ngIf="!isStepCompleted(2) || currentStep === 2">2</span>
+            </div>
+            <span class="text-xs mt-2 font-medium hidden sm:block" [class.text-green-600]="currentStep === 2" [class.text-gray-600]="currentStep !== 2">Contacto</span>
+          </div>
+          <div class="w-16 sm:w-24 h-1 mx-2 rounded-full transition-all duration-300" [class.bg-green-500]="currentStep > 2" [class.bg-gray-200]="currentStep <= 2"></div>
         </div>
-        <div class="step-line mx-2 sm:mx-4" [class.bg-blue-200]="currentStep > 1"></div>
-        <div 
-          class="step-indicator {{getStepClass(2)}}"
-          [class.cursor-pointer]="isStepCompleted(2)"
-          (click)="isStepCompleted(2) ? goToStep(2) : null">
-          2
+
+        <!-- Step 3 -->
+        <div class="flex items-center">
+          <div
+            class="flex flex-col items-center cursor-pointer group"
+            [class.cursor-pointer]="isStepCompleted(3)"
+            (click)="isStepCompleted(3) ? goToStep(3) : null">
+            <div
+              class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 shadow-md"
+              [class.bg-gradient-to-br]="currentStep === 3"
+              [class.from-purple-500]="currentStep === 3"
+              [class.to-purple-600]="currentStep === 3"
+              [class.text-white]="currentStep === 3 || isStepCompleted(3)"
+              [class.bg-purple-500]="isStepCompleted(3) && currentStep !== 3"
+              [class.bg-gray-200]="!isStepCompleted(3) && currentStep !== 3"
+              [class.text-gray-500]="!isStepCompleted(3) && currentStep !== 3"
+              [class.scale-110]="currentStep === 3">
+              <i *ngIf="isStepCompleted(3) && currentStep !== 3" class="fas fa-check"></i>
+              <span *ngIf="!isStepCompleted(3) || currentStep === 3">3</span>
+            </div>
+            <span class="text-xs mt-2 font-medium hidden sm:block" [class.text-purple-600]="currentStep === 3" [class.text-gray-600]="currentStep !== 3">Cuenta</span>
+          </div>
+          <div class="w-16 sm:w-24 h-1 mx-2 rounded-full transition-all duration-300" [class.bg-purple-500]="currentStep > 3" [class.bg-gray-200]="currentStep <= 3"></div>
         </div>
-        <div class="step-line mx-2 sm:mx-4" [class.bg-blue-200]="currentStep > 2"></div>
-        <div 
-          class="step-indicator {{getStepClass(3)}}"
-          [class.cursor-pointer]="isStepCompleted(3)"
-          (click)="isStepCompleted(3) ? goToStep(3) : null">
-          3
-        </div>
-        <div class="step-line mx-2 sm:mx-4" [class.bg-blue-200]="currentStep > 3"></div>
-        <div 
-          class="step-indicator {{getStepClass(4)}}"
+
+        <!-- Step 4 -->
+        <div class="flex flex-col items-center cursor-pointer group"
           [class.cursor-pointer]="isStepCompleted(4)"
           (click)="isStepCompleted(4) ? goToStep(4) : null">
-          4
+          <div
+            class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 shadow-md"
+            [class.bg-gradient-to-br]="currentStep === 4"
+            [class.from-orange-500]="currentStep === 4"
+            [class.to-orange-600]="currentStep === 4"
+            [class.text-white]="currentStep === 4 || isStepCompleted(4)"
+            [class.bg-orange-500]="isStepCompleted(4) && currentStep !== 4"
+            [class.bg-gray-200]="!isStepCompleted(4) && currentStep !== 4"
+            [class.text-gray-500]="!isStepCompleted(4) && currentStep !== 4"
+            [class.scale-110]="currentStep === 4">
+            <i *ngIf="isStepCompleted(4) && currentStep !== 4" class="fas fa-check"></i>
+            <span *ngIf="!isStepCompleted(4) || currentStep === 4">4</span>
+          </div>
+          <span class="text-xs mt-2 font-medium hidden sm:block" [class.text-orange-600]="currentStep === 4" [class.text-gray-600]="currentStep !== 4">Confirmar</span>
         </div>
       </div>
     </div>
 
-    <!-- Form Container -->
-    <div class="bg-white p-8 rounded-lg shadow-lg">
-      
-      <!-- Step 1: Información Personal -->
-      <div *ngIf="currentStep === 1">
-        <app-registro-info-personal 
-          [form]="personalForm"
-          (nextStep)="nextStep()">
-        </app-registro-info-personal>
-      </div>
+    <!-- Form Container mejorado -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <!-- Barra superior decorativa -->
+      <div class="h-2 bg-gradient-to-r"
+           [class.from-blue-400]="currentStep === 1"
+           [class.to-blue-600]="currentStep === 1"
+           [class.from-green-400]="currentStep === 2"
+           [class.to-green-600]="currentStep === 2"
+           [class.from-purple-400]="currentStep === 3"
+           [class.to-purple-600]="currentStep === 3"
+           [class.from-orange-400]="currentStep === 4"
+           [class.to-orange-600]="currentStep === 4"></div>
 
-      <!-- Step 2: Información de Contacto -->
-      <div *ngIf="currentStep === 2">
-        <app-registro-info-contacto 
-          [form]="contactForm"
-          (nextStep)="nextStep()"
-          (previousStep)="previousStep()">
-        </app-registro-info-contacto>
-      </div>
+      <div class="p-8 md:p-10">
+        <!-- Step 1: Información Personal -->
+        <div *ngIf="currentStep === 1">
+          <app-registro-info-personal
+            [form]="personalForm"
+            (nextStep)="nextStep()">
+          </app-registro-info-personal>
+        </div>
 
-      <!-- Step 3: Información de la Cuenta -->
-      <div *ngIf="currentStep === 3">
-        <app-registro-info-cuenta 
-          [form]="accountForm"
-          (nextStep)="nextStep()"
-          (previousStep)="previousStep()">
-        </app-registro-info-cuenta>
-      </div>
+        <!-- Step 2: Información de Contacto -->
+        <div *ngIf="currentStep === 2">
+          <app-registro-info-contacto
+            [form]="contactForm"
+            (nextStep)="nextStep()"
+            (previousStep)="previousStep()">
+          </app-registro-info-contacto>
+        </div>
 
-      <!-- Step 4: Términos y Confirmación -->
-      <div *ngIf="currentStep === 4">
-        <app-registro-terminos 
-          [form]="termsForm"
-          [summaryData]="getSummaryData()"
-          (previousStep)="previousStep()"
-          (submitRegistration)="onSubmitRegistration()">
-        </app-registro-terminos>
-      </div>
+        <!-- Step 3: Información de la Cuenta -->
+        <div *ngIf="currentStep === 3">
+          <app-registro-info-cuenta
+            [form]="accountForm"
+            (nextStep)="nextStep()"
+            (previousStep)="previousStep()">
+          </app-registro-info-cuenta>
+        </div>
 
+        <!-- Step 4: Términos y Confirmación -->
+        <div *ngIf="currentStep === 4">
+          <app-registro-terminos
+            [form]="termsForm"
+            [summaryData]="getSummaryData()"
+            (previousStep)="previousStep()"
+            (submitRegistration)="onSubmitRegistration()">
+          </app-registro-terminos>
+        </div>
+      </div>
     </div>
+
+    <!-- Footer info -->
+    <div class="mt-6 text-center">
+      <p class="text-sm text-gray-500">
+        <i class="fas fa-shield-alt text-blue-500 mr-1"></i>
+        Todos los datos están protegidos y son confidenciales
+      </p>
     </div>
+
   </div>
 </div>

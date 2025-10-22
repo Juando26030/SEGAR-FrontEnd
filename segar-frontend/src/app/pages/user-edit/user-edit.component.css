@@ -1,10 +1,11 @@
-/* Modal animations and styling */
-.modal-overlay {
-  backdrop-filter: blur(2px);
-}
-
-.modal-content {
-  animation: slideIn 0.3s ease-out;
+/* Animaciones para el formulario de edición de usuarios */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
@@ -16,6 +17,73 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Animación del modal */
+.modal-overlay {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  animation: slideIn 0.4s ease-out;
+}
+
+/* Animación de los campos del formulario */
+.grid > div {
+  animation: fadeIn 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.grid > div:nth-child(1) { animation-delay: 0.05s; }
+.grid > div:nth-child(2) { animation-delay: 0.1s; }
+.grid > div:nth-child(3) { animation-delay: 0.15s; }
+.grid > div:nth-child(4) { animation-delay: 0.2s; }
+.grid > div:nth-child(5) { animation-delay: 0.25s; }
+.grid > div:nth-child(6) { animation-delay: 0.3s; }
+
+/* Estilos para inputs mejorados */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* Transiciones suaves */
+button,
+input,
+textarea,
+select {
+  transition: all 0.2s ease;
+}
+
+/* Efecto hover en labels */
+label {
+  transition: color 0.2s ease;
+}
+
+/* Animación del header del modal */
+.px-8.py-6.border-b {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Efecto de pulsación en checkboxes */
+input[type="checkbox"] {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+input[type="checkbox"]:hover {
+  transform: scale(1.1);
+}
+
+/* Scroll suave */
+.overflow-y-auto {
+  scroll-behavior: smooth;
+}
+
+/* Estilo para el backdrop */
+.modal-overlay {
+  backdrop-filter: blur(2px);
 }
 
 .form-section {

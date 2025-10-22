@@ -1,116 +1,155 @@
 <div class="space-y-6">
-  <h3 class="text-lg font-medium text-gray-900">Información de Contacto</h3>
-  
+  <!-- Header de la sección -->
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+      <i class="fas fa-address-book text-green-600"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-800">Información de Contacto</h3>
+  </div>
+
   <div [formGroup]="form" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
     <div>
-      <label for="email" class="block text-sm font-medium text-gray-700">
+      <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-envelope text-blue-500 mr-2"></i>
         Correo electrónico <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="email" 
-        id="email" 
+      <input
+        type="email"
+        id="email"
         formControlName="email"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('email')?.invalid && form.get('email')?.touched">
-      <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="ejemplo@correo.com"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('email')?.invalid && form.get('email')?.touched"
+        [class.bg-red-50]="form.get('email')?.invalid && form.get('email')?.touched">
+      <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         Ingrese un correo electrónico válido
       </div>
     </div>
 
     <div>
-      <label for="confirmEmail" class="block text-sm font-medium text-gray-700">
+      <label for="confirmEmail" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-envelope-open text-blue-500 mr-2"></i>
         Confirmar correo electrónico <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="email" 
-        id="confirmEmail" 
+      <input
+        type="email"
+        id="confirmEmail"
         formControlName="confirmEmail"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="(form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched) || !emailsMatch">
-      <div *ngIf="form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Repita su correo"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="(form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched) || !emailsMatch"
+        [class.bg-red-50]="(form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched) || !emailsMatch">
+      <div *ngIf="form.get('confirmEmail')?.invalid && form.get('confirmEmail')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         La confirmación del correo es requerida
       </div>
-      <div *ngIf="!emailsMatch && form.get('confirmEmail')?.value" class="mt-1 text-sm text-red-600">
+      <div *ngIf="!emailsMatch && form.get('confirmEmail')?.value" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-triangle"></i>
         Los correos electrónicos no coinciden
       </div>
     </div>
 
     <div>
-      <label for="phone" class="block text-sm font-medium text-gray-700">
+      <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-mobile-alt text-purple-500 mr-2"></i>
         Teléfono móvil <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="tel" 
-        id="phone" 
+      <input
+        type="tel"
+        id="phone"
         formControlName="phone"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('phone')?.invalid && form.get('phone')?.touched">
-      <div *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Ej: 3001234567"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('phone')?.invalid && form.get('phone')?.touched"
+        [class.bg-red-50]="form.get('phone')?.invalid && form.get('phone')?.touched">
+      <div *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         El teléfono móvil es requerido
       </div>
     </div>
 
     <div>
-      <label for="altPhone" class="block text-sm font-medium text-gray-700">Teléfono alternativo</label>
-      <input 
-        type="tel" 
-        id="altPhone" 
+      <label for="altPhone" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-phone text-purple-500 mr-2"></i>
+        Teléfono alternativo
+      </label>
+      <input
+        type="tel"
+        id="altPhone"
         formControlName="altPhone"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        placeholder="Opcional"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white">
     </div>
 
     <div class="sm:col-span-2">
-      <label for="address" class="block text-sm font-medium text-gray-700">
+      <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
         Dirección <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="text" 
-        id="address" 
+      <input
+        type="text"
+        id="address"
         formControlName="address"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('address')?.invalid && form.get('address')?.touched">
-      <div *ngIf="form.get('address')?.invalid && form.get('address')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Ej: Calle 123 # 45-67"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('address')?.invalid && form.get('address')?.touched"
+        [class.bg-red-50]="form.get('address')?.invalid && form.get('address')?.touched">
+      <div *ngIf="form.get('address')?.invalid && form.get('address')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         La dirección es requerida
       </div>
     </div>
 
     <div>
-      <label for="city" class="block text-sm font-medium text-gray-700">
+      <label for="city" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-city text-orange-500 mr-2"></i>
         Ciudad <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="text" 
-        id="city" 
+      <input
+        type="text"
+        id="city"
         formControlName="city"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('city')?.invalid && form.get('city')?.touched">
-      <div *ngIf="form.get('city')?.invalid && form.get('city')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Ej: Bogotá"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('city')?.invalid && form.get('city')?.touched"
+        [class.bg-red-50]="form.get('city')?.invalid && form.get('city')?.touched">
+      <div *ngIf="form.get('city')?.invalid && form.get('city')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         La ciudad es requerida
       </div>
     </div>
 
     <div>
-      <label for="postalCode" class="block text-sm font-medium text-gray-700">Código Postal</label>
-      <input 
-        type="text" 
-        id="postalCode" 
+      <label for="postalCode" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-mailbox text-orange-500 mr-2"></i>
+        Código Postal
+      </label>
+      <input
+        type="text"
+        id="postalCode"
         formControlName="postalCode"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        placeholder="Opcional"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white">
     </div>
   </div>
 
-  <div class="flex justify-between">
-    <button 
-      type="button" 
+  <div class="flex justify-between pt-6 border-t border-gray-200">
+    <button
+      type="button"
       (click)="onPrevious()"
-      class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-      Anterior
+      class="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2 group">
+      <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform duration-200"></i>
+      <span>Anterior</span>
     </button>
-    <button 
-      type="button" 
+
+    <button
+      type="button"
       (click)="onNext()"
-      class="btn-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-blue-700">
-      Siguiente
+      [disabled]="form.invalid || !emailsMatch"
+      class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+      <span>Continuar</span>
+      <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform duration-200"></i>
     </button>
   </div>
 </div>

@@ -1,41 +1,182 @@
-<div class="producto-container">
-  <div class="producto-header">
-    <h2>Nuevo Producto Alimenticio</h2>
-    <p>Registre la información básica del nuevo producto</p>
+<div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Header mejorado -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <button
+          type="button"
+          (click)="cancelar()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow">
+          <i class="fas fa-arrow-left"></i>
+          <span>Volver</span>
+        </button>
+
+        <div class="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-md border border-green-100">
+          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-sm font-medium text-gray-600">Nuevo Registro</span>
+        </div>
+      </div>
+
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg mb-4 transform hover:scale-105 transition-transform duration-300">
+          <i class="fas fa-utensils text-white text-3xl"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">
+          Nuevo Producto Alimenticio
+        </h1>
+        <p class="text-gray-600 text-lg">
+          Complete la información del producto para registrarlo en el sistema
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulario con diseño mejorado -->
+    <form class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden" (ngSubmit)="guardarProducto()">
+
+      <!-- Barra superior decorativa -->
+      <div class="h-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600"></div>
+
+      <div class="p-8 md:p-10">
+
+        <!-- Información Básica Section -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-info-circle text-green-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Información Básica</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Nombre del producto -->
+            <div class="md:col-span-2">
+              <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-tag text-green-500 mr-2"></i>
+                Nombre del Producto *
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                [(ngModel)]="producto.nombre"
+                name="nombre"
+                placeholder="Ej: Yogurt Natural Premium"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white" />
+            </div>
+
+            <!-- Referencia -->
+            <div>
+              <label for="referencia" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-barcode text-blue-500 mr-2"></i>
+                Referencia *
+              </label>
+              <input
+                type="text"
+                id="referencia"
+                [(ngModel)]="producto.referencia"
+                name="referencia"
+                placeholder="Ej: YNP-2024-001"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white" />
+            </div>
+
+            <!-- Fabricante -->
+            <div>
+              <label for="fabricante" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-industry text-purple-500 mr-2"></i>
+                Fabricante *
+              </label>
+              <input
+                type="text"
+                id="fabricante"
+                [(ngModel)]="producto.fabricante"
+                name="fabricante"
+                placeholder="Ej: Lácteos Premium S.A.S."
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white" />
+            </div>
+
+            <!-- Descripción -->
+            <div class="md:col-span-2">
+              <label for="descripcion" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-align-left text-orange-500 mr-2"></i>
+                Descripción *
+              </label>
+              <textarea
+                id="descripcion"
+                [(ngModel)]="producto.descripcion"
+                name="descripcion"
+                placeholder="Describa las características principales del producto..."
+                rows="4"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white resize-none"></textarea>
+            </div>
+
+            <!-- Especificaciones -->
+            <div class="md:col-span-2">
+              <label for="especificaciones" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-clipboard-list text-teal-500 mr-2"></i>
+                Especificaciones Técnicas
+              </label>
+              <input
+                type="text"
+                id="especificaciones"
+                [(ngModel)]="producto.especificaciones"
+                name="especificaciones"
+                placeholder="Ej: Contenido graso: 3.2%, Proteína: 4.5%"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-green-300 bg-gray-50 focus:bg-white" />
+              <p class="mt-2 text-xs text-gray-500">
+                <i class="fas fa-info-circle mr-1"></i>
+                Ingrese las especificaciones técnicas del producto (opcional)
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Nota informativa -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg">
+          <div class="flex items-start">
+            <i class="fas fa-lightbulb text-blue-500 mt-1 mr-3"></i>
+            <div>
+              <h3 class="text-sm font-semibold text-blue-800 mb-1">Información importante</h3>
+              <p class="text-xs text-blue-700">
+                Los campos marcados con (*) son obligatorios. Asegúrese de completar toda la información requerida antes de guardar.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="cancelar()"
+            class="flex-1 sm:flex-none px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2 group">
+            <i class="fas fa-times group-hover:rotate-90 transition-transform duration-300"></i>
+            <span>Cancelar</span>
+          </button>
+
+          <button
+            type="submit"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
+            <i class="fas fa-save group-hover:scale-110 transition-transform duration-200"></i>
+            <span>Guardar Producto</span>
+          </button>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- Footer info -->
+    <div class="mt-6 text-center">
+      <p class="text-sm text-gray-500">
+        <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+        Todos los datos están protegidos y son confidenciales
+      </p>
+    </div>
+
   </div>
-
-  <form class="producto-form" (ngSubmit)="guardarProducto()">
-    <div class="form-group">
-      <label for="nombre">Nombre del producto</label>
-      <input type="text" id="nombre" [(ngModel)]="producto.nombre" name="nombre" placeholder="Yogurt Natural Premium" required />
-    </div>
-
-    <div class="form-group">
-      <label for="descripcion">Descripción</label>
-      <textarea id="descripcion" [(ngModel)]="producto.descripcion" name="descripcion" placeholder="Descripción del producto" required></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="especificaciones">Especificaciones</label>
-      <input type="text" id="especificaciones" [(ngModel)]="producto.especificaciones" name="especificaciones" placeholder="Ej: Contenido graso: 3.2%" />
-    </div>
-
-    <div class="form-group">
-      <label for="referencia">Referencia</label>
-      <input type="text" id="referencia" [(ngModel)]="producto.referencia" name="referencia" placeholder="Ej: YNP-2024-001" />
-    </div>
-
-    <div class="form-group">
-      <label for="fabricante">Fabricante</label>
-      <input type="text" id="fabricante" [(ngModel)]="producto.fabricante" name="fabricante" placeholder="Ej: Lácteos Premium S.A.S." />
-    </div>
-
-    <!-- Botones -->
-    <div class="form-actions">
-      <button type="button" class="cancel-btn" (click)="cancelar()">Cancelar</button>
-      <button type="submit" class="save-btn">
-        <i class="fas fa-save"></i> Guardar
-      </button>
-    </div>
-  </form>
 </div>
