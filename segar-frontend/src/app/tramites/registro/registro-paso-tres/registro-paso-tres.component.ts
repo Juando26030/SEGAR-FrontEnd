@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { Location } from '@angular/common';
 // Importar componente del sistema de documentos dinámicos
 import { DocumentosDinamicosComponent } from '../../../components/documentos-dinamicos/documentos-dinamicos.component';
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
@@ -83,7 +84,7 @@ interface SolicitudForm {
   templateUrl: './registro-paso-tres.component.html',
   styleUrls: ['./registro-paso-tres.component.css']
 })
-export class RegistroPasoTresComponent implements OnInit {
+export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   activeTab = 'clasificacion';
 
 
@@ -99,14 +100,53 @@ export class RegistroPasoTresComponent implements OnInit {
   productos: any[] = [];
   productoSeleccionado: any = '';
 
-  constructor(private tramiteService: TramiteInvimaService,
+  constructor(
+    private tramiteService: TramiteInvimaService,
     private http: HttpClient,
     private authService: AuthService,
+    private router: Router,
+    private location: Location
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.obtenerProductos();
+
+    // Configurar el state para la navegación hacia atrás
+    // Cuando el usuario presiona la flecha atrás, debe ir al tab de documentación
+    window.history.replaceState(
+      { navigationId: 'paso-3', previousTab: 'documentacion' },
+      '',
+      window.location.href
+    );
+
+    // Escuchar el evento popstate (flecha atrás del navegador)
+    window.addEventListener('popstate', this.handlePopState);
   }
+
+  ngOnDestroy() {
+    window.removeEventListener('popstate', this.handlePopState);
+  }
+
+  handlePopState = (event: PopStateEvent) => {
+    // Si el usuario presiona la flecha atrás, cambiar al tab de documentación
+    if (event.state && event.state.previousTab) {
+      this.setActiveTab(event.state.previousTab);
+      // Prevenir la navegación por defecto
+      window.history.pushState(
+        { navigationId: 'paso-3', previousTab: 'documentacion' },
+        '',
+        window.location.href
+      );
+    } else if (this.activeTab === 'radicacion') {
+      // Si está en radicación, ir a documentación
+      this.setActiveTab('documentacion');
+      window.history.pushState(
+        { navigationId: 'paso-3', previousTab: 'documentacion' },
+        '',
+        window.location.href
+      );
+    }
+  };
 
   obtenerProductos(): void {
 

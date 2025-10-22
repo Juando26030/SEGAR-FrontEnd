@@ -137,7 +137,7 @@ export class DocumentosDinamicosComponent implements OnInit {
     this.verificarCompletitudTotal();
 
     if (completo) {
-      alert('✅ Documento guardado correctamente. Se generará automáticamente cuando radique la solicitud.');
+      alert('�� Documento guardado correctamente. Se generará automáticamente cuando radique la solicitud.');
       this.volverALista();
     } else {
       alert('⚠️ Complete todos los campos obligatorios marcados con *');
@@ -211,7 +211,7 @@ export class DocumentosDinamicosComponent implements OnInit {
 
     // 1️⃣ Pedir URL firmada al backend
     const requestBody = {
-      bucketName: 'segar-documents', 
+      bucketName: 'segar-documents',
       objectName: `${payload.empresa}/${this.producto.nombre}/${file.name}`,
       contentType: file.type
     };
@@ -222,7 +222,7 @@ export class DocumentosDinamicosComponent implements OnInit {
 
     this.http.post('http://localhost:8090/api/documentos/signed-url', requestBody, {
       headers,
-      responseType: 'text' 
+      responseType: 'text'
     }).subscribe({
         next: (signedUrl) => {
           // 2️⃣ Subir el archivo directamente a GCS
@@ -334,6 +334,14 @@ export class DocumentosDinamicosComponent implements OnInit {
   }
 
   formatearTamanioArchivo(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
