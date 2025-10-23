@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import Keycloak from 'keycloak-js';
 import { BehaviorSubject } from 'rxjs';
+import { Observable, of, map, catchError } from 'rxjs';
+import { UsuarioService } from '../../core/services/usuario.service'; // Ajusta la ruta si es necesario
+
 
 export interface UserInfo {
   username: string;
@@ -30,7 +33,8 @@ export class AuthService {
   private readonly STORAGE_KEY_REFRESH_TOKEN = 'segar_refresh_token';
   private readonly STORAGE_KEY_USER_INFO = 'segar_user_info';
 
-  constructor() {
+  constructor(    private usuarioService: UsuarioService
+  ) {
     // Exponer métodos de debugging para facilitar el diagnóstico
     this.exposeToWindow();
     // ✅ RESTAURAR SESIÓN AL INICIAR (si existe)
@@ -559,4 +563,15 @@ export class AuthService {
       console.error('❌ ERROR AL GUARDAR SESIÓN EN STORAGE:', error);
     }
   }
+
+  getUsuarioId(): Observable<number | null> {
+    const keycloakId = this.keycloak?.tokenParsed?.sub;
+    if (!keycloakId) return of(null);
+
+    return this.usuarioService.getUsuarioByKeycloakId(keycloakId).pipe(
+      map(user => user.id),
+      catchError(() => of(null))
+    );
+  }
+
 }
