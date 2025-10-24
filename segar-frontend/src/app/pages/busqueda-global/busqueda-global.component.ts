@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, EMPTY, forkJoin, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import {
-  DashboardService,
-  BusquedaGlobalResponseDTO
-} from '../../core/services/dashboard.service';
+import {DashboardService, BusquedaGlobalResponseDTO} from '../../core/services/dashboard.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { UsuarioService } from '../../core/services/usuario.service';
+import { Usuario } from '../../core/DTOs/usuario.dto';
 
 interface ResultadoBusqueda {
   id: string;
@@ -18,6 +18,7 @@ interface ResultadoBusqueda {
   fecha: Date;
   radicadoNumber?: string;
   numeroRegistro?: string;
+  esDelUsuario: boolean;
 }
 
 interface FiltroTipo {
@@ -44,12 +45,15 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   showFilters: boolean = false;
   filtroFecha: string = '';
   filtroEstado: string = '';
+  filtroSoloMios: boolean = false; // Nuevo filtro
   tabActual: string = 'todos';
   isLoading: boolean = false;
   hasSearched: boolean = false;
   itemsPorPagina: number = 10;
   paginaActual: number = 1;
   loadingMore: boolean = false;
+  usuarioId: number | null = null;
+  empresaId: number | null = null;
 
   // Subject para debouncing
   private searchSubject = new Subject<string>();
@@ -78,58 +82,6 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   totalTramitesBackend: number = 0;
   totalRegistrosBackend: number = 0;
 
-  // Datos quemados para documentos y usuarios
-  private datosQuemadosDocumentos: ResultadoBusqueda[] = [
-    {
-      id: '2',
-      tipo: 'Documento',
-      titulo: 'Certificado de Zonificación Municipal',
-      descripcion: 'Documento oficial que certifica el uso de suelo permitido según plan regulador',
-      estado: 'completado',
-      responsable: 'María García López',
-      fecha: new Date('2024-01-10')
-    },
-    {
-      id: '5',
-      tipo: 'Documento',
-      titulo: 'Planos Arquitectónicos Aprobados',
-      descripcion: 'Conjunto de planos técnicos aprobados para proyecto residencial',
-      estado: 'archivado',
-      responsable: 'Pedro Martínez Torres',
-      fecha: new Date('2023-12-20')
-    },
-    {
-      id: '8',
-      tipo: 'Documento',
-      titulo: 'Estudio de Impacto Ambiental',
-      descripcion: 'Evaluación ambiental para proyecto de construcción mayor',
-      estado: 'pendiente',
-      responsable: 'Departamento Ambiental',
-      fecha: new Date('2024-01-20')
-    }
-  ];
-
-  private datosQuemadosUsuarios: ResultadoBusqueda[] = [
-    {
-      id: '3',
-      tipo: 'Usuario',
-      titulo: 'Carlos Rodríguez Mendoza',
-      descripcion: 'Arquitecto profesional registrado en el sistema municipal',
-      estado: 'activo',
-      responsable: 'Sistema Administrativo',
-      fecha: new Date('2024-01-08')
-    },
-    {
-      id: '7',
-      tipo: 'Usuario',
-      titulo: 'Ana María Sánchez',
-      descripcion: 'Ingeniero civil especialista en proyectos urbanos',
-      estado: 'activo',
-      responsable: 'Recursos Humanos',
-      fecha: new Date('2024-01-03')
-    }
-  ];
-
   tabs: Tab[] = [
     { key: 'todos', label: 'Todos', count: 0 },
     { key: 'tramites', label: 'Trámites', count: 0 },
@@ -138,27 +90,36 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     { key: 'registros-sanitarios', label: 'Registros Sanitarios', count: 0 }
   ];
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService, private authService: AuthService, private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
-
     // Cargar datos iniciales al inicializar el componente
-    this.cargarDatosIniciales();
+    this.authService.getUsuarioId().subscribe(id => {
+      this.usuarioId = id;
+      if (id) {
+        this.usuarioService.getEmpresaByUsuarioId(id).subscribe(empresa => {
+          this.empresaId = empresa.id;
+          this.cargarDatosIniciales();
+        });
+      } else {
+        this.cargarDatosIniciales();
+      }
+    });
 
-    // Configurar búsqueda con debouncing
+// Configurar búsqueda con debouncing
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(500),
-      distinctUntilChanged(),
-      switchMap(query => {
+      distinctUntilChanged((a: string, b: string) => a === b),
+      switchMap((query: string) => {
         if (query.trim().length >= 2) {
           this.isLoading = true;
-          return this.dashboardService.busquedaGlobal(query, 10, 10);
+          return this.dashboardService.busquedaGlobal(query, 10, 10, this.empresaId ?? undefined);
         } else {
           this.isLoading = false;
           this.hasSearched = false;
           this.resultados = [];
           this.actualizarContadores();
-          return [];
+          return EMPTY;
         }
       })
     ).subscribe({
@@ -187,16 +148,25 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.paginaActual = 1;
 
-    this.dashboardService.busquedaGlobal('', this.itemsPorPagina, this.itemsPorPagina).subscribe({
-      next: (response: BusquedaGlobalResponseDTO) => {
-        this.totalTramitesBackend = response.totalTramites || 0;
-        this.totalRegistrosBackend = response.totalRegistros || 0;
+    const requests = forkJoin({
+      busqueda: this.dashboardService.busquedaGlobal('', this.itemsPorPagina, this.itemsPorPagina, this.empresaId ?? undefined),
+      usuarios: this.empresaId ? this.usuarioService.getUsuariosByEmpresaId(this.empresaId) : of([])
+    });
 
-        if (!response.tramites?.length && !response.registros?.length) {
+    requests.subscribe({
+      next: (data) => {
+        this.totalTramitesBackend = data.busqueda.totalTramites || 0;
+        this.totalRegistrosBackend = data.busqueda.totalRegistros || 0;
+
+        if (!data.busqueda.tramites?.length && !data.busqueda.registros?.length) {
           this.cargarDatosMuestra();
         } else {
-          this.procesarResultadosIniciales(response);
+          this.procesarResultadosIniciales(data.busqueda);
         }
+
+        // Procesar usuarios
+        this.procesarUsuarios(data.usuarios);
+
         this.isLoading = false;
         this.hasSearched = true;
       },
@@ -207,6 +177,23 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
         this.hasSearched = true;
       }
     });
+  }
+
+  private procesarUsuarios(usuarios: Usuario[]): void {
+    const resultadosUsuarios: ResultadoBusqueda[] = usuarios.map(usuario => ({
+      id: usuario.id.toString(),
+      tipo: 'Usuario',
+      titulo: `${usuario.firstName} ${usuario.lastName}`,
+      descripcion: `Email: ${usuario.email} | Rol: ${usuario.role}`,
+      estado: 'activo', // Asumir estado activo por defecto
+      responsable: 'Empresa',
+      fecha: new Date(), // Usar fecha de creación si está disponible
+      esDelUsuario: false // Ajustar según lógica de negocio
+    }));
+
+    // Agregar usuarios a todosLosResultados
+    this.todosLosResultados = [...this.todosLosResultados, ...resultadosUsuarios];
+    this.aplicarFiltrosYPaginacion();
   }
 
   private procesarResultadosIniciales(response: BusquedaGlobalResponseDTO): void {
@@ -222,7 +209,8 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
         estado: this.mapearEstadoTramite(tramite.currentStatus),
         responsable: 'Sistema INVIMA',
         fecha: new Date(tramite.lastUpdate),
-        radicadoNumber: tramite.radicadoNumber
+        radicadoNumber: tramite.radicadoNumber,
+        esDelUsuario: true
       });
     });
 
@@ -236,18 +224,22 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
         estado: this.mapearEstadoRegistro(registro.estado),
         responsable: 'INVIMA',
         fecha: new Date(registro.fechaExpedicion),
-        numeroRegistro: registro.numeroRegistro
+        numeroRegistro: registro.numeroRegistro,
+        esDelUsuario: true
       });
     });
 
-    // Siempre agregar algunos datos quemados para tener contenido
-    this.resultados = [...resultadosBackend, ...this.datosQuemadosDocumentos.slice(0, 2), ...this.datosQuemadosUsuarios.slice(0, 2)];
-    this.actualizarContadores();
+    // Poblar todosLosResultados con datos iniciales
+    this.todosLosResultados = [...resultadosBackend];
+
+    // Aplicar filtros y paginación a los datos iniciales
+    this.aplicarFiltrosYPaginacion();
   }
 
   private cargarDatosMuestra(): void {
-    // Si no hay datos del backend, mostrar solo datos quemados
-    this.resultados = [...this.datosQuemadosDocumentos, ...this.datosQuemadosUsuarios];
+    // Si no hay datos del backend, mostrar array vacío
+    this.todosLosResultados = [];
+    this.resultados = [];
     this.actualizarContadores();
   }
 
@@ -267,7 +259,8 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
         estado: this.mapearEstadoTramite(tramite.currentStatus),
         responsable: 'Sistema INVIMA',
         fecha: new Date(tramite.lastUpdate),
-        radicadoNumber: tramite.radicadoNumber
+        radicadoNumber: tramite.radicadoNumber,
+        esDelUsuario: true
       });
     });
 
@@ -281,25 +274,17 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
         estado: this.mapearEstadoRegistro(registro.estado),
         responsable: 'INVIMA',
         fecha: new Date(registro.fechaExpedicion),
-        numeroRegistro: registro.numeroRegistro
+        numeroRegistro: registro.numeroRegistro,
+        esDelUsuario: true
       });
     });
 
-    // Si es la primera página, incluir datos quemados
+    // Actualizar todosLosResultados con datos del backend
     if (this.paginaActual === 1) {
-      const terminoNormalizado = this.normalizarTexto(this.searchQuery);
-      const documentosFiltrados = this.filtrarDatosQuemados(this.datosQuemadosDocumentos, terminoNormalizado);
-      const usuariosFiltrados = this.filtrarDatosQuemados(this.datosQuemadosUsuarios, terminoNormalizado);
-
-      if (this.paginaActual === 1) {
-        // Primera carga: reemplazar todos los resultados
-        this.todosLosResultados = [...resultadosBackend, ...documentosFiltrados, ...usuariosFiltrados];
-      } else {
-        // Cargar más: agregar a los existentes
-        this.todosLosResultados = [...this.todosLosResultados, ...resultadosBackend];
-      }
+      // Primera carga: reemplazar todos los resultados
+      this.todosLosResultados = [...resultadosBackend];
     } else {
-      // Páginas siguientes: solo datos del backend
+      // Cargar más: agregar a los existentes
       this.todosLosResultados = [...this.todosLosResultados, ...resultadosBackend];
     }
 
@@ -312,16 +297,6 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    });
-  }
-
-  private filtrarDatosQuemados(datos: ResultadoBusqueda[], termino: string): ResultadoBusqueda[] {
-    return datos.filter(item => {
-      return (
-        this.normalizarTexto(item.titulo).includes(termino) ||
-        this.normalizarTexto(item.descripcion).includes(termino) ||
-        this.normalizarTexto(item.responsable).includes(termino)
-      );
     });
   }
 
@@ -358,6 +333,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     };
     return mapeo[estado] || 'activo';
   }
+
   // Método para normalizar texto (quitar tildes y caracteres especiales)
   private normalizarTexto(texto: string): string {
     return texto
@@ -474,48 +450,6 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     }
   }
 
-  private aplicarFiltrosActivos(): void {
-    // Aplicar filtros de tipo
-    const tiposSeleccionados = this.tiposFiltro
-      .filter(t => t.selected)
-      .map(t => t.key);
-
-    if (tiposSeleccionados.length < this.tiposFiltro.length) {
-      this.resultados = this.resultados.filter(r => {
-        const tipoKey = this.tipoAClave(r.tipo);
-        return tiposSeleccionados.includes(tipoKey);
-      });
-    }
-
-    // Aplicar filtro de estado
-    if (this.filtroEstado) {
-      this.resultados = this.resultados.filter(r =>
-        this.normalizarTexto(r.estado) === this.normalizarTexto(this.filtroEstado)
-      );
-    }
-
-    // Aplicar filtro de fecha
-    if (this.filtroFecha) {
-      const ahora = new Date();
-      this.resultados = this.resultados.filter(r => {
-        const fechaResultado = new Date(r.fecha);
-        switch (this.filtroFecha) {
-          case 'semana':
-            const unaSemanaAtras = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
-            return fechaResultado >= unaSemanaAtras;
-          case 'mes':
-            const unMesAtras = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
-            return fechaResultado >= unMesAtras;
-          case 'ano':
-            const unAnoAtras = new Date(ahora.getTime() - 365 * 24 * 60 * 60 * 1000);
-            return fechaResultado >= unAnoAtras;
-          default:
-            return true;
-        }
-      });
-    }
-  }
-
   cambiarTab(tab: string): void {
     this.tabActual = tab;
   }
@@ -523,6 +457,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   limpiarFiltros(): void {
     this.filtroFecha = '';
     this.filtroEstado = '';
+    this.filtroSoloMios = false; // Reset del filtro
     this.searchQuery = '';
     this.paginaActual = 1;
     this.tiposFiltro.forEach(tipo => tipo.selected = true);
@@ -545,6 +480,9 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   aplicarFiltros(): void {
     if (this.searchQuery.trim().length >= 2) {
       this.searchSubject.next(this.searchQuery.trim());
+    } else {
+      // Aplicar filtros a los datos actuales sin nueva búsqueda
+      this.aplicarFiltrosYPaginacion();
     }
   }
 
@@ -616,7 +554,6 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     return !this.hasSearched && this.searchQuery.trim().length > 0 && this.searchQuery.trim().length < 2;
   }
 
-
   private aplicarFiltrosYPaginacion(): void {
     let resultadosFiltrados = [...this.todosLosResultados];
 
@@ -654,6 +591,11 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Aplicar filtro "Solo míos"
+    if (this.filtroSoloMios) {
+      resultadosFiltrados = resultadosFiltrados.filter(r => r.esDelUsuario);
+    }
+
     // CAMBIO: Guardar TODOS los resultados filtrados (sin paginación)
     // La paginación se maneja por pestaña en el getter resultadosFiltrados
     this.resultados = resultadosFiltrados;
@@ -661,7 +603,6 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
 
     this.actualizarContadores();
   }
-
 
   // Método para cargar más resultados
   cargarMasResultados(): void {
@@ -685,7 +626,6 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     }
   }
 
-
   private cargarMasDelBackend(): void {
     this.loadingMore = true;
 
@@ -701,7 +641,8 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     this.dashboardService.busquedaGlobal(
       query,
       this.itemsPorPagina,
-      this.itemsPorPagina
+      this.itemsPorPagina,
+      this.empresaId ?? undefined
     ).subscribe({
       next: (response: BusquedaGlobalResponseDTO) => {
         this.paginaActual++;
@@ -747,5 +688,4 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
 
     return totalElementosMostrados < totalDisponibleLocal || hayMasEnBackend;
   }
-
 }

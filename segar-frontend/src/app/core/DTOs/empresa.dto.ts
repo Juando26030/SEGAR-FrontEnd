@@ -1,15 +1,42 @@
-export interface EmpresaDTO {
-  idEmpresa: number;
-  nombre: string;
-  idSuscripcion: number;
+export interface Empresa {
+  id: number;
+  razonSocial: string;
+  nit: string;
+  nombreComercial: string;
+  direccion: string;
+  ciudad: string;
+  pais: string;
+  telefono: string;
+  email: string;
+  representanteLegal: string;
+  estado: string;
+  tipoEmpresa: string;
 }
 
 export interface CreateEmpresaDTO {
-  nombre: string;
-  idSuscripcion: number;
+  razonSocial: string;
+  nit: string;
+  nombreComercial: string;
+  direccion: string;
+  ciudad: string;
+  pais: string;
+  telefono: string;
+  email: string;
+  representanteLegal: string;
+  estado: string;
+  tipoEmpresa: string;
 }
 
 export interface UpdateEmpresaDTO {
-  nombre?: string;
-  idSuscripcion?: number;
+  razonSocial?: string;
+  nit?: string;
+  nombreComercial?: string;
+  direccion?: string;
+  ciudad?: string;
+  pais?: string;
+  telefono?: string;
+  email?: string;
+  representanteLegal?: string;
+  estado?: string;
+  tipoEmpresa?: string;
 }

@@ -361,20 +361,6 @@
   color: #111827;
 }
 
-.apply-filters-button {
-  background: var(--primary-color);
-  color: #6a717f;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.375rem 0.75rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.apply-filters-button:hover {
-  background: var(--primary-light);
-}
 
 /* Results */
 .results-section {
@@ -793,3 +779,38 @@
     font-size: 0.8125rem;
   }
 }
+.badge-tuyo {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+
+.apply-filters-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  padding: 0.625rem 1.25rem;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-filters-button:hover {
+  color: #5c5c5c;
+  border-color: #cafef6;
+  background: #f2fef9;
+  transform: translateY(-1px);
+}
+
