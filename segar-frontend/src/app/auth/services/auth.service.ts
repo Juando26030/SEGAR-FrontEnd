@@ -13,6 +13,8 @@ export interface UserInfo {
   createdAt?: Date;
   firstName?: string;
   lastName?: string;
+  id?: number; // ID del usuario en la base de datos local
+  keycloakId?: string; // ID de Keycloak
 }
 
 @Injectable({
@@ -25,8 +27,14 @@ export class AuthService {
 
   // ========== RENOVACIÓN AUTOMÁTICA DE TOKENS ==========
   private refreshTokenInterval: any = null;
-  private readonly REFRESH_INTERVAL_MS = 2.5 * 60 * 1000; // 2.5 minutos
-  private readonly TOKEN_MIN_VALIDITY_SECONDS = 70; // Renovar si quedan menos de 70 segundos
+  private readonly REFRESH_INTERVAL_MS = 30 * 1000; // 30 segundos (muy frecuente para testing)
+  private readonly TOKEN_MIN_VALIDITY_SECONDS = 50; // Renovar si quedan menos de 50 segundos
+
+  // ========== DETECCIÓN DE ACTIVIDAD DEL USUARIO ==========
+  private lastActivityTime: number = Date.now();
+  private readonly INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutos de inactividad
+  private activityListenersAttached: boolean = false;
+  private inactivityCheckInterval: any = null; // Timer para verificar inactividad
 
   // ========== PERSISTENCIA DE SESIÓN ==========
   private readonly STORAGE_KEY_TOKEN = 'segar_access_token';
@@ -126,7 +134,9 @@ export class AuthService {
         // user_created_timestamp viene del mapper personalizado de Keycloak (en milisegundos)
         createdAt: tokenParsed.user_created_timestamp
           ? new Date(tokenParsed.user_created_timestamp)
-          : undefined
+          : undefined,
+        id: tokenParsed.sub, // Asignar el ID de Keycloak
+        keycloakId: tokenParsed.sub // Asignar el ID de Keycloak
       };
 
       console.log('👤 UserInfo creado:', userInfo);
@@ -194,7 +204,8 @@ export class AuthService {
 
   /**
    * Ejecuta la renovación del token.
-   * Utiliza updateToken() de Keycloak que usa el Refresh Token.
+   * Utiliza el Refresh Token para obtener un nuevo Access Token.
+   * SOLO renueva si ha habido actividad del usuario.
    * Cada llamada exitosa reinicia el contador de SSO Session Idle en Keycloak.
    */
   private async performTokenRefresh(): Promise<void> {
@@ -205,30 +216,81 @@ export class AuthService {
         return;
       }
 
+      if (!this.keycloak.refreshToken) {
+        console.error('❌ No hay Refresh Token disponible');
+        this.stopTokenRefresh();
+        await this.logoutOnTokenExpired();
+        return;
+      }
+
+      // ⚠️ VERIFICAR INACTIVIDAD DEL USUARIO
+      if (this.isUserInactive()) {
+        console.log('⚠️ ===============================================');
+        console.log('⚠️ USUARIO INACTIVO - NO SE RENOVARÁ EL TOKEN');
+        console.log('⚠️ Esperando actividad para renovar la sesión...');
+        console.log('⚠️ ===============================================');
+        // NO renovar el token - dejar que expire naturalmente
+        // Cuando expire, se cerrará la sesión automáticamente
+        return;
+      }
+
       console.log('🔄 Verificando vigencia del token...');
+      console.log('✅ Usuario activo - verificando si se necesita renovación');
 
-      // updateToken(minValidity) intenta renovar el token si expira en menos de minValidity segundos
-      // Retorna true si se renovó, false si aún es válido
-      const refreshed = await this.keycloak.updateToken(this.TOKEN_MIN_VALIDITY_SECONDS);
+      // Verificar si el token está por expirar
+      const tokenParsed = this.keycloak.tokenParsed as any;
+      const now = Math.floor(Date.now() / 1000);
+      const expiresIn = (tokenParsed?.exp || 0) - now;
 
-      if (refreshed) {
-        console.log('✅ Token renovado exitosamente');
+      console.log(`🔄 Token expira en ${expiresIn} segundos`);
+
+      // Solo renovar si quedan menos de TOKEN_MIN_VALIDITY_SECONDS segundos
+      if (expiresIn > this.TOKEN_MIN_VALIDITY_SECONDS) {
+        console.log('ℹ️ Token aún válido, no se requiere renovación');
+        return;
+      }
+
+      console.log('🔄 Renovando token con Refresh Token...');
+
+      // Hacer petición de renovación con el Refresh Token
+      const response = await fetch('http://localhost:8080/realms/segar/protocol/openid-connect/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          client_id: 'segar-frontend',
+          refresh_token: this.keycloak.refreshToken
+        })
+      });
+
+      if (response.ok) {
+        const tokenData = await response.json();
+
+        console.log('✅ Token renovado exitosamente (usuario activo)');
+
+        // Actualizar tokens en Keycloak
+        (this.keycloak as any).token = tokenData.access_token;
+        (this.keycloak as any).refreshToken = tokenData.refresh_token;
+        (this.keycloak as any).tokenParsed = this.parseJwt(tokenData.access_token);
+
         console.log('🔄 Nuevo token expira en:', new Date((this.keycloak.tokenParsed?.exp || 0) * 1000));
         console.log('✅ Contador de inactividad de Keycloak reiniciado (SSO Session Idle)');
 
         // ✅ ACTUALIZAR TOKEN EN LOCALSTORAGE
-        if (this.keycloak.token && this.keycloak.refreshToken) {
-          this.guardarSesionEnStorage(this.keycloak.token, this.keycloak.refreshToken);
-        }
+        this.guardarSesionEnStorage(tokenData.access_token, tokenData.refresh_token);
 
-        // Actualizar el perfil del usuario con los nuevos datos del token
-        await this.loadUserProfile();
+        // NO es necesario recargar el perfil cada vez
+        // await this.loadUserProfile();
       } else {
-        console.log('ℹ️ Token aún válido, no se requiere renovación');
+        const errorText = await response.text();
+        console.error('❌ Error al renovar token:', response.status, errorText);
+        throw new Error(`Failed to refresh token: ${response.status}`);
       }
     } catch (error) {
       console.error('❌ ERROR AL RENOVAR TOKEN:', error);
-      console.error('❌ Probablemente la sesión expiró por inactividad (5 min)');
+      console.error('❌ Probablemente la sesión expiró por inactividad');
       console.log('🚪 Cerrando sesión por expiración del Refresh Token...');
 
       // Detener la renovación automática
@@ -367,6 +429,9 @@ export class AuthService {
 
         // ✅ GUARDAR SESIÓN EN LOCALSTORAGE
         this.guardarSesionEnStorage(tokenData.access_token, tokenData.refresh_token);
+
+        // ✅ CONFIGURAR LISTENERS DE ACTIVIDAD
+        this.setupActivityListeners();
 
         // ✅ INICIAR RENOVACIÓN AUTOMÁTICA DE TOKENS
         this.startTokenRefresh();
@@ -531,6 +596,9 @@ export class AuthService {
           console.log('✅ El token es válido y no requiere renovación');
         }
 
+        // ✅ CONFIGURAR LISTENERS DE ACTIVIDAD
+        this.setupActivityListeners();
+
         // ✅ INICIAR RENOVACIÓN AUTOMÁTICA DE TOKENS
         this.startTokenRefresh();
       } else {
@@ -558,20 +626,153 @@ export class AuthService {
         localStorage.setItem(this.STORAGE_KEY_USER_INFO, JSON.stringify(userInfo));
       }
 
-      console.log('✅ Sesión guardada en localStorage');
+      console.log('✅ Sesión guardada en almacenamiento local');
     } catch (error) {
       console.error('❌ ERROR AL GUARDAR SESIÓN EN STORAGE:', error);
     }
   }
 
   getUsuarioId(): Observable<number | null> {
-    const keycloakId = this.keycloak?.tokenParsed?.sub;
-    if (!keycloakId) return of(null);
+    // Obtener el Keycloak ID del token (sub claim)
+    const keycloakId = this.keycloak?.tokenParsed?.['sub'];
 
+    if (!keycloakId) {
+      console.warn('⚠️ No se pudo obtener el Keycloak ID del token');
+      return of(null);
+    }
+
+    // Buscar directamente por username (más confiable que keycloakId)
+    const username = this.keycloak?.tokenParsed?.['preferred_username'];
+
+    if (username) {
+      console.log('🔍 Obteniendo ID de usuario por username:', username);
+      return this.usuarioService.getUsuarioByUsername(username).pipe(
+        map(user => {
+          console.log('✅ ID de usuario obtenido:', user.id);
+          return user.id;
+        }),
+        catchError((error) => {
+          console.error('❌ Error al obtener ID de usuario por username:', error);
+
+          // Fallback: intentar con keycloakId solo si username falla
+          console.log('🔄 Intentando fallback con Keycloak ID:', keycloakId);
+          return this.usuarioService.getUsuarioByKeycloakId(keycloakId).pipe(
+            map(user => {
+              console.log('✅ ID de usuario obtenido por keycloakId:', user.id);
+              return user.id;
+            }),
+            catchError((fallbackError) => {
+              console.error('❌ Error en fallback por keycloakId:', fallbackError);
+              return of(null);
+            })
+          );
+        })
+      );
+    }
+
+    // Si no hay username, intentar con keycloakId
+    console.log('🔍 No hay username, intentando con Keycloak ID:', keycloakId);
     return this.usuarioService.getUsuarioByKeycloakId(keycloakId).pipe(
-      map(user => user.id),
-      catchError(() => of(null))
+      map(user => {
+        console.log('✅ ID de usuario obtenido:', user.id);
+        return user.id;
+      }),
+      catchError((error) => {
+        console.error('❌ Error al obtener ID de usuario:', error);
+        return of(null);
+      })
     );
   }
 
+
+  // ========== DETECCIÓN DE ACTIVIDAD DEL USUARIO ==========
+
+  /**
+   * Configura los listeners de actividad del usuario.
+   * Detecta SOLO actividad REAL del usuario: mouse, teclado, touch.
+   * NO considera peticiones HTTP automáticas como actividad.
+   */
+  private setupActivityListeners(): void {
+    if (this.activityListenersAttached) {
+      console.log('👂 Listeners de actividad ya configurados, omitiendo...');
+      return;
+    }
+
+    const updateActivity = () => {
+      this.lastActivityTime = Date.now();
+      console.log('👆 Actividad del usuario detectada - reiniciando contador');
+    };
+
+    // Eventos que indican actividad REAL del usuario
+    const events = ['mousedown', 'keydown', 'touchstart', 'click'];
+
+    events.forEach(event => {
+      document.addEventListener(event, updateActivity, { passive: true });
+    });
+
+    this.activityListenersAttached = true;
+    console.log('👂 Listeners de actividad configurados (solo eventos REALES del usuario)');
+
+    // ✅ INICIAR VERIFICACIÓN PERIÓDICA DE INACTIVIDAD
+    this.startInactivityMonitor();
+  }
+
+  /**
+   * Inicia un monitor que verifica periódicamente si el usuario está inactivo.
+   * Si detecta 5+ minutos de inactividad, cierra la sesión automáticamente.
+   */
+  private startInactivityMonitor(): void {
+    // Verificar cada 10 segundos si el usuario está inactivo
+    this.inactivityCheckInterval = setInterval(() => {
+      const timeSinceLastActivity = Date.now() - this.lastActivityTime;
+
+      if (timeSinceLastActivity > this.INACTIVITY_TIMEOUT_MS) {
+        console.log('🚨 ==============================================');
+        console.log('🚨 CERRANDO SESIÓN POR INACTIVIDAD');
+        console.log(`🚨 Usuario inactivo por ${Math.floor(timeSinceLastActivity / 1000 / 60)} minutos`);
+        console.log('🚨 ==============================================');
+
+        // Detener todos los timers
+        this.stopInactivityMonitor();
+        this.stopTokenRefresh();
+
+        // Cerrar sesión por inactividad
+        this.logoutOnTokenExpired();
+      }
+    }, 10000); // Verificar cada 10 segundos
+
+    console.log('👀 Monitor de inactividad iniciado (verifica cada 10 segundos)');
+  }
+
+  /**
+   * Detiene el monitor de inactividad.
+   */
+  private stopInactivityMonitor(): void {
+    if (this.inactivityCheckInterval) {
+      clearInterval(this.inactivityCheckInterval);
+      this.inactivityCheckInterval = null;
+      console.log('🛑 Monitor de inactividad detenido');
+    }
+  }
+
+  /**
+   * Verifica si el usuario ha estado inactivo por más tiempo del permitido.
+   * @returns true si hay inactividad, false si hay actividad reciente
+   */
+  private isUserInactive(): boolean {
+    const timeSinceLastActivity = Date.now() - this.lastActivityTime;
+    const inactiveMinutes = Math.floor(timeSinceLastActivity / 1000 / 60);
+    const inactiveSeconds = Math.floor((timeSinceLastActivity / 1000) % 60);
+    const isInactive = timeSinceLastActivity > this.INACTIVITY_TIMEOUT_MS;
+
+    console.log(`⏱️ Tiempo desde última actividad: ${inactiveMinutes}m ${inactiveSeconds}s`);
+
+    if (isInactive) {
+      console.log(`⚠️ Usuario INACTIVO por más de ${this.INACTIVITY_TIMEOUT_MS / 1000 / 60} minutos`);
+    } else {
+      console.log(`✅ Usuario ACTIVO (actividad hace ${inactiveSeconds}s)`);
+    }
+
+    return isInactive;
+  }
 }
