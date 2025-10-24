@@ -1,92 +1,119 @@
 <div class="space-y-6">
-  <h3 class="text-lg font-medium text-gray-900">Información Personal</h3>
-  
+  <!-- Header de la sección -->
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+      <i class="fas fa-user text-blue-600"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-800">Información Personal</h3>
+  </div>
+
   <div [formGroup]="form" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
     <div>
-      <label for="firstName" class="block text-sm font-medium text-gray-700">
+      <label for="firstName" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-user-circle text-blue-500 mr-2"></i>
         Nombre <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="text" 
-        id="firstName" 
+      <input
+        type="text"
+        id="firstName"
         formControlName="firstName"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('firstName')?.invalid && form.get('firstName')?.touched">
-      <div *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Ingrese su nombre"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
+        [class.bg-red-50]="form.get('firstName')?.invalid && form.get('firstName')?.touched">
+      <div *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         El nombre es requerido
       </div>
     </div>
 
     <div>
-      <label for="lastName" class="block text-sm font-medium text-gray-700">
+      <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-user-circle text-blue-500 mr-2"></i>
         Apellido <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="text" 
-        id="lastName" 
+      <input
+        type="text"
+        id="lastName"
         formControlName="lastName"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('lastName')?.invalid && form.get('lastName')?.touched">
-      <div *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Ingrese su apellido"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
+        [class.bg-red-50]="form.get('lastName')?.invalid && form.get('lastName')?.touched">
+      <div *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         El apellido es requerido
       </div>
     </div>
 
     <div>
-      <label for="idType" class="block text-sm font-medium text-gray-700">
+      <label for="idType" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-id-card text-purple-500 mr-2"></i>
         Tipo de Documento <span class="text-red-500">*</span>
       </label>
-      <select 
-        id="idType" 
+      <select
+        id="idType"
         formControlName="idType"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('idType')?.invalid && form.get('idType')?.touched">
-        <option value="">Seleccione</option>
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('idType')?.invalid && form.get('idType')?.touched"
+        [class.bg-red-50]="form.get('idType')?.invalid && form.get('idType')?.touched">
+        <option value="">Seleccione un tipo</option>
         <option value="dni">DNI</option>
         <option value="passport">Pasaporte</option>
         <option value="foreign-id">Cédula de Extranjería</option>
       </select>
-      <div *ngIf="form.get('idType')?.invalid && form.get('idType')?.touched" class="mt-1 text-sm text-red-600">
+      <div *ngIf="form.get('idType')?.invalid && form.get('idType')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         Seleccione un tipo de documento
       </div>
     </div>
 
     <div>
-      <label for="idNumber" class="block text-sm font-medium text-gray-700">
+      <label for="idNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-hashtag text-purple-500 mr-2"></i>
         Número de Documento <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="text" 
-        id="idNumber" 
+      <input
+        type="text"
+        id="idNumber"
         formControlName="idNumber"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('idNumber')?.invalid && form.get('idNumber')?.touched">
-      <div *ngIf="form.get('idNumber')?.invalid && form.get('idNumber')?.touched" class="mt-1 text-sm text-red-600">
+        placeholder="Ej: 1234567890"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('idNumber')?.invalid && form.get('idNumber')?.touched"
+        [class.bg-red-50]="form.get('idNumber')?.invalid && form.get('idNumber')?.touched">
+      <div *ngIf="form.get('idNumber')?.invalid && form.get('idNumber')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         El número de documento es requerido
       </div>
     </div>
 
     <div>
-      <label for="birthDate" class="block text-sm font-medium text-gray-700">
+      <label for="birthDate" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-calendar text-green-500 mr-2"></i>
         Fecha de Nacimiento <span class="text-red-500">*</span>
       </label>
-      <input 
-        type="date" 
-        id="birthDate" 
+      <input
+        type="date"
+        id="birthDate"
         formControlName="birthDate"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        [class.border-red-500]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched">
-      <div *ngIf="form.get('birthDate')?.invalid && form.get('birthDate')?.touched" class="mt-1 text-sm text-red-600">
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-gray-50 focus:bg-white"
+        [class.border-red-500]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched"
+        [class.bg-red-50]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched">
+      <div *ngIf="form.get('birthDate')?.invalid && form.get('birthDate')?.touched" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+        <i class="fas fa-exclamation-circle"></i>
         La fecha de nacimiento es requerida
       </div>
     </div>
 
     <div>
-      <label for="gender" class="block text-sm font-medium text-gray-700">Género</label>
-      <select 
-        id="gender" 
+      <label for="gender" class="block text-sm font-semibold text-gray-700 mb-2">
+        <i class="fas fa-venus-mars text-pink-500 mr-2"></i>
+        Género
+      </label>
+      <select
+        id="gender"
         formControlName="gender"
-        class="input-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-gray-50 focus:bg-white">
         <option value="">Seleccione</option>
         <option value="male">Masculino</option>
         <option value="female">Femenino</option>
@@ -95,12 +122,14 @@
     </div>
   </div>
 
-  <div class="flex justify-end">
-    <button 
-      type="button" 
+  <div class="flex justify-end pt-6 border-t border-gray-200">
+    <button
+      type="button"
       (click)="onNext()"
-      class="btn-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:bg-blue-700">
-      Siguiente
+      [disabled]="form.invalid"
+      class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+      <span>Continuar</span>
+      <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform duration-200"></i>
     </button>
   </div>
 </div>

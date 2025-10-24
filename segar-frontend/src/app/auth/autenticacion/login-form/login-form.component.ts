@@ -16,6 +16,7 @@ export class LoginFormComponent implements OnInit {
   showPassword = false;
   isLoading = false;
   errorMessage = '';
+  sessionExpiredMessage = ''; // Mensaje de sesión expirada
 
   constructor(
     private fb: FormBuilder,
@@ -31,9 +32,33 @@ export class LoginFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // ✅ VERIFICAR SI HAY MENSAJE DE SESIÓN EXPIRADA
+    this.checkSessionExpired();
+
     // Verificar si ya está autenticado
     if (this.authService.isAuthenticated()) {
       this.redirectBasedOnRole();
+    }
+  }
+
+  /**
+   * Verifica si la sesión expiró y muestra el mensaje al usuario
+   */
+  private checkSessionExpired(): void {
+    const sessionExpired = sessionStorage.getItem('session_expired');
+    const reason = sessionStorage.getItem('session_expired_reason');
+
+    if (sessionExpired === 'true' && reason) {
+      this.sessionExpiredMessage = reason;
+
+      // Limpiar los mensajes del sessionStorage
+      sessionStorage.removeItem('session_expired');
+      sessionStorage.removeItem('session_expired_reason');
+
+      // Limpiar el mensaje después de 10 segundos
+      setTimeout(() => {
+        this.sessionExpiredMessage = '';
+      }, 10000);
     }
   }
 
@@ -48,18 +73,18 @@ export class LoginFormComponent implements OnInit {
 
       try {
         const { username, password, userType } = this.loginForm.value;
-        
+
         // 🔐 AUTENTICACIÓN REAL CON KEYCLOAK
         const success = await this.authService.loginWithCredentials(username, password);
-        
+
         if (success) {
           // ✅ LOGIN EXITOSO
           console.log('✅ Autenticación exitosa');
-          
+
           // Verificar que el usuario tiene el rol correcto
           const userInfo = this.authService.getUser();
           const hasRequiredRole = this.validateUserRole(userType, userInfo?.roles || []);
-          
+
           if (hasRequiredRole) {
             console.log(`✅ Usuario autorizado como: ${userType}`);
             this.redirectBasedOnRole();
@@ -71,7 +96,7 @@ export class LoginFormComponent implements OnInit {
           // ❌ CREDENCIALES INVÁLIDAS
           this.errorMessage = 'Usuario o contraseña incorrectos';
         }
-        
+
       } catch (error) {
         console.error('❌ Error en autenticación:', error);
         this.errorMessage = 'Error de conexión. Intenta nuevamente.';
@@ -86,11 +111,11 @@ export class LoginFormComponent implements OnInit {
   private validateUserRole(selectedUserType: string, userRoles: string[]): boolean {
     // Convertir roles a minúsculas para comparación case-insensitive
     const rolesLowerCase = userRoles.map(role => role.toLowerCase());
-    
+
     console.log('🔍 Validando rol para tipo:', selectedUserType);
     console.log('🔍 Roles del usuario:', userRoles);
     console.log('🔍 Roles en minúsculas:', rolesLowerCase);
-    
+
     switch (selectedUserType) {
       case 'administrador':
         const hasAdminRole = rolesLowerCase.includes('admin');
@@ -107,7 +132,7 @@ export class LoginFormComponent implements OnInit {
 
   private redirectBasedOnRole(): void {
     const user = this.authService.getUser();
-    
+
     if (!user || !user.roles || user.roles.length === 0) {
       console.error('❌ Usuario sin roles válidos');
       this.errorMessage = 'Usuario sin permisos válidos';

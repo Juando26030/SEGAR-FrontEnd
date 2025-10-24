@@ -258,14 +258,22 @@
             id="file-{{ campo.nombre }}"
             class="file-input"
           />
-          <label [for]="'file-' + campo.nombre" class="file-label">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <span *ngIf="!datosDocumentos[documentoSeleccionado.id][campo.nombre]">
-              Seleccionar archivo
-            </span>
-            <span *ngIf="datosDocumentos[documentoSeleccionado.id][campo.nombre]">
-              {{ datosDocumentos[documentoSeleccionado.id][campo.nombre].nombre }}
-            </span>
+          <label
+            [for]="'file-' + campo.nombre"
+            class="file-label"
+            [ngClass]="{'has-file': datosDocumentos[documentoSeleccionado.id][campo.nombre]}"
+          >
+            <div class="file-info">
+              <i class="fas" [ngClass]="datosDocumentos[documentoSeleccionado.id][campo.nombre] ? 'fa-check-circle' : 'fa-cloud-upload-alt'"></i>
+              <div *ngIf="!datosDocumentos[documentoSeleccionado.id][campo.nombre]">
+                <span class="file-name">Arrastra y suelta el archivo aquí</span>
+                <span class="file-size">o haz clic para seleccionar</span>
+              </div>
+              <div *ngIf="datosDocumentos[documentoSeleccionado.id][campo.nombre]">
+                <span class="file-name">{{ datosDocumentos[documentoSeleccionado.id][campo.nombre].nombre }}</span>
+                <span class="file-size">{{ formatFileSize(datosDocumentos[documentoSeleccionado.id][campo.nombre].tamano) }}</span>
+              </div>
+            </div>
           </label>
         </div>
       </div>

@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { Location } from '@angular/common';
 // Importar componente del sistema de documentos dinámicos
 import { DocumentosDinamicosComponent } from '../../../components/documentos-dinamicos/documentos-dinamicos.component';
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AuthService } from '../../../auth/services/auth.service';
 
 interface OptionItem {
   value: string;
@@ -81,8 +84,9 @@ interface SolicitudForm {
   templateUrl: './registro-paso-tres.component.html',
   styleUrls: ['./registro-paso-tres.component.css']
 })
-export class RegistroPasoTresComponent {
+export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   activeTab = 'clasificacion';
+
 
   // Propiedades para el sistema de documentos dinámicos
   tramiteId: number = 1; // TODO: obtener desde ruta o contexto
@@ -93,7 +97,76 @@ export class RegistroPasoTresComponent {
   clasificacionCompleta: boolean = false;
   todosDocumentosCompletos: boolean = false;
 
-  constructor(private tramiteService: TramiteInvimaService) {}
+  productos: any[] = [];
+  productoSeleccionado: any = '';
+
+  constructor(
+    private tramiteService: TramiteInvimaService,
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router,
+    private location: Location
+  ) {}
+
+  ngOnInit() {
+    this.obtenerProductos();
+
+    // Configurar el state para la navegación hacia atrás
+    // Cuando el usuario presiona la flecha atrás, debe ir al tab de documentación
+    window.history.replaceState(
+      { navigationId: 'paso-3', previousTab: 'documentacion' },
+      '',
+      window.location.href
+    );
+
+    // Escuchar el evento popstate (flecha atrás del navegador)
+    window.addEventListener('popstate', this.handlePopState);
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('popstate', this.handlePopState);
+  }
+
+  handlePopState = (event: PopStateEvent) => {
+    // Si el usuario presiona la flecha atrás, cambiar al tab de documentación
+    if (event.state && event.state.previousTab) {
+      this.setActiveTab(event.state.previousTab);
+      // Prevenir la navegación por defecto
+      window.history.pushState(
+        { navigationId: 'paso-3', previousTab: 'documentacion' },
+        '',
+        window.location.href
+      );
+    } else if (this.activeTab === 'radicacion') {
+      // Si está en radicación, ir a documentación
+      this.setActiveTab('documentacion');
+      window.history.pushState(
+        { navigationId: 'paso-3', previousTab: 'documentacion' },
+        '',
+        window.location.href
+      );
+    }
+  };
+
+  obtenerProductos(): void {
+
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get<any[]>('http://localhost:8090/api/producto/all', { headers })
+      .subscribe({
+        next: (data) => {
+          this.productos = data;
+        },
+        error: (err) => {
+          console.error('Error al obtener productos', err);
+        }
+      });
+  }
+
+  onProductoSeleccionado(): void {
+    console.log('Producto seleccionado:', this.productoSeleccionado);
+  }
 
   readonly tabs: Tab[] = [
     { id: 'clasificacion', label: 'Clasificación del Producto' },
@@ -263,9 +336,79 @@ export class RegistroPasoTresComponent {
     }
   ];
 
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
+  /**
+   * Método para validar si una pestaña está bloqueada
+   */
+  isTabDisabled(tabId: string): boolean {
+    switch(tabId) {
+      case 'clasificacion':
+        return false; // Siempre disponible
+      case 'documentacion':
+        return !this.clasificacionCompleta; // Solo si la clasificación está completa
+      case 'radicacion':
+        return !this.clasificacionCompleta || !this.todosDocumentosCompletos; // Solo si todo está completo
+      default:
+        return false;
+    }
   }
+
+  /**
+   * Método para validar si una pestaña está completada
+   */
+  isTabCompleted(tabId: string): boolean {
+    switch(tabId) {
+      case 'clasificacion':
+        return this.clasificacionCompleta;
+      case 'documentacion':
+        return this.todosDocumentosCompletos;
+      case 'radicacion':
+        return false; // La radicación no se marca como completa hasta que se radique
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Método para validar si el formulario de clasificación está válido
+   */
+  isClassificationFormValid(): boolean {
+    return !!(
+      this.productoSeleccionado &&
+      this.classificationForm.productCategory &&
+      this.classificationForm.riskLevel &&
+      this.classificationForm.targetPopulation &&
+      this.classificationForm.processingType
+    );
+  }
+
+  /**
+   * Método que se ejecuta cada vez que cambia un campo
+   * Realiza validación automática
+   */
+  onFieldChange(): void {
+    // Este método se puede usar para triggers adicionales si es necesario
+    // Por ahora, Angular reactivamente actualizará las validaciones
+  }
+
+  setActiveTab(tab: string): void {
+    // Solo permite cambiar si la pestaña no está bloqueada
+    if (!this.isTabDisabled(tab)) {
+      this.activeTab = tab;
+    }
+
+    if (tab === 'documentacion') {
+      this.mostrarInfoProductoYClasificacion();
+    }
+  }
+
+  mostrarInfoProductoYClasificacion(): void {
+    console.log('📦 Información del producto seleccionado:');
+    console.log(this.productoSeleccionado);
+
+    console.log('🧾 Resultado de la clasificación:');
+    console.log(this.resultadoClasificacion);
+  }
+
 
   /**
    * Método que se ejecuta cada vez que cambia la población objetivo
@@ -466,7 +609,7 @@ export class RegistroPasoTresComponent {
   }
 
   onClasificarProducto(): void {
-    if (!this.isClassificationComplete()) {
+    if (!this.isClassificationFormValid()) {
       alert('Por favor complete todos los campos de clasificación.');
       return;
     }
@@ -555,20 +698,33 @@ export class RegistroPasoTresComponent {
   }
 
   onRadicarSolicitud(): void {
-    if (!this.isFormCompleteForRadication()) {
-      alert('Por favor complete toda la información requerida antes de radicar la solicitud.');
-      return;
-    }
+    console.log("📨 AQUI SE RADICA LA SOLICITUD");
+  console.log("🆔 ID del producto:", this.productoSeleccionado.id);
+  console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
 
-    const numeroRadicado = this.generateRadicationNumber();
+  const token = this.authService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
 
-    alert(`¡Solicitud radicada exitosamente!\n\nNúmero de radicado: ${numeroRadicado}\n\nRecibirá una confirmación por correo electrónico con los detalles del trámite y las instrucciones para el seguimiento.`);
+    const body = {
+      productoId: this.productoSeleccionado.id,
+      procedureType: this.resultadoClasificacion?.tramite_descripcion,
+      radicadoNumber: ''
+    };
 
-    console.log('Solicitud radicada:', {
-      numeroRadicado,
-      clasificacion: this.classificationForm,
-      solicitud: this.solicitudForm,
-      fechaRadicacion: new Date()
+    const url = 'http://localhost:8090/api/tramites/create';
+
+    this.http.post(url, body, { headers }).subscribe({
+      next: (response) => {
+        console.log('✅ Trámite creado exitosamente:', response);
+        alert('✅ Trámite radicado correctamente.');
+      },
+      error: (error) => {
+        console.error('❌ Error al radicar el trámite:', error);
+        alert('❌ Ocurrió un error al radicar el trámite.');
+      }
     });
   }
 

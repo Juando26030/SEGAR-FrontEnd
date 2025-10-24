@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Subject, interval, takeUntil, forkJoin, timer } from 'rxjs';
 import { DashboardService, TramiteRecienteDTO } from '../../core/services/dashboard.service';
 import { TramiteDetalleModalComponent } from '../../shared/tramite-detalle-modal/tramite-detalle-modal.component';
+import { AuthService } from '../../auth/services/auth.service';
 
 interface Estadisticas {
   activos: number;
@@ -58,13 +59,20 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   isLoading = true;
   isRefreshing = false;
 
+
+  private usuarioId: number | null = null;
+
   constructor(
     private router: Router,
-    private dashboardService: DashboardService
-  ) {}
+    private dashboardService: DashboardService,
+    private authService: AuthService
+) {}
 
   ngOnInit(): void {
-    this.cargarDatos();
+    this.authService.getUsuarioId().subscribe(id => {
+      this.usuarioId = id;
+      this.cargarDatos();
+    });
     this.iniciarActualizacionAutomatica();
     this.iniciarAnimaciones();
   }
@@ -78,9 +86,9 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     forkJoin({
-      resumen: this.dashboardService.getResumen(),
-      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(),
-      tramitesRecientes: this.dashboardService.getTramitesRecientes(5)
+      resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined),
+      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined),
+      tramitesRecientes: this.dashboardService.getTramitesRecientes(5, undefined, this.usuarioId ?? undefined)
     }).subscribe({
       next: (data: any) => {
         console.log('Datos recibidos del backend:', data);

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { Location } from '@angular/common';
 
 interface StepCard {
   title: string;
@@ -20,7 +21,7 @@ interface NextStep {
   templateUrl: './registro-paso-uno.component.html',
   styleUrls: ['./registro-paso-uno.component.css']
 })
-export class RegistroPasoUnoComponent {
+export class RegistroPasoUnoComponent implements OnInit, OnDestroy {
   readonly cards: StepCard[] = [
     {
       title: 'Clasificación del Producto',
@@ -78,6 +79,36 @@ export class RegistroPasoUnoComponent {
       desc: 'Presentar formalmente la solicitud con toda la documentación requerida.'
     }
   ];
+
+  constructor(
+    private router: Router,
+    private location: Location
+  ) {}
+
+  ngOnInit() {
+    // Configurar el state para la navegación hacia atrás
+    window.history.replaceState(
+      { navigationId: 'paso-1', previousUrl: '/main/nuevo/producto' },
+      '',
+      window.location.href
+    );
+
+    // Escuchar el evento popstate (flecha atrás del navegador)
+    window.addEventListener('popstate', this.handlePopState);
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('popstate', this.handlePopState);
+  }
+
+  handlePopState = (event: PopStateEvent) => {
+    // Si el usuario presiona la flecha atrás, redirigir a clasificación del producto
+    if (event.state && event.state.previousUrl) {
+      this.router.navigate([event.state.previousUrl]);
+    } else {
+      this.router.navigate(['/main/nuevo/producto']);
+    }
+  };
 
   // Métodos trackBy para optimización de rendimiento
   cardTrackBy(index: number, card: StepCard): string {

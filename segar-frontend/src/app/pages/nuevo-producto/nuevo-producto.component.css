@@ -1,0 +1,210 @@
+.producto-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.producto-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.save-btn {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ccc;
+  color: #333;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Animaciones personalizadas para el formulario */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animación de entrada del formulario */
+form {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Animación de los campos del formulario */
+.grid > div {
+  animation: slideInRight 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.grid > div:nth-child(1) { animation-delay: 0.1s; }
+.grid > div:nth-child(2) { animation-delay: 0.15s; }
+.grid > div:nth-child(3) { animation-delay: 0.2s; }
+.grid > div:nth-child(4) { animation-delay: 0.25s; }
+.grid > div:nth-child(5) { animation-delay: 0.3s; }
+.grid > div:nth-child(6) { animation-delay: 0.35s; }
+
+/* Estilos para inputs con efecto focus mejorado */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Efecto hover en los labels */
+label {
+  transition: color 0.2s ease;
+}
+
+label:hover {
+  color: rgb(34, 197, 94);
+}
+
+/* Animación del botón de guardar */
+button[type="submit"]:active {
+  transform: scale(0.98) translateY(-0.5px);
+}
+
+/* Efecto de pulsación en el indicador de estado */
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Mejora visual de la barra decorativa */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+form > div:first-child {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Transiciones suaves para todos los elementos interactivos */
+button,
+input,
+textarea,
+select {
+  transition: all 0.2s ease;
+}
+
+/* Efecto hover mejorado en campos de entrada */
+input:hover:not(:focus),
+textarea:hover:not(:focus),
+select:hover:not(:focus) {
+  border-color: rgb(134, 239, 172);
+  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Estilo para campos requeridos */
+input:required:invalid,
+textarea:required:invalid {
+  border-color: rgb(209, 213, 219);
+}
+
+input:required:valid,
+textarea:required:valid {
+  border-color: rgb(34, 197, 94);
+}
+
+/* Animación del icono en el header */
+.fa-utensils {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Efecto de elevación en el formulario */
+form:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+  .text-4xl {
+    font-size: 2rem;
+  }
+
+  .p-8 {
+    padding: 1.5rem;
+  }
+}
+
+/* Animación del footer */
+.mt-6 {
+  animation: fadeInUp 1s ease-out;
+}

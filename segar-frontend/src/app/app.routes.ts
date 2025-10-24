@@ -20,6 +20,8 @@ import { RegistroPasoCincoComponent } from './tramites/registro/registro-paso-ci
 import {BusquedaGlobalComponent} from './pages/busqueda-global/busqueda-global.component';  // <- IMPORTAR EL GUARD
 import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
 import { CorreosComponent } from './pages/correos/correos.component';  // <- IMPORTAR COMPONENTE DE CORREOS
+import { NuevoProductoComponent } from './pages/nuevo-producto/nuevo-producto.component';
+import { ProductosComponent } from './pages/productos/productos.component';
 
 export const routes: Routes = [
   {
@@ -36,7 +38,9 @@ export const routes: Routes = [
       { path: 'panel', component: PanelPrincipalComponent },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'calendario', component: CalendarioComponent },
-      { path: 'nuevo', component: NuevoTramiteComponent },
+      { path: 'productos', component: ProductosComponent },
+      { path: 'nuevo/tramite', component: NuevoTramiteComponent },
+      { path: 'nuevo/producto', component: NuevoProductoComponent },
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },
       { path: 'usuarios', component: UsuariosComponent },  // <- COMPONENTE CORRECTO SIN DATOS QUEMADOS
       { path: 'perfil', component: UserProfileComponent },
@@ -54,10 +58,10 @@ export const routes: Routes = [
       {
         path: 'nuevo/registro',
         children: [
-          { path: 'paso-3', component: RegistroPasoTresComponent },
+          { path: 'paso-1', component: RegistroPasoTresComponent },
           { path: 'paso-4', component: RegistroPasoCuatroComponent },
           { path: 'paso-5', component: RegistroPasoCincoComponent },
-          { path: '', redirectTo: 'paso-3', pathMatch: 'full' }
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       }
     ]

@@ -1,4 +1,9 @@
 export const environment = {
-  production: true,
-  apiUrl: 'http://35.238.19.224:8090' // Backend en producción
+  production: false,
+  apiUrl: 'http://localhost:8090',
+  keycloak: {
+    url: 'http://localhost:8080',
+    realm: 'segar',
+    clientId: 'segar-frontend'
+  }
 };

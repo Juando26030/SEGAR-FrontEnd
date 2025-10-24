@@ -1,7 +1,10 @@
+// dashboard.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+// DTOs para las respuestas de la API
 
 
 export interface BusquedaGlobalResponseDTO {
@@ -107,71 +110,69 @@ export interface DashboardConfig {
 })
 export class DashboardService {
   private readonly basePath = `${environment.apiUrl}/api/dashboard`;
-  private readonly configKey = 'dashboard-config';
 
   constructor(private http: HttpClient) {}
 
-  // Endpoints de la API
-  getResumen(diasVencimiento?: number): Observable<DashboardResumenDTO> {
+  // ==================== RESUMEN ====================
+  getResumen(diasVencimiento?: number, empresaId?: number, usuarioId?: number): Observable<DashboardResumenDTO> {
     let params = new HttpParams();
-    if (diasVencimiento) {
-      params = params.set('diasVencimiento', diasVencimiento.toString());
-    }
-    return this.http.get<DashboardResumenDTO>(`${this.basePath}/resumen`, { params });
+    if (diasVencimiento && !usuarioId) params = params.set('diasVencimiento', diasVencimiento.toString()); // Solo para global y empresa
+    const baseUrl = empresaId ? `${this.basePath}/resumen/empresa/${empresaId}` : usuarioId ? `${this.basePath}/resumen/usuario/${usuarioId}` : `${this.basePath}/resumen`;
+    return this.http.get<DashboardResumenDTO>(baseUrl, { params });
   }
 
-  getTramitesPorEstado(): Observable<TramitePorEstadoDTO[]> {
-    return this.http.get<TramitePorEstadoDTO[]>(`${this.basePath}/tramites/por-estado`);
+  // ==================== TRÁMITES POR ESTADO ====================
+  getTramitesPorEstado(empresaId?: number, usuarioId?: number): Observable<TramitePorEstadoDTO[]> {
+    const baseUrl = empresaId ? `${this.basePath}/tramites/por-estado/empresa/${empresaId}` : usuarioId ? `${this.basePath}/tramites/por-estado/usuario/${usuarioId}` : `${this.basePath}/tramites/por-estado`;
+    return this.http.get<TramitePorEstadoDTO[]>(baseUrl);
   }
 
-  getTramitesPorMes(year?: number): Observable<TramitePorMesDTO[]> {
+  // ==================== TRÁMITES POR MES ====================
+  getTramitesPorMes(year?: number, empresaId?: number, usuarioId?: number): Observable<TramitePorMesDTO[]> {
     let params = new HttpParams();
-    if (year) {
-      params = params.set('year', year.toString());
-    }
-    return this.http.get<TramitePorMesDTO[]>(`${this.basePath}/tramites/por-mes`, { params });
+    if (year) params = params.set('year', year.toString());
+    const baseUrl = empresaId ? `${this.basePath}/tramites/por-mes/empresa/${empresaId}` : usuarioId ? `${this.basePath}/tramites/por-mes/usuario/${usuarioId}` : `${this.basePath}/tramites/por-mes`;
+    return this.http.get<TramitePorMesDTO[]>(baseUrl, { params });
   }
 
-  getTramitesRecientes(limit?: number): Observable<TramiteRecienteDTO[]> {
+  // ==================== TRÁMITES RECIENTES ====================
+  getTramitesRecientes(limit?: number, empresaId?: number, usuarioId?: number): Observable<TramiteRecienteDTO[]> {
     let params = new HttpParams();
-    if (limit) {
-      params = params.set('limit', limit.toString());
-    }
-    return this.http.get<TramiteRecienteDTO[]>(`${this.basePath}/tramites/recientes`, { params });
+    if (limit) params = params.set('limit', limit.toString());
+    const baseUrl = empresaId ? `${this.basePath}/tramites/recientes/empresa/${empresaId}` : usuarioId ? `${this.basePath}/tramites/recientes/usuario/${usuarioId}` : `${this.basePath}/tramites/recientes`;
+    return this.http.get<TramiteRecienteDTO[]>(baseUrl, { params });
   }
 
-  getRequerimientosPendientes(limit?: number): Observable<RequerimientoPendienteDTO[]> {
+  // ==================== REQUERIMIENTOS PENDIENTES ====================
+  getRequerimientosPendientes(limit?: number, empresaId?: number, usuarioId?: number): Observable<RequerimientoPendienteDTO[]> {
     let params = new HttpParams();
-    if (limit) {
-      params = params.set('limit', limit.toString());
-    }
-    return this.http.get<RequerimientoPendienteDTO[]>(`${this.basePath}/requerimientos/pendientes`, { params });
+    if (limit) params = params.set('limit', limit.toString());
+    const baseUrl = empresaId ? `${this.basePath}/requerimientos/pendientes/empresa/${empresaId}` : usuarioId ? `${this.basePath}/requerimientos/pendientes/usuario/${usuarioId}` : `${this.basePath}/requerimientos/pendientes`;
+    return this.http.get<RequerimientoPendienteDTO[]>(baseUrl, { params });
   }
 
-  getRegistrosPorAno(year: number): Observable<number> {
+  // ==================== REGISTROS POR AÑO ====================
+  getRegistrosPorAno(year: number, empresaId?: number): Observable<number> {
     const params = new HttpParams().set('year', year.toString());
-    return this.http.get<number>(`${this.basePath}/registros/por-ano`, { params });
+    const baseUrl = empresaId ? `${this.basePath}/registros/por-ano/empresa/${empresaId}` : `${this.basePath}/registros/por-ano`;
+    return this.http.get<number>(baseUrl, { params });
   }
 
-  // Configuración persistente
-  private getDefaultConfig(): DashboardConfig {
-    return {
-      diasVencimiento: 30,
-      limitRequerimientos: 5,
-      autoRefreshInterval: 90000
-    };
+  // ==================== DETALLE TRÁMITE ====================
+  getTramiteDetalle(id: number): Observable<any> { // Ajusta el tipo si tienes TramiteDetalleDTO
+    return this.http.get(`${this.basePath}/tramite/${id}`);
   }
 
-  getConfig(): DashboardConfig {
-    const stored = localStorage.getItem(this.configKey);
-    return stored ? JSON.parse(stored) : this.getDefaultConfig();
+  // ==================== BÚSQUEDA GLOBAL ====================
+  busquedaGlobal(query: string, limitTramites?: number, limitRegistros?: number, empresaId?: number, usuarioId?: number): Observable<BusquedaGlobalResponseDTO> {
+    let params = new HttpParams().set('q', query);
+    if (limitTramites) params = params.set('limitTramites', limitTramites.toString());
+    if (limitRegistros && !usuarioId) params = params.set('limitRegistros', limitRegistros.toString()); // Solo para global y empresa
+    const baseUrl = empresaId ? `${this.basePath}/busqueda/empresa/${empresaId}` : usuarioId ? `${this.basePath}/busqueda/usuario/${usuarioId}` : `${this.basePath}/busqueda`;
+    return this.http.get<BusquedaGlobalResponseDTO>(baseUrl, { params });
   }
 
-  saveConfig(config: DashboardConfig): void {
-    localStorage.setItem(this.configKey, JSON.stringify(config));
-  }
-
-  // Utilidades
+  // ==================== UTILIDADES ====================
   mapearEstado(estado: string): string {
     const mapeo: { [key: string]: string } = {
       'RADICADO': 'Radicado',
@@ -199,27 +200,5 @@ export class DashboardService {
     } else {
       return { color: '#198754', texto: `${diasRestantes} días`, clase: 'text-success' };
     }
-  }
-
-  getTramiteDetalle(id: number): Observable<TramiteDetalleDTO> {
-    return this.http.get<TramiteDetalleDTO>(`${this.basePath}/tramite/${id}`);
-  }
-
-  busquedaGlobal(
-    query: string,
-    limitTramites?: number,
-    limitRegistros?: number
-  ): Observable<BusquedaGlobalResponseDTO> {
-    let params = new HttpParams().set('q', query);
-
-    if (limitTramites) {
-      params = params.set('limitTramites', limitTramites.toString());
-    }
-
-    if (limitRegistros) {
-      params = params.set('limitRegistros', limitRegistros.toString());
-    }
-
-    return this.http.get<BusquedaGlobalResponseDTO>(`${this.basePath}/busqueda`, { params });
   }
 }
