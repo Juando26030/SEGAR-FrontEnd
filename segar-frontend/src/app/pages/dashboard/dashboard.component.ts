@@ -8,7 +8,7 @@ import { interval, Subject, takeUntil, forkJoin } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import {FormsModule} from '@angular/forms';
 import { EventoDTO} from '../../core/DTOs/calendario.dto';
-
+import { AuthService } from '../../auth/services/auth.service'; // Agregar esta importación
 
 // Registrar todos los componentes de Chart.js
 Chart.register(...registerables);
@@ -96,18 +96,24 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   tramitesPorMes: TramitePorMesDTO[] = [];
   anoSeleccionado = new Date().getFullYear();
 
+  private usuarioId: number | null = null; // Agregar esta propiedad
+
   constructor(
     private calendarioService: CalendarioService,
     private notificationService: NotificationService,
     private router: Router,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private authService: AuthService // Agregar esta inyección
   ) {}
 
   ngOnInit() {
-    this.cargarDatosDashboard();
+    // Obtener el usuarioId antes de cargar datos
+    this.authService.getUsuarioId().subscribe(id => {
+      this.usuarioId = id;
+      this.cargarDatosDashboard();
+    });
     this.iniciarActualizacionAutomatica();
     this.generarRangoAnos();
-
   }
 
   ngAfterViewInit() {
@@ -229,9 +235,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cargando = true;
 
       const requests = forkJoin({
-        resumen: this.dashboardService.getResumen(),
-        tramitesPorEstado: this.dashboardService.getTramitesPorEstado(),
-        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado),
+        resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
+        tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined), // Pasar usuarioId
+        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
         eventosProximos: this.calendarioService.obtenerEventosProximos()
       });
 
@@ -504,7 +510,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   private cargarTramitesPorMes() {
-    this.dashboardService.getTramitesPorMes(this.anoSeleccionado)
+    this.dashboardService.getTramitesPorMes(this.anoSeleccionado, undefined, this.usuarioId ?? undefined) // Pasar usuarioId
       .subscribe({
         next: (data) => {
           this.procesarTramitesPorMes(data);
