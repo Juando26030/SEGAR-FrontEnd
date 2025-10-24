@@ -51,7 +51,7 @@ export interface ValidacionCompletaResponse {
   providedIn: 'root'
 })
 export class ValidacionService {
-  private readonly baseUrl = 'http://localhost:8090/api/validaciones';
+  private readonly baseUrl = 'http://35.238.19.224:8090/api/validaciones';
 
   constructor(private http: HttpClient) {}
 

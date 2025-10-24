@@ -234,7 +234,7 @@ El módulo incluye validación automática basada en:
 ```typescript
 // environment.ts
 export const environment = {
-  apiUrl: 'http://localhost:8080/api',
+  apiUrl: 'http://35.238.19.224:8090/api',
   fileStorage: {
     provider: 'local', // 'local' | 's3' | 'minio'
     maxFileSize: 10485760, // 10MB

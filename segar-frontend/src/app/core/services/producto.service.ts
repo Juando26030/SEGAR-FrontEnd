@@ -8,7 +8,7 @@ import { Producto } from '../DTOs/solicitud.dto';
   providedIn: 'root'
 })
 export class ProductoService {
-  private readonly baseUrl = 'http://localhost:8090/producto';
+  private readonly baseUrl = 'http://35.238.19.224:8090/producto';
 
   constructor(private http: HttpClient) {}
 

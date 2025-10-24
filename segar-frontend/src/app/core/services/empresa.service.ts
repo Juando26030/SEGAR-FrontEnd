@@ -18,7 +18,7 @@ export interface EmpresaBackend {
   providedIn: 'root'
 })
 export class EmpresaService {
-  private readonly baseUrl = 'http://localhost:8090/api';
+  private readonly baseUrl = 'http://35.238.19.224:8090/api';
 
   constructor(private http: HttpClient) {}
 

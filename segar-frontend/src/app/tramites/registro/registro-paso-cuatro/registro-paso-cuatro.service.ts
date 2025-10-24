@@ -50,7 +50,7 @@ export interface NotificationSettingsDTO {
 
 @Injectable({ providedIn: 'root' })
 export class RegistroPasoCuatroService {
-  private readonly base = 'http://localhost:8090/api/tramites';
+  private readonly base = 'http://35.238.19.224:8090/api/tramites';
 
   constructor(private http: HttpClient) {}
 
