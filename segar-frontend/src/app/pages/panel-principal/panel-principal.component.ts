@@ -23,6 +23,8 @@ interface Tramite {
   estado: string;
 }
 
+var token: string | undefined = undefined;
+
 @Component({
   selector: 'app-panel-principal',
   standalone: true,
@@ -68,11 +70,13 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     private authService: AuthService
 ) {}
 
+
   ngOnInit(): void {
     this.authService.getUsuarioId().subscribe(id => {
       this.usuarioId = id;
       this.cargarDatos();
     });
+    token = this.authService.getToken();
     this.iniciarActualizacionAutomatica();
     this.iniciarAnimaciones();
   }
@@ -86,9 +90,9 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     forkJoin({
-      resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined),
-      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined),
-      tramitesRecientes: this.dashboardService.getTramitesRecientes(5, undefined, this.usuarioId ?? undefined)
+      resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined, token),
+      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined, token),
+      tramitesRecientes: this.dashboardService.getTramitesRecientes(5, undefined, this.usuarioId ?? undefined, token)
     }).subscribe({
       next: (data: any) => {
         console.log('Datos recibidos del backend:', data);

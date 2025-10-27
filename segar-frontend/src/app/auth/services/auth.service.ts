@@ -3,6 +3,7 @@ import Keycloak from 'keycloak-js';
 import { BehaviorSubject } from 'rxjs';
 import { Observable, of, map, catchError } from 'rxjs';
 import { UsuarioService } from '../../core/services/usuario.service'; // Ajusta la ruta si es necesario
+import { HttpHeaders } from '@angular/common/http';
 
 
 export interface UserInfo {
@@ -55,7 +56,7 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Inicializando Keycloak en modo silencioso...');
         this.keycloak = new Keycloak({
-          url: 'https://35.238.19.224',
+          url: 'https://segar-solutions.duckdns.org/auth',
           realm: 'segar',
           clientId: 'segar-frontend'
         });
@@ -77,7 +78,7 @@ export class AuthService {
   async initKeycloak(): Promise<boolean> {
     try {
       this.keycloak = new Keycloak({
-        url: 'https://35.238.19.224',
+        url: 'https://segar-solutions.duckdns.org/auth',
         realm: 'segar',
         clientId: 'segar-frontend'
       });
@@ -253,7 +254,7 @@ export class AuthService {
       console.log('🔄 Renovando token con Refresh Token...');
 
       // Hacer petición de renovación con el Refresh Token
-      const response = await fetch('http://localhost:8080/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch('https://segar-solutions.duckdns.org/auth/realms/segar/protocol/openid-connect/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -384,7 +385,7 @@ export class AuthService {
       }
 
       console.log('📡 Haciendo petición al servidor de tokens...');
-      const response = await fetch('https://35.238.19.224/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch('https://segar-solutions.duckdns.org/auth/realms/segar/protocol/openid-connect/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -409,7 +410,7 @@ export class AuthService {
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
           this.keycloak = new Keycloak({
-            url: 'https://35.238.19.224',
+            url: 'https://segar-solutions.duckdns.org/auth',
             realm: 'segar',
             clientId: 'segar-frontend'
           });
@@ -643,10 +644,11 @@ export class AuthService {
 
     // Buscar directamente por username (más confiable que keycloakId)
     const username = this.keycloak?.tokenParsed?.['preferred_username'];
+    const token = this.getToken() || '';
 
     if (username) {
       console.log('🔍 Obteniendo ID de usuario por username:', username);
-      return this.usuarioService.getUsuarioByUsername(username).pipe(
+      return this.usuarioService.getUsuarioByUsername(username, token).pipe(
         map(user => {
           console.log('✅ ID de usuario obtenido:', user.id);
           return user.id;

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CalendarioService } from '../../core/services/calendario.service';
 import { EventoDTO, CrearEventoDTO, EstadisticasCalendarioDTO } from '../../core/DTOs/calendario.dto';
+import { AuthService } from '../../auth/services/auth.service';
 
 interface DiaCalendario {
   dia: number;
@@ -12,6 +13,8 @@ interface DiaCalendario {
   fecha: Date;
   eventos: EventoDTO[];
 }
+
+var token: string | undefined = undefined;
 
 @Component({
   selector: 'app-calendario',
@@ -58,9 +61,12 @@ export class CalendarioComponent implements OnInit {
 
   cargando = false;
 
-  constructor(private calendarioService: CalendarioService) {}
+  constructor(private calendarioService: CalendarioService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    token = this.authService.getToken();
     this.cargarDatosIniciales();
   }
 
@@ -81,7 +87,7 @@ export class CalendarioComponent implements OnInit {
   }
 
   cargarEventosPorMes(): void {
-    this.calendarioService.obtenerEventosPorMes(this.mesActual + 1, this.anioActual)
+    this.calendarioService.obtenerEventosPorMes(this.mesActual + 1, this.anioActual, token)
       .subscribe({
         next: (eventos) => {
           this.eventos = eventos;
@@ -96,7 +102,7 @@ export class CalendarioComponent implements OnInit {
   }
 
   cargarEstadisticas(): void {
-    this.calendarioService.obtenerEstadisticas()
+    this.calendarioService.obtenerEstadisticas(token)
       .subscribe({
         next: (estadisticas) => {
           this.estadisticas = estadisticas;
@@ -108,7 +114,7 @@ export class CalendarioComponent implements OnInit {
   }
 
   cargarTiposYCategorias(): void {
-    this.calendarioService.obtenerTiposEvento()
+    this.calendarioService.obtenerTiposEvento(token)
       .subscribe({
         next: (tipos) => {
           this.tiposEvento = tipos;
@@ -118,7 +124,7 @@ export class CalendarioComponent implements OnInit {
         }
       });
 
-    this.calendarioService.obtenerCategoriasEvento()
+    this.calendarioService.obtenerCategoriasEvento(token)
       .subscribe({
         next: (categorias) => {
           this.categoriasEvento = categorias;
@@ -296,7 +302,7 @@ export class CalendarioComponent implements OnInit {
 
     if (this.editandoEvento && this.eventoEditandoId) {
       // Actualizar evento existente
-      this.calendarioService.actualizarEvento(this.eventoEditandoId, this.nuevoEvento)
+      this.calendarioService.actualizarEvento(this.eventoEditandoId, this.nuevoEvento, token)
         .subscribe({
           next: () => {
             this.cargarEventosPorMes();
@@ -310,7 +316,7 @@ export class CalendarioComponent implements OnInit {
         });
     } else {
       // Crear nuevo evento
-      this.calendarioService.crearEvento(this.nuevoEvento)
+      this.calendarioService.crearEvento(this.nuevoEvento, token)
         .subscribe({
           next: () => {
             this.cargarEventosPorMes();
@@ -327,7 +333,7 @@ export class CalendarioComponent implements OnInit {
 
   eliminarEvento(evento: EventoDTO): void {
     if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
-      this.calendarioService.eliminarEvento(evento.id)
+      this.calendarioService.eliminarEvento(evento.id, token)
         .subscribe({
           next: () => {
             this.cargarEventosPorMes();
@@ -342,7 +348,7 @@ export class CalendarioComponent implements OnInit {
   }
 
   marcarComoCompletado(evento: EventoDTO): void {
-    this.calendarioService.marcarComoCompletado(evento.id)
+    this.calendarioService.marcarComoCompletado(evento.id, token)
       .subscribe({
         next: () => {
           this.cargarEventosPorMes();
