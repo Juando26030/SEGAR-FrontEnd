@@ -10,12 +10,13 @@ import {
   TipoTramite,
   ErrorResponse
 } from '../DTOs/solicitud.dto';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SolicitudService {
-  private readonly baseUrl = 'http://35.238.19.224:8090/api/solicitudes';
+  private readonly baseUrl = `${environment.apiUrl}/api/solicitudes`;
 
   constructor(private http: HttpClient) {}
 

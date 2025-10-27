@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 /**
  * DTOs que coinciden con el backend
@@ -38,7 +39,7 @@ export interface UpdateDocumentInstanceRequest {
   providedIn: 'root'
 })
 export class DocumentInstanceService {
-  private readonly baseUrl = 'http://35.238.19.224:8090';
+  private readonly baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

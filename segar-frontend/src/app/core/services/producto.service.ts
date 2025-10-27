@@ -3,12 +3,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Producto } from '../DTOs/solicitud.dto';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
-  private readonly baseUrl = 'http://35.238.19.224:8090/producto';
+  private readonly baseUrl = `${environment.apiUrl}/producto`;
+
 
   constructor(private http: HttpClient) {}
 

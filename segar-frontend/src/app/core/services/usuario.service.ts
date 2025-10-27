@@ -3,23 +3,25 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Usuario } from '../DTOs/usuario.dto';
 import { Empresa } from '../DTOs/empresa.dto'; // Ajusta la ruta si es necesario
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-  private baseUrl = 'http://35.238.19.224:8090/api/usuarios';
+  private baseUrl = `${environment.apiUrl}/api/usuarios`;
+
 
   constructor(private http: HttpClient) {}
 
   // ========== CONSULTAS ==========
 
   getUsuariosByEmpresaId(empresaId: number): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/empresa/${empresaId}`);
+    return this.http.get<Usuario[]>(`${this.baseUrl}/empresa/${empresaId}`);
   }
 
   getEmpresaByUsuarioId(usuarioId: number): Observable<Empresa> {
-    return this.http.get<Empresa>(`${this.apiUrl}/${usuarioId}/empresa`).pipe(
+    return this.http.get<Empresa>(`${this.baseUrl}/${usuarioId}/empresa`).pipe(
       tap(empresa => console.log('✅ Empresa obtenida por usuario ID:', empresa))
     );
   }

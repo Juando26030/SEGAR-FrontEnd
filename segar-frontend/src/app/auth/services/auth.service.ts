@@ -3,6 +3,7 @@ import Keycloak from 'keycloak-js';
 import { BehaviorSubject } from 'rxjs';
 import { Observable, of, map, catchError } from 'rxjs';
 import { UsuarioService } from '../../core/services/usuario.service'; // Ajusta la ruta si es necesario
+import { environment } from '../../../environments/environment';
 
 
 export interface UserInfo {
@@ -55,9 +56,9 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Inicializando Keycloak en modo silencioso...');
         this.keycloak = new Keycloak({
-          url: 'https://35.238.19.224',
-          realm: 'segar',
-          clientId: 'segar-frontend'
+          url: environment.keycloak.url,
+          realm: environment.keycloak.realm,
+          clientId: environment.keycloak.clientId
         });
 
         // Inicialización silenciosa - NO redirige automáticamente
@@ -77,9 +78,9 @@ export class AuthService {
   async initKeycloak(): Promise<boolean> {
     try {
       this.keycloak = new Keycloak({
-        url: 'https://35.238.19.224',
-        realm: 'segar',
-        clientId: 'segar-frontend'
+        url: environment.keycloak.url,
+        realm: environment.keycloak.realm,
+        clientId: environment.keycloak.clientId
       });
 
       const authenticated = await this.keycloak.init({
@@ -253,14 +254,14 @@ export class AuthService {
       console.log('🔄 Renovando token con Refresh Token...');
 
       // Hacer petición de renovación con el Refresh Token
-      const response = await fetch('http://localhost:8080/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch(`${environment.keycloak.url}/realms/${environment.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           grant_type: 'refresh_token',
-          client_id: 'segar-frontend',
+          client_id: environment.keycloak.clientId,
           refresh_token: this.keycloak.refreshToken
         })
       });
@@ -376,22 +377,22 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Creando instancia básica de Keycloak...');
         this.keycloak = new Keycloak({
-          url: 'https://35.238.19.224',
-          realm: 'segar',
-          clientId: 'segar-frontend'
+          url: environment.keycloak.url,
+          realm: environment.keycloak.realm,
+          clientId: environment.keycloak.clientId
         });
         console.log('✅ Instancia de Keycloak creada');
       }
 
       console.log('📡 Haciendo petición al servidor de tokens...');
-      const response = await fetch('https://35.238.19.224/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch(`${environment.keycloak.url}/realms/${environment.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           grant_type: 'password',
-          client_id: 'segar-frontend',
+          client_id: environment.keycloak.clientId,
           username: username,
           password: password,
           scope: 'openid profile email'
@@ -409,9 +410,9 @@ export class AuthService {
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
           this.keycloak = new Keycloak({
-            url: 'https://35.238.19.224',
-            realm: 'segar',
-            clientId: 'segar-frontend'
+            url: environment.keycloak.url,
+            realm: environment.keycloak.realm,
+            clientId: environment.keycloak.clientId
           });
         }
 
@@ -567,9 +568,9 @@ export class AuthService {
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
           this.keycloak = new Keycloak({
-            url: 'http://localhost:8080',
-            realm: 'segar',
-            clientId: 'segar-frontend'
+            url: environment.keycloak.url,
+            realm: environment.keycloak.realm,
+            clientId: environment.keycloak.clientId
           });
         }
 

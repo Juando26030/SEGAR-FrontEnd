@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
 import { catchError, tap, delay } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 import {
   DocumentTemplateDto,
@@ -21,7 +22,7 @@ import {
   providedIn: 'root'
 })
 export class DocumentService {
-  private readonly apiUrl = '/api'; // Configurar según environment
+  private readonly apiUrl = `${environment.apiUrl}/api`;
   private documentsSubject = new BehaviorSubject<DocumentInstanceDto[]>([]);
 
   constructor(private http: HttpClient) {}

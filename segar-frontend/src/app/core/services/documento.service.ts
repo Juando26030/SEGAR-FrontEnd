@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface DocumentoDisponible {
   id: number;
@@ -15,7 +16,7 @@ export interface DocumentoDisponible {
   providedIn: 'root'
 })
 export class DocumentoService {
-  private readonly baseUrl = 'http://35.238.19.224:8090/api';
+  private readonly baseUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 

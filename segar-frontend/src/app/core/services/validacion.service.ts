@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface ValidacionEmpresaResponse {
   empresaId: number;
@@ -51,7 +52,7 @@ export interface ValidacionCompletaResponse {
   providedIn: 'root'
 })
 export class ValidacionService {
-  private readonly baseUrl = 'http://35.238.19.224:8090/api/validaciones';
+  private readonly baseUrl = `${environment.apiUrl}/api/validaciones`;
 
   constructor(private http: HttpClient) {}
 

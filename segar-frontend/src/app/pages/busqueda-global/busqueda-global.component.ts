@@ -90,6 +90,9 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     { key: 'registros-sanitarios', label: 'Registros Sanitarios', count: 0 }
   ];
 
+  // Propiedad para almacenar usuarios
+  usuarios: Usuario[] = [];
+
   constructor(private dashboardService: DashboardService, private authService: AuthService, private usuarioService: UsuarioService) {}
 
   ngOnInit(): void {
@@ -106,7 +109,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       }
     });
 
-// Configurar búsqueda con debouncing
+    // Configurar búsqueda con debouncing
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(500),
       distinctUntilChanged((a: string, b: string) => a === b),
@@ -124,7 +127,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (response: BusquedaGlobalResponseDTO) => {
-        this.procesarResultadosBackend(response);
+        this.procesarResultadosBackend(response, this.searchQuery.trim());
         this.isLoading = false;
         this.hasSearched = true;
       },
@@ -180,6 +183,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   }
 
   private procesarUsuarios(usuarios: Usuario[]): void {
+    this.usuarios = usuarios;
     const resultadosUsuarios: ResultadoBusqueda[] = usuarios.map(usuario => ({
       id: usuario.id.toString(),
       tipo: 'Usuario',
@@ -243,7 +247,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     this.actualizarContadores();
   }
 
-  private procesarResultadosBackend(response: BusquedaGlobalResponseDTO): void {
+  private procesarResultadosBackend(response: BusquedaGlobalResponseDTO, query: string = ''): void {
     this.totalTramitesBackend = response.totalTramites || 0;
     this.totalRegistrosBackend = response.totalRegistros || 0;
 
@@ -279,15 +283,19 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       });
     });
 
-    // Actualizar todosLosResultados con datos del backend
-    if (this.paginaActual === 1) {
-      // Primera carga: reemplazar todos los resultados
-      this.todosLosResultados = [...resultadosBackend];
+    // Filtrar usuarios si hay query
+    let usuariosFiltrados: ResultadoBusqueda[] = [];
+    if (query.trim()) {
+      usuariosFiltrados = this.usuarios
+        .filter((u: Usuario) => this.matchesQuery(u, query))
+        .map(u => this.mapUsuarioToResultado(u));
     } else {
-      // Cargar más: agregar a los existentes
-      this.todosLosResultados = [...this.todosLosResultados, ...resultadosBackend];
+      // Para carga inicial, incluir todos los usuarios
+      usuariosFiltrados = this.usuarios.map(u => this.mapUsuarioToResultado(u));
     }
 
+    // Combinar resultados
+    this.todosLosResultados = [...resultadosBackend, ...usuariosFiltrados];
     this.aplicarFiltrosYPaginacion();
   }
 
@@ -298,6 +306,28 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  private matchesQuery(usuario: Usuario, query: string): boolean {
+    const q = query.toLowerCase();
+    return (
+      usuario.firstName?.toLowerCase().includes(q) ||
+      usuario.lastName?.toLowerCase().includes(q) ||
+      usuario.email?.toLowerCase().includes(q)
+    );
+  }
+
+  private mapUsuarioToResultado(usuario: Usuario): ResultadoBusqueda {
+    return {
+      id: usuario.id.toString(),
+      tipo: 'Usuario',
+      titulo: `${usuario.firstName} ${usuario.lastName}`,
+      descripcion: `Email: ${usuario.email} | Rol: ${usuario.role}`,
+      estado: 'activo',
+      responsable: 'Empresa',
+      fecha: new Date(), // Ajusta si hay fecha de creación
+      esDelUsuario: false
+    };
   }
 
   private mapearTipoProcedimiento(tipo: string): string {
@@ -664,7 +694,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
           totalRegistros: response.totalRegistros
         };
 
-        this.procesarResultadosBackend(responseNuevos);
+        this.procesarResultadosBackend(responseNuevos, query);
         this.loadingMore = false;
       },
       error: (error) => {

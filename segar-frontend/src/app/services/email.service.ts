@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/services/auth.service';
+import { environment } from '../../environments/environment';
 
 export interface Email {
   id: number;
