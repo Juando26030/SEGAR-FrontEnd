@@ -9,8 +9,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class ProductoService {
-  private readonly baseUrl = `${environment.apiUrl}/producto`;
-
+  private readonly baseUrl = `${environment.apiUrl}/api/producto`;
 
   constructor(private http: HttpClient) {}
 
@@ -19,6 +18,26 @@ export class ProductoService {
    */
   getAllProductos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${this.baseUrl}/all`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Crea un nuevo producto
+   */
+  createProducto(producto: Omit<Producto, 'id'>): Observable<Producto> {
+    return this.http.post<Producto>(`${this.baseUrl}/create`, producto)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Elimina un producto por ID
+   */
+  deleteProducto(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`)
       .pipe(
         catchError(this.handleError)
       );
@@ -35,20 +54,20 @@ export class ProductoService {
   }
 
   /**
-   * Busca productos por nombre
+   * Actualiza un producto por ID
    */
-  buscarProductosPorNombre(nombre: string): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.baseUrl}/buscar?nombre=${encodeURIComponent(nombre)}`)
+  updateProducto(id: number, producto: Producto): Observable<Producto> {
+    return this.http.put<Producto>(`${this.baseUrl}/${id}`, producto)
       .pipe(
         catchError(this.handleError)
       );
   }
 
   /**
-   * Obtiene productos por fabricante
+   * Obtiene productos de una empresa que no están asociados a trámites
    */
-  getProductosPorFabricante(fabricante: string): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.baseUrl}/fabricante/${encodeURIComponent(fabricante)}`)
+  getProductosSinTramites(empresaId: number): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.baseUrl}/empresa/${empresaId}/sin-tramites`)
       .pipe(
         catchError(this.handleError)
       );

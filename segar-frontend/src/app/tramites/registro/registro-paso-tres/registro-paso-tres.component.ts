@@ -9,6 +9,8 @@ import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } f
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
+import { ProductoService } from '../../../core/services/producto.service';
+import { UsuarioService } from '../../../core/services/usuario.service';
 
 
 interface OptionItem {
@@ -107,7 +109,9 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private authService: AuthService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private productoService: ProductoService,
+    private usuarioService: UsuarioService
   ) {}
 
   ngOnInit() {
@@ -151,20 +155,35 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   };
 
   obtenerProductos(): void {
-
-    const token = this.authService.getToken();
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
-    this.http.get<any[]>(`${environment.apiUrl}/api/producto/all`, { headers })
-      .subscribe({
-        next: (data) => {
-          this.productos = data;
-        },
-        error: (err) => {
-          console.error('Error al obtener productos', err);
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId !== null) {
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+            next: (empresa) => {
+              const empresaId = empresa.id;
+              this.productoService.getProductosSinTramites(empresaId).subscribe({
+                next: (productos) => {
+                  this.productos = productos;
+                },
+                error: (err) => {
+                  console.error('Error al obtener productos sin trámites', err);
+                }
+              });
+            },
+            error: (err) => {
+              console.error('Error al obtener empresa del usuario', err);
+            }
+          });
+        } else {
+          console.error('Usuario ID es null');
         }
-      });
+      },
+      error: (err) => {
+        console.error('Error al obtener usuario ID', err);
+      }
+    });
   }
+
 
   onProductoSeleccionado(): void {
     console.log('Producto seleccionado:', this.productoSeleccionado);
