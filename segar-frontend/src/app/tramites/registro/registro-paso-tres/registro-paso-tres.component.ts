@@ -8,6 +8,8 @@ import { DocumentosDinamicosComponent } from '../../../components/documentos-din
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
+import { environment } from '../../../../environments/environment';
+
 
 interface OptionItem {
   value: string;
@@ -153,7 +155,7 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     const token = this.authService.getToken();
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    this.http.get<any[]>('http://localhost:8090/api/producto/all', { headers })
+    this.http.get<any[]>(`${environment.apiUrl}/api/producto/all`, { headers })
       .subscribe({
         next: (data) => {
           this.productos = data;
@@ -714,12 +716,14 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
       radicadoNumber: ''
     };
 
-    const url = 'http://localhost:8090/api/tramites/create';
+    const url = `${environment.apiUrl}/api/tramites/create`;
 
     this.http.post(url, body, { headers }).subscribe({
       next: (response) => {
         console.log('✅ Trámite creado exitosamente:', response);
         alert('✅ Trámite radicado correctamente.');
+        // Navegar al paso 4
+        this.router.navigate(['main/nuevo/registro/paso-4']);
       },
       error: (error) => {
         console.error('❌ Error al radicar el trámite:', error);
