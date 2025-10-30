@@ -7,6 +7,8 @@ import {DashboardService, BusquedaGlobalResponseDTO} from '../../core/services/d
 import { AuthService } from '../../auth/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { Usuario } from '../../core/DTOs/usuario.dto';
+import { Router } from '@angular/router';
+
 
 interface ResultadoBusqueda {
   id: string;
@@ -93,7 +95,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   // Propiedad para almacenar usuarios
   usuarios: Usuario[] = [];
 
-  constructor(private dashboardService: DashboardService, private authService: AuthService, private usuarioService: UsuarioService) {}
+  constructor(private dashboardService: DashboardService, private authService: AuthService, private usuarioService: UsuarioService,  private router: Router) {}
 
   ngOnInit(): void {
     // Cargar datos iniciales al inicializar el componente
@@ -144,6 +146,20 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
+    }
+  }
+
+  //  método para manejar la navegación
+  navigateToResult(resultado: ResultadoBusqueda): void {
+    const id = +resultado.id; // Convierte el ID a número
+    if (resultado.tipo === 'Trámite') {
+      if (resultado.estado === 'pendiente') {
+        this.router.navigate(['/main/nuevo/registro/paso-2', id]);
+      } else if (resultado.estado === 'completado') {
+        this.router.navigate(['/main/nuevo/registro/paso-3', id]);
+      }
+    } else if (resultado.tipo === 'Registro Sanitario') {
+      this.router.navigate(['/main/nuevo/registro/paso-3', id]);
     }
   }
 

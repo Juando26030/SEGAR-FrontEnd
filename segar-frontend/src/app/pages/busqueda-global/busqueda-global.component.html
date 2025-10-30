@@ -204,7 +204,7 @@
                     {{resultado.estado}}
                   </span>
                 </div>
-                <a href="#" class="result-title-link">
+                <a href="#" class="result-title-link" (click)="navigateToResult(resultado); $event.preventDefault()">
                   <p class="result-title" [innerHTML]="highlightText(resultado.titulo)"></p>
                 </a>
                 <p class="result-description" [innerHTML]="highlightText(resultado.descripcion)"></p>
