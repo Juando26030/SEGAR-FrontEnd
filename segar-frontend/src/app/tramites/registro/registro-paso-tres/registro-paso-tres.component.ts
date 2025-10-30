@@ -76,6 +76,11 @@ interface SolicitudForm {
   healthClaimsDescription: string;
 }
 
+interface TramiteResponse {
+  id: number;
+  // Agrega otras propiedades si el backend las devuelve
+}
+
 @Component({
   standalone: true,
   selector: 'app-registro-paso-tres',
@@ -719,37 +724,54 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   }
 
   onRadicarSolicitud(): void {
-    console.log("📨 AQUI SE RADICA LA SOLICITUD");
-  console.log("🆔 ID del producto:", this.productoSeleccionado.id);
-  console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId !== null) {
+          console.log("📨 AQUI SE RADICA LA SOLICITUD");
+          console.log("🆔 ID del producto:", this.productoSeleccionado.id);
+          console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
+          console.log("👤 ID del usuario:", usuarioId);
 
-  const token = this.authService.getToken();
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+          const token = this.authService.getToken();
+          const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          });
 
-    const body = {
-      productoId: this.productoSeleccionado.id,
-      procedureType: this.resultadoClasificacion?.tramite_descripcion,
-      radicadoNumber: ''
-    };
+          const body = {
+            productoId: this.productoSeleccionado.id,
+            procedureType: this.resultadoClasificacion?.tramite_descripcion,
+            radicadoNumber: '',
+            usuarioId: usuarioId
+          };
 
-    const url = `${environment.apiUrl}/api/tramites/create`;
+          const url = `${environment.apiUrl}/api/tramites/create`;
 
-    this.http.post(url, body, { headers }).subscribe({
-      next: (response) => {
-        console.log('✅ Trámite creado exitosamente:', response);
-        alert('✅ Trámite radicado correctamente.');
-        // Navegar al paso 4
-        this.router.navigate(['main/nuevo/registro/paso-4']);
+          this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
+            next: (response: TramiteResponse) => {
+              console.log('✅ Trámite creado exitosamente:', response);
+              alert('✅ Trámite radicado correctamente.');
+              const tramiteId = response.id;
+              // Navegar al paso 4
+              this.router.navigate(['main/nuevo/registro/paso-2', tramiteId]);
+            },
+            error: (error) => {
+              console.error('❌ Error al radicar el trámite:', error);
+              alert('❌ Ocurrió un error al radicar el trámite.');
+            }
+          });
+        } else {
+          console.error('Usuario ID es null');
+          alert('Error: No se pudo obtener el ID del usuario.');
+        }
       },
-      error: (error) => {
-        console.error('❌ Error al radicar el trámite:', error);
-        alert('❌ Ocurrió un error al radicar el trámite.');
+      error: (err) => {
+        console.error('Error al obtener usuario ID', err);
+        alert('Error al obtener el ID del usuario.');
       }
     });
   }
+
 
   isFormCompleteForRadication(): boolean {
     return this.isClassificationComplete() && this.isSolicitudFormValid();

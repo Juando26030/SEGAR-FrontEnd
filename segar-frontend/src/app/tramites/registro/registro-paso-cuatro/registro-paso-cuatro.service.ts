@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../../../environments/environment';
 
 // Backend DTOs
 export interface TrackingDTO {
@@ -50,13 +50,12 @@ export interface NotificationSettingsDTO {
 
 @Injectable({ providedIn: 'root' })
 export class RegistroPasoCuatroService {
-  private readonly base = 'http://35.238.19.224:8090/api/tramites';
+  private readonly base = `${environment.apiUrl}/api/tramites`;
 
   constructor(private http: HttpClient) {}
 
   getTracking(id: number): Observable<TrackingDTO> {
     return this.http.get<TrackingDTO>(`${this.base}/${id}/tracking`);
-
   }
 
   getTimeline(id: number): Observable<TimelineEventDTO[]> {
