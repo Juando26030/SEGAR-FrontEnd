@@ -11,6 +11,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { ProductoService } from '../../../core/services/producto.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
+import { DocumentService } from '../../../core/services/document.service';
 
 
 interface OptionItem {
@@ -94,6 +95,9 @@ interface TramiteResponse {
   styleUrls: ['./registro-paso-tres.component.css']
 })
 export class RegistroPasoTresComponent implements OnInit, OnDestroy {
+
+  documentosCargados: { documentoId: string; archivo: File }[] = [];
+
   activeTab = 'clasificacion';
 
 
@@ -116,7 +120,8 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     private router: Router,
     private location: Location,
     private productoService: ProductoService,
-    private usuarioService: UsuarioService
+    private usuarioService: UsuarioService,
+    private documentService: DocumentService
   ) {}
 
   ngOnInit() {
@@ -703,8 +708,24 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   }
 
   onDocumentoCompletado(evento: { documentoId: string; datos: any }): void {
-    console.log('Documento completado:', evento);
-    // Aquí se podría guardar en el backend o en el estado local
+    const { documentoId, datos } = evento;
+    const nuevoDoc = { documentoId, archivo: datos.archivo };
+
+    // Verificar si el documento ya existe
+    const index = this.documentosCargados.findIndex(d => d.documentoId === documentoId);
+
+    if (index !== -1) {
+      // Si existe, reemplazar el documento
+      this.documentosCargados[index] = nuevoDoc;
+      console.log(`🔁 Documento "${documentoId}" actualizado.`);
+    } else {
+      // Si no existe, agregarlo a la lista
+      this.documentosCargados.push(nuevoDoc);
+      console.log(`✅ Documento "${documentoId}" agregado.`);
+    }
+
+    // Mostrar la lista completa
+    console.log('📄 Lista actualizada de documentos:', this.documentosCargados);
   }
 
   onTodosDocumentosCompletos(completos: boolean): void {
@@ -770,6 +791,13 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
         alert('Error al obtener el ID del usuario.');
       }
     });
+
+    const token = this.authService.getToken();
+
+    for (const doc of this.documentosCargados) {
+      this.documentService.cargarDocumento(doc.documentoId, doc.archivo, token!, this.productoSeleccionado);
+    }
+
   }
 
 
