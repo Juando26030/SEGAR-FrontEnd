@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
 import { catchError, tap, delay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -17,6 +17,7 @@ import {
   ExportPdfResponseDto,
   ValidationError
 } from '../DTOs/document-instance.dto';
+import { Producto } from '../DTOs/solicitud.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -834,4 +835,49 @@ export class DocumentService {
     console.error('Error en DocumentService:', error);
     return throwError(() => new Error(error.message || 'Error en el servicio de documentos'));
   }
+
+  cargarDocumento(docId: string, file: File, token: string, producto: Producto): void {
+    if (!token) {
+      console.error('❌ No se encontró token');
+      return;
+    }
+
+    const empresa = 'naturela';
+
+    // 📦 Cuerpo de la solicitud para obtener la URL firmada
+    const requestBody = {
+      bucketName: 'segar-documents',
+      objectName: `${empresa}/${producto.nombre}/${file.name}`,
+      contentType: file.type
+    };
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    // 🟢 1️⃣ Solicitar URL firmada al backend
+    this.http.post('http://localhost:8090/api/documentos/signed-url', requestBody, {
+      headers,
+      responseType: 'text'
+    }).subscribe({
+      next: async (signedUrl) => {
+        try {
+          // 🟡 2️⃣ Subir el archivo directamente a GCS
+          const response = await fetch(signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file
+          });
+
+          console.log(`✅ Documento ${docId} cargado y emitido al padre.`);
+        } catch (err) {
+          console.error('❌ Error al subir el archivo a GCS:', err);
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error al obtener la URL firmada:', err);
+      }
+    });
+  }
+
 }

@@ -216,93 +216,67 @@ export class DocumentosDinamicosComponent implements OnInit {
   }
 
   private procesarArchivoExterno(file: File) {
+  const token = this.authService.getToken();
 
-    const token = this.authService.getToken();
+  if (!this.documentoSeleccionado) return;
 
-    if (!this.documentoSeleccionado) return;
+  const docId = this.documentoSeleccionado.id;
 
-    const docId = this.documentoSeleccionado.id;
-
-    // Validar formato y tamaño
-    const formatoPermitido = this.validarFormatoArchivo(file, this.documentoSeleccionado.formato);
-    if (!formatoPermitido) {
-      alert(`⚠️ Formato de archivo no válido. Se requiere: ${this.documentoSeleccionado.formato}`);
-      return;
-    }
-    const tamanioMaximo = 10 * 1024 * 1024; // 10MB
-    if (file.size > tamanioMaximo) {
-      alert('⚠️ El archivo excede el tamaño máximo permitido (10MB)');
-      return;
-    }
-
-    var payload = null;
-    if (token) {
-      payload = this.decodeToken(token);
-      console.log(payload);
-
-      console.log('Empresa:', payload.empresa);
-    }
-
-    console.log("Tramite seleccionado:", this.resultado.tramite);
-
-    // 1️⃣ Pedir URL firmada al backend
-    const requestBody = {
-      bucketName: 'segar-documents',
-      objectName: `${payload.empresa}/${this.producto.nombre}/${file.name}`,
-      contentType: file.type
-    };
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    this.http.post('http://localhost:8090/api/documentos/signed-url', requestBody, {
-      headers,
-      responseType: 'text'
-    }).subscribe({
-        next: (signedUrl) => {
-          // 2️⃣ Subir el archivo directamente a GCS
-          fetch(signedUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': file.type },
-            body: file
-          })
-          .then(response => {
-            if (!response.ok) throw new Error('Error al subir el archivo a GCS');
-
-            // 3️⃣ Marcar documento como completo
-            this.archivosSubidos[docId] = file;
-            this.datosDocumentos[docId] = {
-              nombreArchivo: file.name,
-              tipoArchivo: file.type,
-              tamanioArchivo: file.size,
-              fechaCarga: new Date()
-            };
-            this.estadoDocumentos[docId] = {
-              completo: true,
-              progreso: 100
-            };
-
-            this.documentoCompletado.emit({
-              documentoId: docId,
-              datos: { archivo: file.name, metadata: this.datosDocumentos[docId] }
-            });
-
-            this.verificarCompletitudTotal();
-            alert('✅ Archivo subido correctamente al servidor.');
-            this.volverALista();
-          })
-          .catch(err => {
-            console.error(err);
-            alert('❌ Error al subir el archivo.');
-          });
-        },
-        error: (err) => {
-          console.error(err);
-          alert('❌ Error al obtener la URL firmada.');
-        }
-      });
+  // ✅ Validar formato y tamaño
+  const formatoPermitido = this.validarFormatoArchivo(file, this.documentoSeleccionado.formato);
+  if (!formatoPermitido) {
+    alert(`⚠️ Formato de archivo no válido. Se requiere: ${this.documentoSeleccionado.formato}`);
+    return;
   }
+
+  const tamanioMaximo = 10 * 1024 * 1024; // 10MB
+  if (file.size > tamanioMaximo) {
+    alert('⚠️ El archivo excede el tamaño máximo permitido (10MB)');
+    return;
+  }
+
+  // ✅ Decodificar token si existe
+  let payload = null;
+  if (token) {
+    payload = this.decodeToken(token);
+    console.log('Payload:', payload);
+    console.log('Empresa:', payload?.empresa);
+  }
+
+  console.log('Trámite seleccionado:', this.resultado.tramite);
+
+  // ✅ Armar información del archivo
+  this.archivosSubidos[docId] = file;
+  this.datosDocumentos[docId] = {
+    nombreArchivo: file.name,
+    tipoArchivo: file.type,
+    tamanioArchivo: file.size,
+    fechaCarga: new Date()
+  };
+
+  // ✅ Emitir el archivo al componente padre
+  this.documentoCompletado.emit({
+    documentoId: docId,
+    datos: {
+      archivo: file, // 🔥 Aquí va el File real
+      metadata: this.datosDocumentos[docId],
+      empresa: payload?.empresa || null,
+      tramite: this.resultado.tramite
+    }
+  });
+
+  // ✅ Actualizar estado interno
+  this.estadoDocumentos[docId] = {
+    completo: true,
+    progreso: 100
+  };
+
+  this.verificarCompletitudTotal();
+
+  alert('✅ Archivo procesado y enviado al componente padre correctamente.');
+  this.volverALista();
+}
+
 
 
   private validarFormatoArchivo(file: File, formatoRequerido: string): boolean {
