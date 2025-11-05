@@ -286,6 +286,7 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
 
   verTodosTramites(): void {
     console.log('Navegar a todos los trámites');
+    this.router.navigate(['/main/busqueda-global']);
   }
 
   exportarDatos(): void {

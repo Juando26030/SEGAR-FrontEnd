@@ -56,9 +56,21 @@ interface EventoReciente {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('chartCanvas', { static: false }) chartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('chartPersonalizado', { static: false }) chartPersonalizadoRef!: ElementRef<HTMLCanvasElement>;
 
   private chart: Chart | null = null;
   private destroy$ = new Subject<void>();
+  private chartPersonalizado: Chart | null = null;
+  mostrarConfigPanel = false;
+  cargandoGraficoPersonalizado = false;
+
+  graficoConfig = {
+    tipoDatos: 'tramites',
+    tipoGrafico: 'doughnut',
+    visualizarPor: 'estado'
+  };
+
+  datosGraficoPersonalizado: any[] = [];
 
   fechaActual: Date = new Date();
   cargando = true;
@@ -117,10 +129,191 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Pequeño delay para asegurar que el canvas esté disponible
     setTimeout(() => {
       this.crearGraficoBarras();
+      this.crearGraficoPersonalizado();
     }, 100);
+  }
+
+  toggleConfigPanel() {
+    this.mostrarConfigPanel = !this.mostrarConfigPanel;
+  }
+
+  aplicarPreset(preset: string) {
+    switch (preset) {
+      case 'tramites-estado':
+        this.graficoConfig = { tipoDatos: 'tramites', tipoGrafico: 'doughnut', visualizarPor: 'estado' };
+        break;
+      case 'tramites-mes':
+        this.graficoConfig = { tipoDatos: 'tramites', tipoGrafico: 'bar', visualizarPor: 'mes' };
+        break;
+      case 'registros-estado':
+        this.graficoConfig = { tipoDatos: 'registros', tipoGrafico: 'pie', visualizarPor: 'estado' };
+        break;
+    }
+    this.actualizarGraficoPersonalizado();
+  }
+
+  private crearGraficoPersonalizado() {
+    if (this.chartPersonalizadoRef?.nativeElement) {
+      const ctx = this.chartPersonalizadoRef.nativeElement.getContext('2d');
+      if (ctx) {
+        this.chartPersonalizado = new Chart(ctx, {
+          type: this.graficoConfig.tipoGrafico as any,
+          data: this.obtenerDatosGraficoPersonalizado(),
+          options: this.obtenerOpcionesGraficoPersonalizado()
+        });
+      }
+    }
+  }
+
+  actualizarGraficoPersonalizado() {
+    this.cargandoGraficoPersonalizado = true;
+
+    setTimeout(() => {
+      if (this.chartPersonalizado) {
+        this.chartPersonalizado.destroy();
+      }
+      this.crearGraficoPersonalizado();
+      this.cargandoGraficoPersonalizado = false;
+    }, 300);
+  }
+
+  private obtenerDatosGraficoPersonalizado(): any {
+    const { tipoDatos, tipoGrafico, visualizarPor } = this.graficoConfig;
+
+    if (tipoDatos === 'tramites') {
+      if (visualizarPor === 'estado') {
+        return {
+          labels: ['Completados', 'En Proceso', 'Pendientes', 'Rechazados'],
+          datasets: [{
+            label: 'Trámites por Estado',
+            data: [
+              this.tramites.completados,
+              this.tramites.enProceso,
+              this.tramites.pendientes,
+              this.tramites.rechazados
+            ],
+            backgroundColor: [
+              'rgba(17, 153, 142, 0.8)',
+              'rgba(102, 126, 234, 0.8)',
+              'rgba(240, 147, 251, 0.8)',
+              'rgba(220, 53, 69, 0.8)'
+            ],
+            borderColor: [
+              'rgba(17, 153, 142, 1)',
+              'rgba(102, 126, 234, 1)',
+              'rgba(240, 147, 251, 1)',
+              'rgba(220, 53, 69, 1)'
+            ],
+            borderWidth: 2
+          }]
+        };
+      } else if (visualizarPor === 'mes') {
+        return {
+          labels: this.tramitesPorMes.map(t => this.obtenerNombreMes(t.mes)),
+          datasets: [{
+            label: 'Trámites por Mes',
+            data: this.tramitesPorMes.map(t => t.cantidad),
+            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+            borderColor: 'rgba(102, 126, 234, 1)',
+            borderWidth: 2,
+            borderRadius: tipoGrafico === 'bar' ? 8 : 0
+          }]
+        };
+      }
+    } else if (tipoDatos === 'registros') {
+      return {
+        labels: ['Vigentes', 'Por Vencer', 'Vencidos'],
+        datasets: [{
+          label: 'Registros Sanitarios',
+          data: [
+            this.registros.vigentes,
+            this.registros.porVencer,
+            this.registros.vencidos
+          ],
+          backgroundColor: [
+            'rgba(40, 167, 69, 0.8)',
+            'rgba(255, 193, 7, 0.8)',
+            'rgba(220, 53, 69, 0.8)'
+          ],
+          borderColor: [
+            'rgba(40, 167, 69, 1)',
+            'rgba(255, 193, 7, 1)',
+            'rgba(220, 53, 69, 1)'
+          ],
+          borderWidth: 2
+        }]
+      };
+    }
+
+    return { labels: [], datasets: [] };
+  }
+
+  private obtenerOpcionesGraficoPersonalizado(): any {
+    const { tipoGrafico } = this.graficoConfig;
+
+    const baseOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800, easing: 'easeOutQuart' },
+      plugins: {
+        legend: {
+          display: tipoGrafico === 'pie' || tipoGrafico === 'doughnut',
+          position: 'bottom' as const,
+          labels: {
+            padding: 15,
+            font: { size: 12, weight: '600' },
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 14, weight: 'bold' },
+          bodyFont: { size: 13 }
+        }
+      }
+    };
+
+    if (tipoGrafico === 'bar' || tipoGrafico === 'line') {
+      return {
+        ...baseOptions,
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { font: { size: 11 } }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 11, weight: 'bold' } }
+          }
+        }
+      };
+    }
+
+    return baseOptions;
+  }
+
+  obtenerTotalGraficoPersonalizado(): number {
+    const { tipoDatos } = this.graficoConfig;
+    return tipoDatos === 'tramites' ? this.tramites.total : this.registros.total;
+  }
+
+  obtenerMaximoGraficoPersonalizado(): string {
+    const datos = this.chartPersonalizado?.data.datasets[0].data as number[] || [];
+    const max = Math.max(...datos);
+    const index = datos.indexOf(max);
+    const label = this.chartPersonalizado?.data.labels?.[index] || '';
+    return `${label} (${max})`;
+  }
+
+  obtenerPromedioGraficoPersonalizado(): string {
+    const datos = this.chartPersonalizado?.data.datasets[0].data as number[] || [];
+    const promedio = datos.reduce((a, b) => a + b, 0) / datos.length;
+    return promedio.toFixed(1);
   }
 
   ngOnDestroy() {

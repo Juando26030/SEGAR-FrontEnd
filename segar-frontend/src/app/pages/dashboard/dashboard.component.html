@@ -217,31 +217,93 @@
       </div>
 
       <!-- Distribución de Trámites -->
+      <!-- Gráfico Personalizado Interactivo -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Distribución de Trámites</h3>
+          <h3>Análisis Personalizado</h3>
+          <div class="chart-config-toggle">
+            <button class="btn-config" (click)="toggleConfigPanel()" [class.active]="mostrarConfigPanel">
+              <i class="fas fa-sliders-h"></i>
+              <span>Configurar</span>
+            </button>
+          </div>
         </div>
-        <div class="chart-container">
-          <div class="donut-chart">
-            <div class="donut-segments" [style]="'background: ' + obtenerGradienteDonut()"></div>
-            <div class="donut-legend">
-              <div class="legend-item">
-                <div class="legend-color completados"></div>
-                <span class="legend-text">Completados ({{ tramites.completados }})</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color proceso"></div>
-                <span class="legend-text">En Proceso ({{ tramites.enProceso }})</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color pendientes"></div>
-                <span class="legend-text">Pendientes ({{ tramites.pendientes }})</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color rechazados"></div>
-                <span class="legend-text">Rechazados ({{ tramites.rechazados }})</span>
-              </div>
+
+        <!-- Panel de Configuración -->
+        <div class="config-panel" *ngIf="mostrarConfigPanel">
+          <div class="config-grid">
+            <div class="config-item">
+              <label class="config-label">Tipo de Datos</label>
+              <select class="config-select" [(ngModel)]="graficoConfig.tipoDatos" (change)="actualizarGraficoPersonalizado()">
+                <option value="tramites">Trámites</option>
+                <option value="registros">Registros Sanitarios</option>
+              </select>
             </div>
+
+            <div class="config-item">
+              <label class="config-label">Tipo de Gráfico</label>
+              <select class="config-select" [(ngModel)]="graficoConfig.tipoGrafico" (change)="actualizarGraficoPersonalizado()">
+                <option value="bar">Barras</option>
+                <option value="line">Líneas</option>
+                <option value="pie">Circular</option>
+                <option value="doughnut">Dona</option>
+              </select>
+            </div>
+
+            <div class="config-item" *ngIf="graficoConfig.tipoDatos === 'tramites'">
+              <label class="config-label">Visualizar Por</label>
+              <select class="config-select" [(ngModel)]="graficoConfig.visualizarPor" (change)="actualizarGraficoPersonalizado()">
+                <option value="estado">Estado</option>
+                <option value="tipo">Tipo de Trámite</option>
+                <option value="mes">Mes (Año Actual)</option>
+              </select>
+            </div>
+
+            <div class="config-item" *ngIf="graficoConfig.tipoDatos === 'registros'">
+              <label class="config-label">Visualizar Por</label>
+              <select class="config-select" [(ngModel)]="graficoConfig.visualizarPor" (change)="actualizarGraficoPersonalizado()">
+                <option value="estado">Estado (Vigentes/Vencidos)</option>
+                <option value="vencimiento">Próximos a Vencer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="config-presets">
+            <span class="preset-label">Vistas Rápidas:</span>
+            <button class="btn-preset-view" (click)="aplicarPreset('tramites-estado')">
+              <i class="fas fa-chart-pie"></i> Estado Trámites
+            </button>
+            <button class="btn-preset-view" (click)="aplicarPreset('tramites-mes')">
+              <i class="fas fa-chart-bar"></i> Trámites por Mes
+            </button>
+            <button class="btn-preset-view" (click)="aplicarPreset('registros-estado')">
+              <i class="fas fa-chart-line"></i> Estado Registros
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenedor del Gráfico -->
+        <div class="chart-container">
+          <div class="chart-loading" *ngIf="cargandoGraficoPersonalizado">
+            <div class="spinner"></div>
+            <span>Cargando datos...</span>
+          </div>
+          <canvas #chartPersonalizado width="400" height="250"></canvas>
+        </div>
+
+        <!-- Resumen del Gráfico -->
+        <div class="chart-summary" *ngIf="!cargandoGraficoPersonalizado">
+          <div class="summary-stat">
+            <div class="summary-value">{{ obtenerTotalGraficoPersonalizado() }}</div>
+            <div class="summary-label">Total</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-value">{{ obtenerMaximoGraficoPersonalizado() }}</div>
+            <div class="summary-label">Máximo</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-value">{{ obtenerPromedioGraficoPersonalizado() }}</div>
+            <div class="summary-label">Promedio</div>
           </div>
         </div>
       </div>
