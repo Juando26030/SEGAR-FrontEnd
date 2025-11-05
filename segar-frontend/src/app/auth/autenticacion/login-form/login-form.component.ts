@@ -26,7 +26,6 @@ export class LoginFormComponent implements OnInit {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
-      userType: ['administrador', [Validators.required]],
       rememberMe: [false]
     });
   }
@@ -72,7 +71,7 @@ export class LoginFormComponent implements OnInit {
       this.errorMessage = '';
 
       try {
-        const { username, password, userType } = this.loginForm.value;
+        const { username, password } = this.loginForm.value;
 
         // 🔐 AUTENTICACIÓN REAL CON KEYCLOAK
         const success = await this.authService.loginWithCredentials(username, password);
@@ -81,17 +80,9 @@ export class LoginFormComponent implements OnInit {
           // ✅ LOGIN EXITOSO
           console.log('✅ Autenticación exitosa');
 
-          // Verificar que el usuario tiene el rol correcto
-          const userInfo = this.authService.getUser();
-          const hasRequiredRole = this.validateUserRole(userType, userInfo?.roles || []);
-
-          if (hasRequiredRole) {
-            console.log(`✅ Usuario autorizado como: ${userType}`);
-            this.redirectBasedOnRole();
-          } else {
-            this.errorMessage = `No tienes permisos para acceder como ${userType}`;
-            await this.authService.logout(); // Cerrar sesión si no tiene el rol
-          }
+          // El sistema detecta automáticamente el rol del usuario desde el JWT
+          // y redirige según corresponda (SUPER_ADMIN, ADMIN, o EMPLEADO)
+          this.redirectBasedOnRole();
         } else {
           // ❌ CREDENCIALES INVÁLIDAS
           this.errorMessage = 'Usuario o contraseña incorrectos';
@@ -108,27 +99,6 @@ export class LoginFormComponent implements OnInit {
     }
   }
 
-  private validateUserRole(selectedUserType: string, userRoles: string[]): boolean {
-    // Convertir roles a minúsculas para comparación case-insensitive
-    const rolesLowerCase = userRoles.map(role => role.toLowerCase());
-
-    console.log('🔍 Validando rol para tipo:', selectedUserType);
-    console.log('🔍 Roles del usuario:', userRoles);
-    console.log('🔍 Roles en minúsculas:', rolesLowerCase);
-
-    switch (selectedUserType) {
-      case 'administrador':
-        const hasAdminRole = rolesLowerCase.includes('admin');
-        console.log('🔍 ¿Tiene rol admin?', hasAdminRole);
-        return hasAdminRole;
-      case 'empleado':
-        const hasEmpleadoRole = rolesLowerCase.includes('empleado') || rolesLowerCase.includes('admin');
-        console.log('🔍 ¿Tiene rol empleado o admin?', hasEmpleadoRole);
-        return hasEmpleadoRole; // Admin puede ser empleado también
-      default:
-        return false;
-    }
-  }
 
   private redirectBasedOnRole(): void {
     const user = this.authService.getUser();
@@ -142,21 +112,50 @@ export class LoginFormComponent implements OnInit {
 
     // Convertir roles a minúsculas para comparación case-insensitive
     const rolesLowerCase = user.roles.map(role => role.toLowerCase());
-    console.log('🔄 Roles del usuario para redirección:', user.roles);
+    console.log('🔄 =================================');
+    console.log('🔄 REDIRIGIENDO SEGÚN ROL');
+    console.log('🔄 Roles originales del usuario:', user.roles);
     console.log('🔄 Roles en minúsculas:', rolesLowerCase);
+    console.log('🔄 =================================');
 
-    if (rolesLowerCase.includes('admin')) {
-      console.log('🔄 Redirigiendo a panel de administrador');
-      this.router.navigate(['/main/panel']); // Panel completo para admin
-    } else if (rolesLowerCase.includes('empleado')) {
-      console.log('🔄 Redirigiendo a panel de empleado');
-      this.router.navigate(['/main/panel']); // Panel limitado para empleado
-    } else {
-      console.error('❌ Usuario sin roles válidos');
-      console.error('❌ Roles encontrados:', user.roles);
-      this.errorMessage = 'Usuario sin permisos válidos';
-      this.authService.logout();
+    // ⭐ SUPER_ADMIN: Redirigir al backoffice (panel de administración SaaS)
+    // Buscar variaciones del nombre del rol
+    const isSuperAdmin = rolesLowerCase.some(role =>
+      role === 'super_admin' ||
+      role === 'super-admin' ||
+      role === 'superadmin' ||
+      role === 'super admin'
+    );
+
+    if (isSuperAdmin) {
+      console.log('✅ Usuario SUPER_ADMIN detectado!');
+      console.log('🔄 Redirigiendo a backoffice: http://localhost:4201/admin/welcome');
+      window.location.href = 'http://localhost:4201/admin/welcome';
+      return;
     }
+
+    // ADMIN: Panel completo en frontend
+    if (rolesLowerCase.includes('admin')) {
+      console.log('✅ Usuario ADMIN detectado');
+      console.log('🔄 Redirigiendo a panel de administrador');
+      this.router.navigate(['/main/panel']);
+      return;
+    }
+
+    // EMPLEADO: Panel limitado en frontend
+    if (rolesLowerCase.includes('empleado')) {
+      console.log('✅ Usuario EMPLEADO detectado');
+      console.log('🔄 Redirigiendo a panel de empleado');
+      this.router.navigate(['/main/panel']);
+      return;
+    }
+
+    // Sin roles válidos
+    console.error('❌ Usuario sin roles válidos para acceder al sistema');
+    console.error('❌ Roles encontrados:', user.roles);
+    console.error('❌ Roles esperados: SUPER_ADMIN, ADMIN, o EMPLEADO');
+    this.errorMessage = 'Usuario sin permisos válidos. Contacte al administrador.';
+    this.authService.logout();
   }  private markFormGroupTouched(): void {
     Object.keys(this.loginForm.controls).forEach(key => {
       const control = this.loginForm.get(key);
@@ -169,14 +168,12 @@ export class LoginFormComponent implements OnInit {
     if (testUser === 'admin') {
       this.loginForm.patchValue({
         username: 'admin.segar',
-        password: 'admin123',
-        userType: 'administrador'
+        password: 'admin123'
       });
     } else {
       this.loginForm.patchValue({
         username: 'empleado.segar',
-        password: 'empleado123',
-        userType: 'empleado'
+        password: 'empleado123'
       });
     }
   }

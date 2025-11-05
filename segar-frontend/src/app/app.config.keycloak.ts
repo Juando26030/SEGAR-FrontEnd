@@ -10,7 +10,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
       config: {
-        url: 'https://35.238.19.224',
+        url: 'http://localhost:8080',  // Usar localhost para pruebas locales
         realm: 'segar',
         clientId: 'segar-frontend'
       },

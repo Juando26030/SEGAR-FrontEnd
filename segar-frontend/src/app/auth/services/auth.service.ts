@@ -118,18 +118,26 @@ export class AuthService {
 
       const tokenParsed = this.keycloak.tokenParsed as any;
       console.log('👤 Token parseado completo:', tokenParsed);
+      console.log('👤 Realm access:', tokenParsed?.realm_access);
       console.log('👤 Resource access:', tokenParsed?.resource_access);
 
-      // Extraer roles de resource_access.segar-backend.roles
-      const roles = tokenParsed?.resource_access?.['segar-backend']?.roles || [];
-      console.log('👤 Roles extraídos de segar-backend:', roles);
+      // Extraer roles - buscar en realm_access y resource_access
+      const realmRoles = tokenParsed?.realm_access?.roles || [];
+      const backendRoles = tokenParsed?.resource_access?.['segar-backend']?.roles || [];
+
+      // Combinar roles de ambas fuentes y eliminar duplicados
+      const allRoles = [...new Set([...realmRoles, ...backendRoles])];
+
+      console.log('👤 Roles de realm_access:', realmRoles);
+      console.log('👤 Roles de resource_access.segar-backend:', backendRoles);
+      console.log('👤 Todos los roles combinados:', allRoles);
 
       // Usar datos del token en lugar de loadUserProfile() que puede fallar
       const userInfo: UserInfo = {
         username: tokenParsed.preferred_username || '',
         email: tokenParsed.email || '',
         fullName: tokenParsed.name || `${tokenParsed.given_name || ''} ${tokenParsed.family_name || ''}`.trim(),
-        roles: roles,
+        roles: allRoles,
         firstName: tokenParsed.given_name,
         lastName: tokenParsed.family_name,
         // user_created_timestamp viene del mapper personalizado de Keycloak (en milisegundos)
