@@ -501,18 +501,33 @@ export class AuthService {
       (this.keycloak as any).tokenParsed = undefined;
     }
 
-    // ✅ LIMPIAR COMPLETAMENTE LOCALSTORAGE
+    // ✅ LIMPIAR COMPLETAMENTE LOCALSTORAGE Y SESSIONSTORAGE
     localStorage.removeItem(this.STORAGE_KEY_TOKEN);
     localStorage.removeItem(this.STORAGE_KEY_REFRESH_TOKEN);
     localStorage.removeItem(this.STORAGE_KEY_USER_INFO);
     localStorage.removeItem('userInfo'); // Limpiar también el viejo formato
 
+    // Limpiar también sessionStorage
+    sessionStorage.clear();
+
+    // Limpiar cualquier otra clave relacionada con Keycloak
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('kc-') || key.includes('keycloak')) {
+        localStorage.removeItem(key);
+      }
+    });
+
     console.log('✅ Sesión cerrada completamente');
-    console.log('✅ LocalStorage limpiado');
+    console.log('✅ LocalStorage y SessionStorage limpiados');
     console.log('🚪 =================================');
 
-    // Redirigir al login
-    window.location.href = '/auth/login';
+    // ✅ PREVENIR NAVEGACIÓN HACIA ATRÁS
+    // Reemplazar el historial para que no se pueda volver atrás
+    history.pushState(null, '', '/auth/login');
+
+    // Redirigir al login y recargar completamente la página
+    // Esto asegura que no quede ningún estado en memoria
+    window.location.replace('/auth/login');
   }
 
   // Método para debugging

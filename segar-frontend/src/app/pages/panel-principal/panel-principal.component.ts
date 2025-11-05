@@ -5,6 +5,7 @@ import { Subject, interval, takeUntil, forkJoin, timer } from 'rxjs';
 import { DashboardService, TramiteRecienteDTO } from '../../core/services/dashboard.service';
 import { TramiteDetalleModalComponent } from '../../shared/tramite-detalle-modal/tramite-detalle-modal.component';
 import { AuthService } from '../../auth/services/auth.service';
+import { NavigationGuardService } from '../../core/services/navigation-guard.service';
 
 interface Estadisticas {
   activos: number;
@@ -65,10 +66,21 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private navigationGuard: NavigationGuardService
 ) {}
 
   ngOnInit(): void {
+    // Verificar autenticación antes de cualquier cosa
+    if (!this.authService.isAuthenticated()) {
+      console.warn('⚠️ Usuario no autenticado, redirigiendo al login');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    // Prevenir navegación hacia atrás después de logout
+    this.navigationGuard.preventBackNavigation();
+
     this.authService.getUsuarioId().subscribe(id => {
       this.usuarioId = id;
       this.cargarDatos();
@@ -78,6 +90,9 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Limpiar listener de navegación
+    this.navigationGuard.clearBackNavigationPrevention();
+
     this.destroy$.next();
     this.destroy$.complete();
   }

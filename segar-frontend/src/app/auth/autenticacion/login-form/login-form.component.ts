@@ -34,9 +34,24 @@ export class LoginFormComponent implements OnInit {
     // ✅ VERIFICAR SI HAY MENSAJE DE SESIÓN EXPIRADA
     this.checkSessionExpired();
 
+    // ✅ VERIFICAR SI VIENE DE UN LOGOUT DEL BACKOFFICE
+    this.checkLogoutFromBackoffice();
+
     // Verificar si ya está autenticado
     if (this.authService.isAuthenticated()) {
       this.redirectBasedOnRole();
+    }
+  }
+
+  /**
+   * Verifica si viene de un logout del backoffice y cierra la sesión de Keycloak
+   */
+  private checkLogoutFromBackoffice(): void {
+    // Verificar si está autenticado en Keycloak
+    if (this.authService.isAuthenticated()) {
+      // Si está autenticado pero está en el login, significa que vino de un logout
+      console.log('🚪 Usuario autenticado en login - cerrando sesión de Keycloak...');
+      this.authService.logout(); // Esto cerrará la sesión de Keycloak completamente
     }
   }
 
