@@ -41,7 +41,7 @@ export class CalendarioService {
   }
 
   obtenerEventosPorEmpresa(empresaId: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/empresa/${empresaId}`);
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos`);
   }
 
   obtenerEstadisticas(): Observable<EstadisticasCalendarioDTO> {
@@ -60,8 +60,45 @@ export class CalendarioService {
     return this.http.get<string[]>(`${this.apiUrl}/prioridades`);
   }
 
+  obtenerEstadosEvento(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/estados`);
+  }
+
   obtenerEventosProximos(): Observable<EventoDTO[]> {
     return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/proximos`);
   }
 
+  // Endpoints por Empresa
+  obtenerEventosPorMesEmpresa(empresaId: number, mes: number, anio: number): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos/${mes}/${anio}`);
+  }
+
+  obtenerTodosLosEventosEmpresa(empresaId: number): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos`);
+  }
+
+  obtenerEstadisticasEmpresa(empresaId: number): Observable<EstadisticasCalendarioDTO> {
+    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/empresa/${empresaId}/estadisticas`);
+  }
+
+  obtenerEventosProximosEmpresa(empresaId: number): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos/proximos`);
+  }
+
+  // Endpoints por Usuario
+  obtenerEventosPorMesUsuario(usuarioId: number, mes: number, anio: number): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos/${mes}/${anio}`);
+  }
+
+  obtenerTodosLosEventosUsuario(usuarioId: number): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos`);
+  }
+
+  obtenerEstadisticasUsuario(usuarioId: number): Observable<EstadisticasCalendarioDTO> {
+    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/usuario/${usuarioId}/estadisticas`);
+  }
+
+  obtenerEventosProximosUsuario(usuarioId: number): Observable<EventoDTO[]> {
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos/proximos`);
+  }
 }
