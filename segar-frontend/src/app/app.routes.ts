@@ -22,6 +22,7 @@ import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
 import { CorreosComponent } from './pages/correos/correos.component';  // <- IMPORTAR COMPONENTE DE CORREOS
 import { NuevoProductoComponent } from './pages/nuevo-producto/nuevo-producto.component';
 import { ProductosComponent } from './pages/productos/productos.component';
+import { TramitesComponent } from './pages/tramites/tramites.component';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'calendario', component: CalendarioComponent },
       { path: 'productos', component: ProductosComponent },
+      { path: 'tramites', component: TramitesComponent },
       { path: 'nuevo/tramite', component: NuevoTramiteComponent },
       { path: 'nuevo/producto', component: NuevoProductoComponent },
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },

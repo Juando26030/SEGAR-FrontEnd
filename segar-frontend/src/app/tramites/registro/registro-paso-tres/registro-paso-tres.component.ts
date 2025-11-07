@@ -795,8 +795,17 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     const token = this.authService.getToken();
 
     for (const doc of this.documentosCargados) {
-      this.documentService.cargarDocumento(doc.documentoId, doc.archivo, token!, this.productoSeleccionado);
+      console.log("documentos a cargar:", doc);
+      
+      this.documentService
+        .cargarDocumento(doc.documentoId, doc.archivo, token!, this.productoSeleccionado)
+        .subscribe({
+          next: (res) => console.log(`📤 Documento ${doc.documentoId} cargado correctamente`),
+          error: (err) => console.error(`❌ Error al subir documento ${doc.documentoId}:`, err),
+          complete: () => console.log(`✅ Flujo completado para ${doc.documentoId}`)
+        });
     }
+
 
   }
 
