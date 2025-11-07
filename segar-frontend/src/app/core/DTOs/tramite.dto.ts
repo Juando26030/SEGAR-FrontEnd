@@ -1,19 +1,18 @@
+import { EventoDTO } from './calendario.dto';
 import {DocumentoDto} from './documento.dto';
+import { Producto } from './solicitud.dto';
+import { Usuario } from './usuario.dto';
 
 export interface TramiteDto {
-  idTramite: number;
-  numeroRadicado: string;
-  nombreProducto: string;
-  descripcionProducto: string;
-  tipo: string;
-  estado: string;
-  fechaCreacion: Date;
-  etapa: string;
-  progreso: number;
-  prioridad: string;
-  comentarios: string;
+  id: number;
+  radicadoNumber: string;
+  submissionDate: string;
+  procedureType: string;
+  product: Producto;
+  usuario: Usuario;
+  currentStatus: string;
+  lastUpdate: Date;
+  eventos: EventoDTO;
   // Información adicional para el frontend
-  documentosRequeridos?: DocumentoDto[];
-  empresaInfo?: any;
-  usuarioInfo?: any;
+  documentos?: DocumentoDto[];
 }

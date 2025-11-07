@@ -27,6 +27,7 @@ import { RenovaciNPasoCuatroComponent } from './tramites/renovación/renovación
 import { RenovaciNPasoCincoComponent } from './tramites/renovación/renovación-paso-cinco/renovación-paso-cinco.component';
 
 
+import { TramitesComponent } from './pages/tramites/tramites.component';
 
 export const routes: Routes = [
   {
@@ -44,6 +45,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'calendario', component: CalendarioComponent },
       { path: 'productos', component: ProductosComponent },
+      { path: 'tramites', component: TramitesComponent },
       { path: 'nuevo/tramite', component: NuevoTramiteComponent },
       { path: 'nuevo/producto', component: NuevoProductoComponent },
       { path: 'nuevo-usuario', component: PaginaRegistroComponent },

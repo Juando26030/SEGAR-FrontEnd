@@ -167,7 +167,7 @@ export class DocumentosDinamicosComponent implements OnInit {
       progreso
     };
 
-    this.documentoCompletado.emit({ documentoId: docId, datos });
+    //this.documentoCompletado.emit({ documentoId: docId, datos });
 
     // Verificar si todos los obligatorios están completos
     this.verificarCompletitudTotal();
