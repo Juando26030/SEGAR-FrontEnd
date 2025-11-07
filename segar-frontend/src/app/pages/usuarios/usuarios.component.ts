@@ -693,7 +693,7 @@ export class UsuariosComponent implements OnInit {
 
     console.log('📋 Cargando lista de usuarios desde el backend...');
 
-    this.usuarioService.getUsuariosLocales().subscribe({
+    this.usuarioService.getUsuariosLocales(this.authService.getToken()).subscribe({
       next: (usuarios) => {
         // Filtrar el usuario actual (el que inició sesión) de la lista
         const usuarioActual = this.authService.getUser();
@@ -728,7 +728,7 @@ export class UsuariosComponent implements OnInit {
     console.log('🔄 Sincronizando usuarios con Keycloak...');
     this.cargando = true;
 
-    this.usuarioService.sincronizarConKeycloak().subscribe({
+    this.usuarioService.sincronizarConKeycloak(this.authService.getToken()).subscribe({
       next: (usuarios) => {
         // Filtrar el usuario actual de la lista
         const usuarioActual = this.authService.getUser();
@@ -771,7 +771,7 @@ export class UsuariosComponent implements OnInit {
       delete datosActualizacion.fullName;
       delete datosActualizacion.roles;
 
-      this.usuarioService.actualizarUsuario(id, datosActualizacion).subscribe({
+      this.usuarioService.actualizarUsuario(id, datosActualizacion, this.authService.getToken()).subscribe({
         next: (usuario) => {
           this.mensajeExito = `Usuario "${usuario.username}" actualizado exitosamente`;
           this.cargarUsuarios();
@@ -807,7 +807,7 @@ export class UsuariosComponent implements OnInit {
         return;
       }
 
-      this.usuarioService.crearUsuario(this.usuarioFormData).subscribe({
+      this.usuarioService.crearUsuario(this.usuarioFormData, this.authService.getToken()).subscribe({
         next: (usuario) => {
           this.mensajeExito = `Usuario "${usuario.username}" creado exitosamente`;
           this.cargarUsuarios();
@@ -845,7 +845,7 @@ export class UsuariosComponent implements OnInit {
     }
 
     this.limpiarMensajes();
-    this.usuarioService.toggleActivoUsuario(usuario.id).subscribe({
+    this.usuarioService.toggleActivoUsuario(usuario.id, this.authService.getToken()).subscribe({
       next: (usuarioActualizado) => {
         this.mensajeExito = `Usuario "${usuarioActualizado.username}" ${usuarioActualizado.activo ? 'activado' : 'desactivado'} exitosamente`;
         this.cargarUsuarios();
@@ -864,7 +864,7 @@ export class UsuariosComponent implements OnInit {
     }
 
     this.limpiarMensajes();
-    this.usuarioService.eliminarUsuario(usuario.id).subscribe({
+    this.usuarioService.eliminarUsuario(usuario.id, this.authService.getToken()).subscribe({
       next: () => {
         this.mensajeExito = `Usuario "${usuario.username}" eliminado exitosamente`;
         this.cargarUsuarios();
@@ -900,7 +900,9 @@ export class UsuariosComponent implements OnInit {
 
     this.usuarioService.cambiarPassword(
       this.usuarioPasswordModal.id,
-      this.nuevaPassword
+      this.nuevaPassword,
+      false,
+      this.authService.getToken()
     ).subscribe({
       next: () => {
         this.mensajeExito = `Contraseña actualizada para "${this.usuarioPasswordModal!.username}"`;
