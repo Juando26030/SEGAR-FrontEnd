@@ -16,6 +16,9 @@ import { Producto } from '../../core/DTOs/solicitud.dto';
 export class DocumentosDinamicosComponent implements OnInit {
   @Input() resultado!: ResultadoClasificacion;
   @Input() producto!: Producto;
+  @Input() modoRenovacion: boolean = false;
+  @Input() documentosOriginales: any[] = [];
+  @Input() reglasBloqueo: string[] = [];
   @Output() documentoCompletado = new EventEmitter<{ documentoId: string; datos: any }>();
   @Output() todosCompletados = new EventEmitter<boolean>();
 
@@ -41,6 +44,10 @@ export class DocumentosDinamicosComponent implements OnInit {
 
   ngOnInit() {
     this.inicializarEstados();
+    if (this.modoRenovacion) {
+      this.cargarDocumentosRenovacion();
+      this.aplicarReglasBloqueo();
+    }
     console.log("Producto recibido en DocumentosDinamicosComponent:");
     console.log(this.producto);
   }
@@ -53,6 +60,35 @@ export class DocumentosDinamicosComponent implements OnInit {
       };
       this.datosDocumentos[doc.id] = {};
       this.archivosSubidos[doc.id] = null;
+    });
+  }
+
+  cargarDocumentosRenovacion(): void {
+    this.resultado.documentos.forEach(doc => {
+      const docOriginal = this.documentosOriginales.find(
+        d => d.tipo === doc.id || d.nombre === doc.nombre
+      );
+
+      if (docOriginal) {
+        // Prellenar con datos originales
+        this.datosDocumentos[doc.id] = { ...docOriginal.datos };
+        this.archivosSubidos[doc.id] = docOriginal.archivo || null;
+        this.estadoDocumentos[doc.id] = {
+          completo: true,
+          progreso: 100
+        };
+      }
+    });
+  }
+
+  aplicarReglasBloqueo(): void {
+    this.resultado.documentos.forEach(doc => {
+      doc.campos?.forEach((campo: any) => {
+        if (this.reglasBloqueo.includes(campo.nombre)) {
+          campo.bloqueado = true;
+          campo.tooltip = '🔒 Este campo no puede modificarse en renovación';
+        }
+      });
     });
   }
 

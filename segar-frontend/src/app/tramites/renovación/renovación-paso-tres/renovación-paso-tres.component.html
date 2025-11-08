@@ -117,7 +117,7 @@
         </div>
 
         <!-- Selector de Producto con validación -->
-        <div class="mb-6 bg-blue-50 p-6 rounded-xl border border-blue-200">
+        <div class="mb-6 bg-blue-50 p-6 rounded-xl border border-blue-200" *ngIf="currentTramiteType === 'REGISTRO'">
           <div class="flex items-center justify-between mb-3">
             <label class="block text-sm font-semibold text-gray-700">
               <i class="fas fa-box text-blue-700 mr-2"></i>
@@ -137,6 +137,63 @@
               {{ producto.nombre }}
             </option>
           </select>
+        </div>
+
+        <!-- Selector de Trámite para Renovación -->
+        <div class="mb-6 bg-blue-50 p-6 rounded-xl border border-blue-200" *ngIf="currentTramiteType === 'RENOVACION'">
+          <div class="flex items-center justify-between mb-3">
+            <label class="block text-sm font-semibold text-gray-700">
+              <i class="fas fa-redo text-blue-700 mr-2"></i>
+              Seleccione el Trámite a Renovar <span class="text-red-500">*</span>
+            </label>
+            <i *ngIf="tramiteARenovar"
+               class="fas fa-check-circle text-green-500 text-xl animate-scale-in"></i>
+          </div>
+          <select
+            [(ngModel)]="tramiteARenovar"
+            name="tramiteARenovar"
+            (ngModelChange)="onTramiteSeleccionado()"
+            class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-200 hover:border-blue-400 bg-white"
+            required>
+            <option value="">-- Seleccione un trámite --</option>
+            <option *ngFor="let tramite of tramitesDisponiblesParaRenovar" [ngValue]="tramite">
+              {{tramite.producto.nombre}} - {{tramite.registroSanitario}} - Vence: {{tramite.fechaVencimiento | date:'dd/MM/yyyy'}}
+            </option>
+          </select>
+        </div>
+
+        <!-- Información del Trámite Original (solo en renovación) -->
+        <div *ngIf="tramiteARenovar && currentTramiteType === 'RENOVACION'"
+             class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl mb-6">
+          <h4 class="font-bold text-gray-800 mb-4">
+            📋 Información del Registro Actual
+          </h4>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-xs text-blue-600">Registro Sanitario</p>
+              <p class="font-bold">{{tramiteARenovar.registroSanitario}}</p>
+            </div>
+            <div>
+              <p class="text-xs text-blue-600">Clasificación</p>
+              <p class="font-bold">{{tramiteARenovar.clasificacion.nivel_riesgo}}</p>
+            </div>
+            <div>
+              <p class="text-xs text-blue-600">Fecha Expedición</p>
+              <p class="font-bold">{{tramiteARenovar.fechaExpedicion | date}}</p>
+            </div>
+            <div>
+              <p class="text-xs text-blue-600">Fecha Vencimiento</p>
+              <p class="font-bold text-red-600">{{tramiteARenovar.fechaVencimiento | date}}</p>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 bg-green-50 border-l-4 border-green-500 rounded">
+            <p class="text-sm text-green-800">
+              ✅ Clasificación heredada automáticamente.
+              No requiere nueva clasificación.
+            </p>
+          </div>
         </div>
 
         <form #classificationFormRef="ngForm" (ngSubmit)="onClasificarProducto()" novalidate>
@@ -328,8 +385,11 @@
         <!-- Componente dinámico de documentos -->
         <div *ngIf="clasificacionCompleta && resultadoClasificacion">
           <app-documentos-dinamicos
-            [producto]="productoSeleccionado"
             [resultado]="resultadoClasificacion"
+            [producto]="tramiteARenovar ? tramiteARenovar.producto : productoSeleccionado"
+            [modoRenovacion]="currentTramiteType === 'RENOVACION'"
+            [documentosOriginales]="tramiteARenovar?.documentosOriginales || []"
+            [reglasBloqueo]="reglasRenovacion.camposBloqueados"
             (documentoCompletado)="onDocumentoCompletado($event)"
             (todosCompletados)="onTodosDocumentosCompletos($event)">
           </app-documentos-dinamicos>
@@ -482,6 +542,60 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Renovación -->
+<div *ngIf="mostrarModalConfirmacion"
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+    <h3 class="text-2xl font-bold mb-4">
+      Confirmar Renovación de Registro Sanitario
+    </h3>
+
+    <div class="mb-6">
+      <h4 class="font-bold mb-2">Cambios Realizados:</h4>
+      <ul class="list-disc pl-5 space-y-1">
+        <li *ngFor="let cambio of cambiosRealizados" class="text-sm">
+          <span class="font-medium">{{cambio.campo}}:</span>
+          <span class="text-gray-500">{{cambio.anterior}}</span> →
+          <span class="text-green-600">{{cambio.nuevo}}</span>
+        </li>
+        <li *ngIf="cambiosRealizados.length === 0" class="text-gray-500 italic">
+          No se detectaron cambios en los campos bloqueados
+        </li>
+      </ul>
+    </div>
+
+    <!-- Checklist de Validación -->
+    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+      <h4 class="font-bold mb-3">✅ Checklist de Validación</h4>
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center gap-2">
+          <i [class]="!tieneCambiosProhibidos ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500'"></i>
+          <span>Sin cambios prohibidos</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i [class]="documentosSoporteCambios ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500'"></i>
+          <span>Documentos de soporte adjuntos</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i [class]="certificadosActualizados ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500'"></i>
+          <span>Certificados vigentes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-4">
+      <button (click)="radicarRenovacion()"
+              class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+        Confirmar Renovación
+      </button>
+      <button (click)="cerrarModal()"
+              class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors">
+        Cancelar
+      </button>
     </div>
   </div>
 </div>
