@@ -22,6 +22,11 @@ import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
 import { CorreosComponent } from './pages/correos/correos.component';  // <- IMPORTAR COMPONENTE DE CORREOS
 import { NuevoProductoComponent } from './pages/nuevo-producto/nuevo-producto.component';
 import { ProductosComponent } from './pages/productos/productos.component';
+import { RenovaciNPasoTresComponent } from './tramites/renovación/renovación-paso-tres/renovación-paso-tres.component';
+import { RenovaciNPasoCuatroComponent } from './tramites/renovación/renovación-paso-cuatro/renovación-paso-cuatro.component';
+import { RenovaciNPasoCincoComponent } from './tramites/renovación/renovación-paso-cinco/renovación-paso-cinco.component';
+
+
 
 export const routes: Routes = [
   {
@@ -61,6 +66,15 @@ export const routes: Routes = [
           { path: 'paso-1', component: RegistroPasoTresComponent },
           { path: 'paso-2/:id', component: RegistroPasoCuatroComponent },
           { path: 'paso-3', component: RegistroPasoCincoComponent },
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+        ]
+      },
+      {
+        path: 'nuevo/renovacion',
+        children: [
+          { path: 'paso-1', component: RenovaciNPasoTresComponent },
+          { path: 'paso-2/:id', component: RenovaciNPasoCuatroComponent },
+          { path: 'paso-3', component: RenovaciNPasoCincoComponent },
           { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       }

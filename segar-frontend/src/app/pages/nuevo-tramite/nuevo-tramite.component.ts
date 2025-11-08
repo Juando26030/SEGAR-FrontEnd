@@ -14,13 +14,18 @@ export class NuevoTramiteComponent {
   constructor(private router: Router) {}
 
   seleccionar(tipo: 'registro' | 'renovacion' | 'modificacion') {
-    if (tipo === 'registro') {
-      // Navegar directamente al paso 3 (ahora el primer paso del proceso de registro)
-      this.router.navigate(['/main/nuevo/registro/paso-1']);
-    } else {
-      // Para otros tipos, mostrar mensaje temporal
-      alert(`Has seleccionado: ${tipo}. En la próxima versión se mostrará el formulario correspondiente.`);
+    switch (tipo) {
+      case 'registro':
+        this.router.navigate(['/main/nuevo/registro/paso-1']);
+        break;
+      case 'renovacion':
+        this.router.navigate(['/main/nuevo/renovacion/paso-1']);
+        break;
+      case 'modificacion':
+        alert(`Has seleccionado: ${tipo}. En la próxima versión se mostrará el formulario correspondiente.`);
+        break;
     }
   }
+
 
 }
