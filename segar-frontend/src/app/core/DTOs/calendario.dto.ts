@@ -10,6 +10,7 @@ export interface EventoDTO {
   estado: 'ACTIVO' | 'COMPLETADO' | 'VENCIDO' | 'CANCELADO';
   empresaId?: number;
   tramiteId?: number;
+  usuarioId?: number;
   documentoId?: number;
   fechaCreacion: string;
   fechaActualizacion?: string;
@@ -25,6 +26,7 @@ export interface CrearEventoDTO {
   prioridad: 'BAJA' | 'MEDIA' | 'ALTA';
   empresaId?: number;
   tramiteId?: number;
+  usuarioId?: number;
   documentoId?: number;
 }
 

@@ -1,236 +1,275 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CalendarioService } from '../../core/services/calendario.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 import { EventoDTO, CrearEventoDTO, EstadisticasCalendarioDTO } from '../../core/DTOs/calendario.dto';
+import { Subscription, switchMap, of, catchError, finalize } from 'rxjs';
 
-interface DiaCalendario {
+interface CalendarDay {
   dia: number;
+  fecha: Date;
   esOtroMes: boolean;
   esHoy: boolean;
-  esFeriado: boolean;
-  fecha: Date;
   eventos: EventoDTO[];
 }
 
 @Component({
   selector: 'app-calendario',
-  templateUrl: './calendario.component.html',
-  styleUrls: ['./calendario.component.css'],
+  standalone: true,
   imports: [CommonModule, FormsModule],
-  standalone: true
+  templateUrl: './calendario.component.html',
+  styleUrls: ['./calendario.component.css']
 })
-export class CalendarioComponent implements OnInit {
-  fechaActual = new Date();
-  mesActual = this.fechaActual.getMonth();
-  anioActual = this.fechaActual.getFullYear();
+export class CalendarioComponent implements OnInit, OnDestroy {
+  // ========== ESTADO DEL CALENDARIO ==========
+  fechaActual: Date = new Date();
+  mes: number = this.fechaActual.getMonth();
+  anio: number = this.fechaActual.getFullYear();
+  nombreMes: string = '';
+  diasSemana: string[] = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  calendarDays: CalendarDay[] = [];
 
-  diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ];
-
-  calendarDays: DiaCalendario[] = [];
+  // ========== DATOS DEL BACKEND ==========
   eventos: EventoDTO[] = [];
   estadisticas: EstadisticasCalendarioDTO | null = null;
-  tiposEvento: string[] = [];
-  categoriasEvento: string[] = [];
+  usuarioId: number | null = null;
+  esAdmin: boolean = false;
 
-  // Variables para detalles de evento
-  mostrarDetalles = false;
+  // ========== ESTADOS DE UI ==========
+  cargando: boolean = false;
+  mostrarDetalles: boolean = false;
+  mostrarModalNuevoEvento: boolean = false;
+  mostrarModalEventosDia: boolean = false;
+  editandoEvento: boolean = false;
   eventoSeleccionado: EventoDTO | null = null;
+  eventosDiaSeleccionado: EventoDTO[] = [];
 
-  // Variables para nuevo evento
-  mostrarModalNuevoEvento = false;
-  editandoEvento = false;
-  eventoEditandoId: number | null = null;
+  // ========== FORMULARIO DE NUEVO EVENTO ==========
+  nuevoEvento: CrearEventoDTO = this.inicializarNuevoEvento();
 
-  nuevoEvento: CrearEventoDTO = {
-    titulo: '',
-    descripcion: '',
-    fecha: '',
-    hora: '',
-    tipo: 'RECORDATORIO',
-    categoria: 'TRAMITE',
-    prioridad: 'MEDIA'
-  };
+  // ========== SUBSCRIPCIONES ==========
+  private subscriptions: Subscription = new Subscription();
 
-  cargando = false;
-
-  constructor(private calendarioService: CalendarioService) {}
+  constructor(
+    private calendarioService: CalendarioService,
+    private authService: AuthService,
+    private usuarioService: UsuarioService
+  ) {}
 
   ngOnInit(): void {
-    this.cargarDatosIniciales();
+    console.log('🔄 Inicializando CalendarioComponent...');
+    this.actualizarNombreMes();
+    this.cargarDatos();
   }
 
-  private cargarDatosIniciales(): void {
+  ngOnDestroy(): void {
+    console.log('🛑 Destruyendo CalendarioComponent...');
+    this.subscriptions.unsubscribe();
+  }
+
+  // ========== CARGA DE DATOS ==========
+  private cargarDatos(): void {
     this.cargando = true;
 
-    // Cargar eventos del mes actual
-    this.cargarEventosPorMes();
-    console.log(this.eventos);
-    // Cargar estadísticas
-    this.cargarEstadisticas();
-    console.log(this.estadisticas);
+    const sub = this.authService.getUsuarioId().pipe(
+      switchMap(usuarioId => {
+        this.usuarioId = usuarioId;
+        console.log('👤 Usuario ID obtenido:', usuarioId);
 
-    // Cargar tipos y categorías
-    this.cargarTiposYCategorias();
-    console.log(this.tiposEvento);
-    console.log(this.categoriasEvento);
-  }
-
-  cargarEventosPorMes(): void {
-    this.calendarioService.obtenerEventosPorMes(this.mesActual + 1, this.anioActual)
-      .subscribe({
-        next: (eventos) => {
-          this.eventos = eventos;
-          this.generarCalendario();
-          this.cargando = false;
-        },
-        error: (error) => {
-          console.error('Error al cargar eventos:', error);
-          this.cargando = false;
+        if (!usuarioId) {
+          console.error('❌ No se pudo obtener el ID del usuario');
+          return of({ eventos: [], estadisticas: null, esAdmin: false });
         }
-      });
+
+        // Verificar si es admin
+        return this.usuarioService.esAdmin(usuarioId).pipe(
+          switchMap(esAdmin => {
+            this.esAdmin = esAdmin;
+            console.log('🔑 Usuario es admin:', esAdmin);
+
+            // Cargar eventos según el rol
+            const eventosObs = esAdmin
+              ? this.calendarioService.obtenerEventosPorMes(this.mes + 1, this.anio)
+              : this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio);
+
+            // Cargar estadísticas según el rol
+            const estadisticasObs = esAdmin
+              ? this.calendarioService.obtenerEstadisticas()
+              : this.calendarioService.obtenerEstadisticasUsuario(usuarioId);
+
+            // Combinar ambas peticiones
+            return eventosObs.pipe(
+              switchMap(eventos =>
+                estadisticasObs.pipe(
+                  switchMap(estadisticas =>
+                    of({ eventos, estadisticas, esAdmin })
+                  )
+                )
+              )
+            );
+          }),
+          catchError(error => {
+            console.error('❌ Error al verificar rol de admin:', error);
+            // Si falla la verificación de admin, intentar cargar solo los eventos del usuario
+            return this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio).pipe(
+              switchMap(eventos =>
+                this.calendarioService.obtenerEstadisticasUsuario(usuarioId).pipe(
+                  switchMap(estadisticas =>
+                    of({ eventos, estadisticas, esAdmin: false })
+                  )
+                )
+              ),
+              catchError(() => of({ eventos: [], estadisticas: null, esAdmin: false }))
+            );
+          })
+        );
+      }),
+      catchError(error => {
+        console.error('❌ Error al obtener ID de usuario:', error);
+        return of({ eventos: [], estadisticas: null, esAdmin: false });
+      }),
+      finalize(() => {
+        this.cargando = false;
+        console.log('✅ Carga de datos finalizada');
+      })
+    ).subscribe({
+      next: ({ eventos, estadisticas, esAdmin }) => {
+        this.eventos = eventos;
+        this.estadisticas = estadisticas;
+        this.esAdmin = esAdmin;
+        this.generarCalendario();
+        console.log('✅ Datos cargados:', {
+          eventosCount: eventos.length,
+          estadisticas,
+          esAdmin
+        });
+      },
+      error: (error) => {
+        console.error('❌ Error en la carga de datos:', error);
+      }
+    });
+
+    this.subscriptions.add(sub);
   }
 
-  cargarEstadisticas(): void {
-    this.calendarioService.obtenerEstadisticas()
-      .subscribe({
-        next: (estadisticas) => {
-          this.estadisticas = estadisticas;
-        },
-        error: (error) => {
-          console.error('Error al cargar estadísticas:', error);
-        }
-      });
-  }
-
-  cargarTiposYCategorias(): void {
-    this.calendarioService.obtenerTiposEvento()
-      .subscribe({
-        next: (tipos) => {
-          this.tiposEvento = tipos;
-        },
-        error: (error) => {
-          console.error('Error al cargar tipos de evento:', error);
-        }
-      });
-
-    this.calendarioService.obtenerCategoriasEvento()
-      .subscribe({
-        next: (categorias) => {
-          this.categoriasEvento = categorias;
-        },
-        error: (error) => {
-          console.error('Error al cargar categorías de evento:', error);
-        }
-      });
-  }
-
-  get nombreMes(): string {
-    return this.meses[this.mesActual];
-  }
-
-  get anio(): number {
-    return this.anioActual;
-  }
-
-  generarCalendario(): void {
-    const primerDia = new Date(this.anioActual, this.mesActual, 1);
-    const ultimoDia = new Date(this.anioActual, this.mesActual + 1, 0);
-    const primerDiaSemana = primerDia.getDay();
-    const diasEnMes = ultimoDia.getDate();
+  // ========== GENERACIÓN DEL CALENDARIO ==========
+  private generarCalendario(): void {
+    const primerDiaMes = new Date(this.anio, this.mes, 1);
+    const ultimoDiaMes = new Date(this.anio, this.mes + 1, 0);
+    const primerDiaSemana = primerDiaMes.getDay();
+    const diasEnMes = ultimoDiaMes.getDate();
 
     this.calendarDays = [];
 
     // Días del mes anterior
-    const mesAnterior = new Date(this.anioActual, this.mesActual, 0);
+    const diasMesAnterior = new Date(this.anio, this.mes, 0).getDate();
     for (let i = primerDiaSemana - 1; i >= 0; i--) {
-      const dia = mesAnterior.getDate() - i;
-      const fecha = new Date(this.anioActual, this.mesActual - 1, dia);
-
+      const dia = diasMesAnterior - i;
+      const fecha = new Date(this.anio, this.mes - 1, dia);
       this.calendarDays.push({
         dia,
+        fecha,
         esOtroMes: true,
         esHoy: false,
-        esFeriado: false,
-        fecha,
-        eventos: this.obtenerEventosPorFecha(fecha)
+        eventos: []
       });
     }
 
     // Días del mes actual
     for (let dia = 1; dia <= diasEnMes; dia++) {
-      const fecha = new Date(this.anioActual, this.mesActual, dia);
-      const esHoy = this.esFechaHoy(fecha);
+      const fecha = new Date(this.anio, this.mes, dia);
+      const esHoy = this.esHoy(fecha);
+      const eventos = this.obtenerEventosPorFecha(fecha);
 
       this.calendarDays.push({
         dia,
+        fecha,
         esOtroMes: false,
         esHoy,
-        esFeriado: false,
-        fecha,
-        eventos: this.obtenerEventosPorFecha(fecha)
+        eventos
       });
     }
 
-    // Días del mes siguiente para completar la grilla
-    const celdasRestantes = 42 - this.calendarDays.length;
-    for (let dia = 1; dia <= celdasRestantes; dia++) {
-      const fecha = new Date(this.anioActual, this.mesActual + 1, dia);
-
+    // Días del mes siguiente
+    const diasRestantes = 42 - this.calendarDays.length;
+    for (let dia = 1; dia <= diasRestantes; dia++) {
+      const fecha = new Date(this.anio, this.mes + 1, dia);
       this.calendarDays.push({
         dia,
+        fecha,
         esOtroMes: true,
         esHoy: false,
-        esFeriado: false,
-        fecha,
-        eventos: this.obtenerEventosPorFecha(fecha)
+        eventos: []
       });
     }
   }
 
-  obtenerEventosPorFecha(fecha: Date): EventoDTO[] {
-    const fechaStr = fecha.toISOString().split('T')[0];
-    return this.eventos.filter(evento => evento.fecha === fechaStr);
+  private obtenerEventosPorFecha(fecha: Date): EventoDTO[] {
+    return this.eventos.filter(evento => {
+      // Crear fecha sin considerar la hora, solo año-mes-día
+      const fechaEvento = new Date(evento.fecha + 'T00:00:00');
+      const fechaLocal = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+
+      return (
+        fechaEvento.getDate() === fechaLocal.getDate() &&
+        fechaEvento.getMonth() === fechaLocal.getMonth() &&
+        fechaEvento.getFullYear() === fechaLocal.getFullYear()
+      );
+    });
   }
 
-  esFechaHoy(fecha: Date): boolean {
+
+  private esHoy(fecha: Date): boolean {
     const hoy = new Date();
-    return fecha.getDate() === hoy.getDate() &&
+    return (
+      fecha.getDate() === hoy.getDate() &&
       fecha.getMonth() === hoy.getMonth() &&
-      fecha.getFullYear() === hoy.getFullYear();
+      fecha.getFullYear() === hoy.getFullYear()
+    );
   }
 
+  // ========== NAVEGACIÓN DEL CALENDARIO ==========
   mesAnterior(): void {
-    if (this.mesActual === 0) {
-      this.mesActual = 11;
-      this.anioActual--;
+    if (this.mes === 0) {
+      this.mes = 11;
+      this.anio--;
     } else {
-      this.mesActual--;
+      this.mes--;
     }
-    this.cargarEventosPorMes();
+    this.actualizarNombreMes();
+    this.cargarDatos();
   }
 
   mesSiguiente(): void {
-    if (this.mesActual === 11) {
-      this.mesActual = 0;
-      this.anioActual++;
+    if (this.mes === 11) {
+      this.mes = 0;
+      this.anio++;
     } else {
-      this.mesActual++;
+      this.mes++;
     }
-    this.cargarEventosPorMes();
+    this.actualizarNombreMes();
+    this.cargarDatos();
   }
 
   irHoy(): void {
-    const hoy = new Date();
-    this.mesActual = hoy.getMonth();
-    this.anioActual = hoy.getFullYear();
-    this.cargarEventosPorMes();
+    this.fechaActual = new Date();
+    this.mes = this.fechaActual.getMonth();
+    this.anio = this.fechaActual.getFullYear();
+    this.actualizarNombreMes();
+    this.cargarDatos();
   }
 
+  private actualizarNombreMes(): void {
+    const meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    this.nombreMes = meses[this.mes];
+  }
+
+  // ========== GESTIÓN DE EVENTOS ==========
   seleccionarEvento(evento: EventoDTO): void {
     this.eventoSeleccionado = evento;
     this.mostrarDetalles = true;
@@ -243,17 +282,12 @@ export class CalendarioComponent implements OnInit {
 
   abrirModalNuevoEvento(): void {
     this.editandoEvento = false;
-    this.eventoEditandoId = null;
+    this.nuevoEvento = this.inicializarNuevoEvento();
     this.mostrarModalNuevoEvento = true;
-    const hoy = new Date();
-    this.nuevoEvento.fecha = hoy.toISOString().split('T')[0];
   }
 
   abrirModalEditarEvento(evento: EventoDTO): void {
     this.editandoEvento = true;
-    this.eventoEditandoId = evento.id;
-    this.mostrarModalNuevoEvento = true;
-
     this.nuevoEvento = {
       titulo: evento.titulo,
       descripcion: evento.descripcion || '',
@@ -262,161 +296,141 @@ export class CalendarioComponent implements OnInit {
       tipo: evento.tipo,
       categoria: evento.categoria,
       prioridad: evento.prioridad,
+      usuarioId: evento.usuarioId,
       empresaId: evento.empresaId,
-      tramiteId: evento.tramiteId,
-      documentoId: evento.documentoId
+      tramiteId: evento.tramiteId
     };
+    this.mostrarModalNuevoEvento = true;
+    this.cerrarDetalles();
   }
 
   cerrarModalNuevoEvento(): void {
     this.mostrarModalNuevoEvento = false;
-    this.resetearFormulario();
+    this.editandoEvento = false;
+    this.nuevoEvento = this.inicializarNuevoEvento();
   }
 
-  resetearFormulario(): void {
-    this.nuevoEvento = {
+  guardarEvento(): void {
+    if (!this.nuevoEvento.titulo || !this.nuevoEvento.fecha) {
+      alert('Por favor completa los campos requeridos');
+      return;
+    }
+
+    this.cargando = true;
+    const operacion = this.editandoEvento && this.eventoSeleccionado
+      ? this.calendarioService.actualizarEvento(this.eventoSeleccionado.id, this.nuevoEvento)
+      : this.calendarioService.crearEvento(this.nuevoEvento);
+
+    const sub = operacion.pipe(
+      finalize(() => this.cargando = false)
+    ).subscribe({
+      next: () => {
+        console.log('✅ Evento guardado exitosamente');
+        this.cerrarModalNuevoEvento();
+        this.cargarDatos();
+      },
+      error: (error) => {
+        console.error('❌ Error al guardar evento:', error);
+        alert('Error al guardar el evento. Intenta nuevamente.');
+      }
+    });
+
+    this.subscriptions.add(sub);
+  }
+
+  eliminarEvento(evento: EventoDTO): void {
+    if (!confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+      return;
+    }
+
+    this.cargando = true;
+    const sub = this.calendarioService.eliminarEvento(evento.id).pipe(
+      finalize(() => this.cargando = false)
+    ).subscribe({
+      next: () => {
+        console.log('✅ Evento eliminado exitosamente');
+        this.cerrarDetalles();
+        this.cargarDatos();
+      },
+      error: (error) => {
+        console.error('❌ Error al eliminar evento:', error);
+        alert('Error al eliminar el evento. Intenta nuevamente.');
+      }
+    });
+
+    this.subscriptions.add(sub);
+  }
+
+  marcarComoCompletado(evento: EventoDTO): void {
+    this.cargando = true;
+    const sub = this.calendarioService.marcarComoCompletado(evento.id).pipe(
+      finalize(() => this.cargando = false)
+    ).subscribe({
+      next: () => {
+        console.log('✅ Evento marcado como completado');
+        this.cerrarDetalles();
+        this.cargarDatos();
+      },
+      error: (error) => {
+        console.error('❌ Error al completar evento:', error);
+        alert('Error al completar el evento. Intenta nuevamente.');
+      }
+    });
+
+    this.subscriptions.add(sub);
+  }
+
+  mostrarTodosEventosDia(eventos: EventoDTO[]): void {
+    this.eventosDiaSeleccionado = eventos;
+    this.mostrarModalEventosDia = true;
+  }
+
+  cerrarModalEventosDia(): void {
+    this.mostrarModalEventosDia = false;
+    this.eventosDiaSeleccionado = [];
+  }
+
+  // ========== HELPERS ==========
+  private inicializarNuevoEvento(): CrearEventoDTO {
+    return {
       titulo: '',
       descripcion: '',
       fecha: '',
       hora: '',
       tipo: 'RECORDATORIO',
       categoria: 'TRAMITE',
-      prioridad: 'MEDIA'
+      prioridad: 'MEDIA',
+      usuarioId: this.usuarioId || 0,
+      empresaId: undefined,
+      tramiteId: undefined
     };
-    this.editandoEvento = false;
-    this.eventoEditandoId = null;
-  }
-
-  guardarEvento(): void {
-    if (!this.nuevoEvento.titulo || !this.nuevoEvento.fecha || !this.nuevoEvento.tipo) {
-      return;
-    }
-
-    this.cargando = true;
-
-    if (this.editandoEvento && this.eventoEditandoId) {
-      // Actualizar evento existente
-      this.calendarioService.actualizarEvento(this.eventoEditandoId, this.nuevoEvento)
-        .subscribe({
-          next: () => {
-            this.cargarEventosPorMes();
-            this.cargarEstadisticas();
-            this.cerrarModalNuevoEvento();
-          },
-          error: (error) => {
-            console.error('Error al actualizar evento:', error);
-            this.cargando = false;
-          }
-        });
-    } else {
-      // Crear nuevo evento
-      this.calendarioService.crearEvento(this.nuevoEvento)
-        .subscribe({
-          next: () => {
-            this.cargarEventosPorMes();
-            this.cargarEstadisticas();
-            this.cerrarModalNuevoEvento();
-          },
-          error: (error) => {
-            console.error('Error al crear evento:', error);
-            this.cargando = false;
-          }
-        });
-    }
-  }
-
-  eliminarEvento(evento: EventoDTO): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
-      this.calendarioService.eliminarEvento(evento.id)
-        .subscribe({
-          next: () => {
-            this.cargarEventosPorMes();
-            this.cargarEstadisticas();
-            this.cerrarDetalles();
-          },
-          error: (error) => {
-            console.error('Error al eliminar evento:', error);
-          }
-        });
-    }
-  }
-
-  marcarComoCompletado(evento: EventoDTO): void {
-    this.calendarioService.marcarComoCompletado(evento.id)
-      .subscribe({
-        next: () => {
-          this.cargarEventosPorMes();
-          this.cargarEstadisticas();
-          this.cerrarDetalles();
-        },
-        error: (error) => {
-          console.error('Error al marcar evento como completado:', error);
-        }
-      });
   }
 
   obtenerClaseEvento(evento: EventoDTO): string {
-    let claseBase = 'evento-item';
+    const clases: string[] = [];
 
-    switch (evento.tipo) {
-      case 'COMPLETADO':
-        claseBase += ' evento-completado';
-        break;
-      case 'RECORDATORIO':
-        claseBase += ' evento-recordatorio';
-        break;
-      case 'VENCIMIENTO':
-      case 'PLAZO_FINAL':
-        claseBase += ' evento-critico';
-        if (evento.prioridad === 'ALTA') {
-          claseBase += ' prioridad-critica';
-        }
-        break;
-      default:
-        claseBase += ' evento-recordatorio';
+    if (evento.estado === 'COMPLETADO') {
+      clases.push('evento-completado');
+    } else if (evento.tipo === 'RECORDATORIO') {
+      clases.push('evento-recordatorio');
+    } else if (evento.prioridad === 'ALTA' || evento.tipo === 'PLAZO_FINAL') {
+      clases.push('evento-critico');
+      if (evento.prioridad === 'ALTA') {
+        clases.push('prioridad-critica');
+      }
     }
 
-    return claseBase;
+    return clases.join(' ');
   }
 
   obtenerIconoEvento(tipo: string): string {
-    switch (tipo) {
-      case 'RECORDATORIO':
-        return '🔔';
-      case 'VENCIMIENTO':
-        return '⏰';
-      case 'RENOVACION':
-        return '🔄';
-      case 'PLAZO_FINAL':
-        return '⚠️';
-      case 'COMPLETADO':
-        return '✅';
-      default:
-        return '📅';
-    }
-  }
-
-  obtenerResumenEventos(): { total: number; criticos: number; completados: number } {
-    const eventosMesActual = this.eventos.filter(evento => {
-      const fechaEvento = new Date(evento.fecha);
-      return fechaEvento.getMonth() === this.mesActual &&
-        fechaEvento.getFullYear() === this.anioActual;
-    });
-
-    return {
-      total: eventosMesActual.length,
-      criticos: eventosMesActual.filter(e =>
-        e.tipo === 'VENCIMIENTO' || e.tipo === 'PLAZO_FINAL' || e.prioridad === 'ALTA'
-      ).length,
-      completados: eventosMesActual.filter(e => e.tipo === 'COMPLETADO').length
+    const iconos: Record<string, string> = {
+      'RECORDATORIO': '🔔',
+      'VENCIMIENTO': '⏰',
+      'RENOVACION': '🔄',
+      'PLAZO_FINAL': '⚠️',
+      'COMPLETADO': '✅'
     };
+    return iconos[tipo] || '📅';
   }
-
-  mostrarTodosEventosDia(eventos: EventoDTO[]): void {
-    // Por ahora muestra el primer evento, puedes implementar un modal con todos
-    if (eventos.length > 0) {
-      this.seleccionarEvento(eventos[0]);
-    }
-  }
-
 }
