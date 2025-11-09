@@ -1,18 +1,9 @@
 export interface DocumentoDto {
-  idDocumento: number;
-  nombre: string;
-  version: string;
-  tipo: string;
-  urlNube: string;
-  idTramite: number;
-  aprobado: boolean;
-  comentarios: string;
-  // Propiedades adicionales para el frontend
-  archivo?: File;
-  estado?: 'pendiente' | 'completado' | 'error';
-  obligatorio?: boolean;
-  tamano?: string; // Cambié 'tamaño' por 'tamano' para evitar problemas con ñ
-  fechaSubida?: Date;
+  id: number;
+  bucketName: string;
+  objectName: string;
+  contentType: string;
+  uploadedAt: Date;
 }
 
 export interface DocumentoRequerido {

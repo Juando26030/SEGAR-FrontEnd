@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
-import { catchError, tap, delay } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, BehaviorSubject, throwError, of, from } from 'rxjs';
+import { catchError, tap, delay, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 import {
@@ -17,6 +17,7 @@ import {
   ExportPdfResponseDto,
   ValidationError
 } from '../DTOs/document-instance.dto';
+import { Producto } from '../DTOs/solicitud.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -833,5 +834,82 @@ export class DocumentService {
   private handleError(error: any): Observable<never> {
     console.error('Error en DocumentService:', error);
     return throwError(() => new Error(error.message || 'Error en el servicio de documentos'));
+  }
+
+  cargarDocumento(docId: string, file: File, token: string, producto: Producto) {
+
+    console.log('🚀 Iniciando carga de documento:', { docId, file, producto });
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const payload = this.decodeToken(token);
+    const username = payload?.preferred_username;
+    if (!username) {
+      console.error('❌ No se pudo obtener el username del token');
+      return of(null);
+    }
+
+    // 🚀 Comenzamos el flujo de peticiones
+    return this.http.get<any>(`${this.apiUrl}/usuarios/username/${username}`, { headers }).pipe(
+
+      // 2️⃣ Con el id del usuario, pedimos su empresa
+      switchMap((usuario) => {
+        const usuarioId = usuario.id;
+        console.log(`🔑 Usuario ID obtenido: ${usuarioId}`);
+        return this.http.get<any>(`${this.apiUrl}/usuarios/${usuarioId}/empresa`, { headers });
+      }),
+
+      // 3️⃣ Con los datos de la empresa, pedimos la signed URL
+      switchMap((empresa) => {
+        const requestBody = {
+          bucketName: 'segar-documents',
+          objectName: `${empresa.razonSocial}/${producto.nombre}/${docId}/${file.name}`,
+          contentType: file.type
+        };
+        console.log('📄 Solicitando signed URL con body:', requestBody);
+        return this.http.post(`${this.apiUrl}/documentos/signed-url`, requestBody, {
+          headers,
+          responseType: 'text'
+        });
+      }),
+
+      // 4️⃣ Subir el archivo a GCS con la signed URL
+      switchMap((signedUrl: string) =>
+        from(
+          fetch(signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file
+          }).then((response) => {
+            if (!response.ok) throw new Error('❌ Error al subir el archivo a GCS');
+            return file.name;
+          })
+        )
+      ),
+
+      // ✅ Éxito
+      tap((nombreArchivo) => {
+        console.log(`✅ Archivo ${nombreArchivo} subido correctamente`);
+      }),
+
+      // ❌ Error global
+      catchError((error) => {
+        console.error('❌ Error en la cadena de peticiones:', error);
+        return of(null);
+      })
+    );
+  }
+
+  private decodeToken(token: string): any {
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const payloadDecoded = atob(payloadBase64);
+      return JSON.parse(payloadDecoded);
+    } catch {
+      console.error('Error al decodificar el token');
+      return null;
+    }
   }
 }
