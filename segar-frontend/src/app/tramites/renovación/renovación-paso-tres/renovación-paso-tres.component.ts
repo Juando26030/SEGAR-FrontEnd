@@ -81,38 +81,6 @@ interface TramiteResponse {
   // Agrega otras propiedades si el backend las devuelve
 }
 
-// Nuevas interfaces para renovación
-interface TramiteCompletado {
-  id: number;
-  producto: any;
-  registroSanitario: string;
-  fechaExpedicion: Date;
-  fechaVencimiento: Date;
-  clasificacion: ClasificacionProducto;
-  documentosOriginales: any[];
-}
-
-// Nuevas interfaces para reglas de renovación
-interface CampoDocumento {
-  nombre: string;
-  bloqueado: boolean;
-  razon?: string;
-  valorOriginal?: any;
-  tooltip?: string;
-}
-
-interface CambioRealizado {
-  campo: string;
-  anterior: any;
-  nuevo: any;
-}
-
-interface ValidationResult {
-  valido: boolean;
-  errores: string[];
-  cambiosPermitidos: CambioRealizado[];
-}
-
 @Component({
   standalone: true,
   selector: 'app-renovación-paso-tres',
@@ -141,41 +109,98 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
   productos: any[] = [];
   productoSeleccionado: any = '';
 
-  // Propiedades para renovación
-  tramitesDisponiblesParaRenovar: TramiteCompletado[] = [];
-  tramiteARenovar: TramiteCompletado | null = null;
-  cambiosRealizados: CambioRealizado[] = [];
-  mostrarModalConfirmacion: boolean = false;
+  constructor(
+    private tramiteService: TramiteInvimaService,
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router,
+    private location: Location,
+    private productoService: ProductoService,
+    private usuarioService: UsuarioService
+  ) {}
 
-  // Propiedades para validación de renovación
-  tieneCambiosProhibidos: boolean = false;
-  documentosSoporteCambios: boolean = false;
-  certificadosActualizados: boolean = false;
+  ngOnInit() {
+    this.obtenerProductos();
 
-  // Reglas de renovación
-  readonly reglasRenovacion = {
-    camposBloqueados: [
-      'formula_ingredientes',
-      'composicion_nutricional',
-      'proceso_fabricacion',
-      'marca_comercial',
-      'nombre_producto',
-      'categoria_producto',
-      'fabricante',
-      'pais_origen',
-      'envase_tipo',
-      'presentacion'
-    ],
-    camposModificables: [
-      'direccion_titular',
-      'representante_legal',
-      'razon_social',
-      'diseno_etiqueta',
-      'certificado_bpm',
-      'certificado_iso',
-      'responsable_tecnico'
-    ]
+    // Configurar el state para la navegación hacia atrás
+    // Cuando el usuario presiona la flecha atrás, debe ir al tab de documentación
+    window.history.replaceState(
+      { navigationId: 'paso-3', previousTab: 'documentacion' },
+      '',
+      window.location.href
+    );
+
+    // Escuchar el evento popstate (flecha atrás del navegador)
+    window.addEventListener('popstate', this.handlePopState);
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('popstate', this.handlePopState);
+  }
+
+  handlePopState = (event: PopStateEvent) => {
+    // Si el usuario presiona la flecha atrás, cambiar al tab de documentación
+    if (event.state && event.state.previousTab) {
+      this.setActiveTab(event.state.previousTab);
+      // Prevenir la navegación por defecto
+      window.history.pushState(
+        { navigationId: 'paso-3', previousTab: 'documentacion' },
+        '',
+        window.location.href
+      );
+    } else if (this.activeTab === 'radicacion') {
+      // Si está en radicación, ir a documentación
+      this.setActiveTab('documentacion');
+      window.history.pushState(
+        { navigationId: 'paso-3', previousTab: 'documentacion' },
+        '',
+        window.location.href
+      );
+    }
   };
+
+
+  obtenerProductos(): void {
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId !== null) {
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+            next: (empresa) => {
+              const empresaId = empresa.id;
+              // ✅ CAMBIO: Usar el endpoint de productos con registro vigente
+              this.productoService.getProductosConRegistroVigente(empresaId).subscribe({
+                next: (productos) => {
+                  this.productos = productos;
+                  console.log('📦 Productos con registro vigente:', productos);
+                },
+                error: (err) => {
+                  console.error('❌ Error al obtener productos con registro vigente', err);
+                  alert('No se pudieron cargar los productos con registro sanitario vigente.');
+                }
+              });
+            },
+            error: (err) => {
+              console.error('❌ Error al obtener empresa del usuario', err);
+              alert('No se pudo obtener la información de la empresa.');
+            }
+          });
+        } else {
+          console.error('❌ Usuario ID es null');
+          alert('Error: No se pudo obtener el ID del usuario.');
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error al obtener usuario ID', err);
+        alert('Error al obtener el ID del usuario.');
+      }
+    });
+  }
+
+
+
+  onProductoSeleccionado(): void {
+    console.log('Producto seleccionado:', this.productoSeleccionado);
+  }
 
   readonly tabs: Tab[] = [
     { id: 'clasificacion', label: 'Clasificación del Producto' },
@@ -345,142 +370,6 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(
-    private tramiteService: TramiteInvimaService,
-    private http: HttpClient,
-    private authService: AuthService,
-    private router: Router,
-    private location: Location,
-    private productoService: ProductoService,
-    private usuarioService: UsuarioService
-  ) {}
-
-  ngOnInit() {
-    // Determinar si es renovación basado en la ruta o contexto
-    this.currentTramiteType = this.determinarTipoTramite();
-
-    if (this.currentTramiteType === 'RENOVACION') {
-      this.obtenerTramitesRenovables();
-    } else {
-      this.obtenerProductos();
-    }
-
-    // Configurar el state para la navegación hacia atrás
-    // Cuando el usuario presiona la flecha atrás, debe ir al tab de documentación
-    window.history.replaceState(
-      { navigationId: 'paso-3', previousTab: 'documentacion' },
-      '',
-      window.location.href
-    );
-
-    // Escuchar el evento popstate (flecha atrás del navegador)
-    window.addEventListener('popstate', this.handlePopState);
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('popstate', this.handlePopState);
-  };
-
-  handlePopState = (event: PopStateEvent) => {
-    // Si el usuario presiona la flecha atrás, cambiar al tab de documentación
-    if (event.state && event.state.previousTab) {
-      this.setActiveTab(event.state.previousTab);
-      // Prevenir la navegación por defecto
-      window.history.pushState(
-        { navigationId: 'paso-3', previousTab: 'documentacion' },
-        '',
-        window.location.href
-      );
-    } else if (this.activeTab === 'radicacion') {
-      // Si está en radicación, ir a documentación
-      this.setActiveTab('documentacion');
-      window.history.pushState(
-        { navigationId: 'paso-3', previousTab: 'documentacion' },
-        '',
-        window.location.href
-      );
-    }
-  };
-
-  private loadTramitesDisponibles(): void {
-    // TODO: Obtener el ID del trámite desde la ruta o contexto
-    const tramiteId = this.tramiteId;
-
-    // TODO: Implementar método getTramiteById en TramiteInvimaService
-    // this.tramiteService.getTramiteById(tramiteId).subscribe({
-    //   next: (tramite: TramiteCompletado) => {
-    //     this.tramiteARenovar = tramite;
-    //     this.populateFormsWithTramiteData(tramite);
-    //   },
-    //   error: (error: any) => {
-    //     console.error('Error al cargar el trámite:', error);
-    //     alert('Error al cargar el trámite. Por favor intente nuevamente más tarde.');
-    //   }
-    // });
-  }
-
-  private populateFormsWithTramiteData(tramite: TramiteCompletado): void {
-    // TODO: Mapear los datos del trámite a los formularios correspondientes
-    this.solicitudForm = {
-      procedureType: tramite.clasificacion.nivel_riesgo === 'alto' ? 'registro-sanitario' : tramite.clasificacion.nivel_riesgo === 'medio' ? 'permiso-sanitario' : 'notificacion-sanitaria',
-      procedureMode: 'ordinario',
-      productName: tramite.producto.nombre_producto,
-      brandName: tramite.producto.marca_comercial,
-      presentation: tramite.producto.presentacion,
-      manufacturer: {
-        name: tramite.producto.fabricante.nombre,
-        address: tramite.producto.fabricante.direccion,
-        city: tramite.producto.fabricante.ciudad,
-        department: tramite.producto.fabricante.departamento,
-        country: tramite.producto.fabricante.pais || 'Colombia'
-      },
-      isImported: tramite.producto.es_importado,
-      importer: tramite.producto.es_importado ? {
-        name: tramite.producto.importador.nombre,
-        address: tramite.producto.importador.direccion,
-        city: tramite.producto.importador.ciudad,
-        department: tramite.producto.importador.departamento
-      } : {
-        name: '',
-        address: '',
-        city: '',
-        department: ''
-      },
-      originCountryRegistration: tramite.producto.registroSanitarioOrigen || '',
-      ingredients: tramite.producto.ingredientes,
-      additives: tramite.producto.aditivos,
-      shelfLife: tramite.producto.vida_util || 0,
-      shelfLifeUnit: 'months',
-      storageConditions: tramite.producto.condiciones_almacenamiento,
-      targetPopulationDescription: tramite.producto.poblacion_objetivo_descripcion,
-      hasHealthClaims: tramite.producto.tiene_reclamos_salud,
-      healthClaimsDescription: tramite.producto.reclamos_salud || ''
-    };
-
-    this.classificationForm = {
-      productCategory: tramite.clasificacion.categoria,
-      riskLevel: tramite.clasificacion.nivel_riesgo,
-      targetPopulation: tramite.clasificacion.poblacion_objetivo,
-      processingType: tramite.clasificacion.procesamiento
-    };
-
-    this.resultadoClasificacion = {
-      tramite: tramite.clasificacion.nivel_riesgo === 'alto' ? 'RSA' : tramite.clasificacion.nivel_riesgo === 'medio' ? 'PSA' : 'NSO',
-      tramite_descripcion: '',
-      documentos: [],
-      tiempo_estimado: '',
-      costo_estimado: '',
-      advertencias: []
-    };
-
-    // TODO: Cargar documentos originales si existen
-    this.todosDocumentosCompletos = false; // O cambiar a true si ya vienen completos
-  }
-
-  onProductoSeleccionado(): void {
-    console.log('Producto seleccionado:', this.productoSeleccionado);
-  }
-
   /**
    * Método para validar si una pestaña está bloqueada
    */
@@ -593,9 +482,9 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
     // REGLA 1: POBLACIÓN VULNERABLE → ALTO (RSA) AUTOMÁTICO
     // ============================================
     const poblacionesVulnerables = [
-      'infantiles', 'alimentos infantiles', 'formula infantil',
-      'conservas', 'comidas listas', 'comidas-listas',
-      'esterilizados', 'productos esterilizados'
+      'infantil', 'bebés', 'bebes', 'niños', 'ninos',
+      'gestantes', 'gestante', 'lactantes', 'lactante',
+      'adultos mayores', 'adulto mayor', 'tercera-edad', 'especial'
     ];
 
     if (poblacionesVulnerables.some(pob => poblacion.includes(pob))) {
@@ -842,6 +731,56 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
     this.setActiveTab('documentacion');
   }
 
+  onRadicarSolicitud(): void {
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId !== null) {
+          console.log("📨 AQUI SE RADICA LA SOLICITUD");
+          console.log("🆔 ID del producto:", this.productoSeleccionado.id);
+          console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
+          console.log("👤 ID del usuario:", usuarioId);
+
+          const token = this.authService.getToken();
+          const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          });
+
+          const body = {
+            productoId: this.productoSeleccionado.id,
+            procedureType: this.resultadoClasificacion?.tramite_descripcion,
+            radicadoNumber: '',
+            usuarioId: usuarioId
+          };
+
+          const url = `${environment.apiUrl}/api/tramites/create`;
+
+          this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
+            next: (response: TramiteResponse) => {
+              console.log('✅ Trámite creado exitosamente:', response);
+              alert('✅ Trámite radicado correctamente.');
+              const tramiteId = response.id;
+              // Navegar al paso 4
+              this.router.navigate(['main/nuevo/registro/paso-2', tramiteId]);
+            },
+            error: (error) => {
+              console.error('❌ Error al radicar el trámite:', error);
+              alert('❌ Ocurrió un error al radicar el trámite.');
+            }
+          });
+        } else {
+          console.error('Usuario ID es null');
+          alert('Error: No se pudo obtener el ID del usuario.');
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener usuario ID', err);
+        alert('Error al obtener el ID del usuario.');
+      }
+    });
+  }
+
+
   isFormCompleteForRadication(): boolean {
     return this.isClassificationComplete() && this.isSolicitudFormValid();
   }
@@ -930,324 +869,5 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
 
   trackByNextStep(index: number, step: NextStep): string {
     return step.title;
-  }
-
-  /**
-   * Determina el tipo de trámite basado en la ruta actual
-   */
-  private determinarTipoTramite(): 'REGISTRO' | 'RENOVACION' | 'MODIFICACION' {
-    const currentUrl = this.router.url;
-    if (currentUrl.includes('renovacion')) {
-      return 'RENOVACION';
-    } else if (currentUrl.includes('modificacion')) {
-      return 'MODIFICACION';
-    }
-    return 'REGISTRO';
-  }
-
-  /**
-   * Obtiene los trámites completados disponibles para renovación
-   */
-  obtenerTramitesRenovables(): void {
-    this.authService.getUsuarioId().subscribe({
-      next: (usuarioId) => {
-        if (usuarioId !== null) {
-          // TODO: Implementar endpoint en backend
-          // GET /api/tramites/renovables/:usuarioId
-          const url = `${environment.apiUrl}/api/tramites/renovables/${usuarioId}`;
-
-          this.http.get<TramiteCompletado[]>(url).subscribe({
-            next: (tramites) => {
-              // Filtrar solo trámites no vencidos
-              this.tramitesDisponiblesParaRenovar = tramites.filter(tramite =>
-                new Date(tramite.fechaVencimiento) > new Date()
-              );
-            },
-            error: (err) => {
-              console.error('Error al obtener trámites renovables', err);
-              // Por ahora, mostrar mensaje de que no hay trámites disponibles
-              alert('No se encontraron trámites disponibles para renovación. Complete primero un registro sanitario.');
-            }
-          });
-        }
-      },
-      error: (err) => {
-        console.error('Error al obtener usuario ID', err);
-      }
-    });
-  }
-
-  /**
-   * Se ejecuta cuando se selecciona un trámite para renovar
-   */
-  onTramiteSeleccionado(): void {
-    if (this.tramiteARenovar) {
-      console.log('Trámite seleccionado para renovación:', this.tramiteARenovar);
-
-      // Cargar clasificación del trámite original
-      this.resultadoClasificacion = {
-        tramite: 'RSA',
-        tramite_descripcion: 'Renovación de Registro Sanitario',
-        documentos: [], // Los documentos se cargarán desde el componente documentos-dinamicos
-        tiempo_estimado: '60 días hábiles',
-        costo_estimado: '$500.000 COP',
-        advertencias: []
-      };
-
-      // Marcar clasificación como completa automáticamente
-      this.clasificacionCompleta = true;
-
-      // Mostrar información del trámite seleccionado
-      alert(`Trámite seleccionado: ${this.tramiteARenovar.producto.nombre}\nRegistro: ${this.tramiteARenovar.registroSanitario}\nVence: ${this.tramiteARenovar.fechaVencimiento.toLocaleDateString()}`);
-
-      // Ir al tab de documentación
-      this.setActiveTab('documentacion');
-    }
-  }
-
-  /**
-   * Valida cambios en renovación según reglas INVIMA
-   */
-  validarCambiosRenovacion(): ValidationResult {
-    const errores: string[] = [];
-    const cambiosPermitidos: CambioRealizado[] = [];
-
-    if (!this.tramiteARenovar) {
-      return { valido: false, errores: ['No hay trámite seleccionado'], cambiosPermitidos: [] };
-    }
-
-    // Validar que NO haya cambios en campos bloqueados
-    this.reglasRenovacion.camposBloqueados.forEach(campo => {
-      // TODO: Comparar valores actuales vs originales
-      // Por ahora, simular validación
-      const valorActual = this.getValorCampo(campo);
-      const valorOriginal = this.getValorOriginalCampo(campo);
-
-      if (valorActual !== valorOriginal) {
-        errores.push(`❌ No puede modificar: ${campo}`);
-      }
-    });
-
-    // Validar cambios administrativos requieren documentos
-    if (this.cambioRepresentanteLegal() && !this.certificadosActualizados) {
-      errores.push('⚠️ Cambio de representante requiere Certificado de Cámara de Comercio actualizado');
-    }
-
-    if (this.cambioDireccion() && !this.documentosSoporteCambios) {
-      errores.push('⚠️ Cambio de dirección requiere documento legal de cambio de domicilio');
-    }
-
-    return {
-      valido: errores.length === 0,
-      errores,
-      cambiosPermitidos
-    };
-  }
-
-  /**
-   * Detecta cambios prohibidos en tiempo real
-   */
-  detectarCambiosProhibidos(): void {
-    const cambiosProhibidos = [];
-
-    // Verificar cambios en fórmula
-    if (this.solicitudForm.ingredients !== this.tramiteARenovar?.clasificacion.categoria) {
-      cambiosProhibidos.push({
-        tipo: 'FORMULA',
-        mensaje: '🚫 Cambio en fórmula NO permitido en renovación',
-        accion: 'Debe solicitar Modificación Técnica por separado'
-      });
-    }
-
-    // Verificar cambios en fabricante
-    if (this.solicitudForm.manufacturer.name !== this.tramiteARenovar?.producto.fabricante) {
-      cambiosProhibidos.push({
-        tipo: 'FABRICANTE',
-        mensaje: '🚫 Cambio de fabricante NO permitido en renovación',
-        accion: 'Debe solicitar Modificación Técnica'
-      });
-    }
-
-    if (cambiosProhibidos.length > 0) {
-      this.mostrarModalAdvertencia(cambiosProhibidos);
-    }
-  }
-
-  /**
-   * Radica la renovación
-   */
-  radicarRenovacion(): void {
-    const validacion = this.validarCambiosRenovacion();
-
-    if (!validacion.valido) {
-      alert('Errores encontrados:\n' + validacion.errores.join('\n'));
-      return;
-    }
-
-    this.authService.getUsuarioId().subscribe({
-      next: (usuarioId) => {
-        if (usuarioId !== null && this.tramiteARenovar) {
-          const token = this.authService.getToken();
-          const headers = new HttpHeaders({
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          });
-
-          const body = {
-            tramiteOriginalId: this.tramiteARenovar.id,
-            tipoTramite: 'renovacion',
-            cambiosRealizados: this.cambiosRealizados,
-            usuarioId: usuarioId
-          };
-
-          const url = `${environment.apiUrl}/api/tramites/renovacion/radicar`;
-
-          this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
-            next: (response: TramiteResponse) => {
-              console.log('✅ Renovación radicada exitosamente:', response);
-              alert('✅ Renovación radicada correctamente.');
-              this.cerrarModal();
-              // Navegar a seguimiento
-              this.router.navigate(['/main/tramites/seguimiento', response.id]);
-            },
-            error: (error) => {
-              console.error('❌ Error al radicar renovación:', error);
-              alert('❌ Ocurrió un error al radicar la renovación.');
-            }
-          });
-        }
-      }
-    });
-  }
-
-  /**
-   * Cierra el modal de confirmación
-   */
-  cerrarModal(): void {
-    this.mostrarModalConfirmacion = false;
-  }
-
-  /**
-   * Muestra modal de advertencia para cambios prohibidos
-   */
-  private mostrarModalAdvertencia(cambios: any[]): void {
-    const mensaje = cambios.map(c => `${c.mensaje}\n${c.accion}`).join('\n\n');
-    alert('⚠️ CAMBIOS PROHIBIDOS DETECTADOS:\n\n' + mensaje);
-  }
-
-  /**
-   * Helpers para obtener valores de campos
-   */
-  private getValorCampo(campo: string): any {
-    // TODO: Implementar lógica para obtener valor actual del campo
-    return null;
-  }
-
-  private getValorOriginalCampo(campo: string): any {
-    // TODO: Implementar lógica para obtener valor original del campo
-    return null;
-  }
-
-  private cambioRepresentanteLegal(): boolean {
-    // TODO: Implementar lógica para detectar cambio de representante
-    return false;
-  }
-
-  private cambioDireccion(): boolean {
-    // TODO: Implementar lógica para detectar cambio de dirección
-    return false;
-  }
-
-  onRadicarSolicitud(): void {
-    if (this.currentTramiteType === 'RENOVACION') {
-      // Para renovación, mostrar modal de confirmación
-      this.detectarCambiosProhibidos();
-      this.mostrarModalConfirmacion = true;
-    } else {
-      // Para registro nuevo, radicar directamente
-      this.radicarSolicitudNormal();
-    }
-  }
-
-  private radicarSolicitudNormal(): void {
-    this.authService.getUsuarioId().subscribe({
-      next: (usuarioId) => {
-        if (usuarioId !== null) {
-          console.log("📨 AQUI SE RADICA LA SOLICITUD");
-          console.log("🆔 ID del producto:", this.productoSeleccionado.id);
-          console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
-          console.log("👤 ID del usuario:", usuarioId);
-
-          const token = this.authService.getToken();
-          const headers = new HttpHeaders({
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          });
-
-          const body = {
-            productoId: this.productoSeleccionado.id,
-            procedureType: this.resultadoClasificacion?.tramite_descripcion,
-            radicadoNumber: '',
-            usuarioId: usuarioId
-          };
-
-          const url = `${environment.apiUrl}/api/tramites/create`;
-
-          this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
-            next: (response: TramiteResponse) => {
-              console.log('✅ Trámite creado exitosamente:', response);
-              alert('✅ Trámite radicado correctamente.');
-              const tramiteId = response.id;
-              // Navegar al paso 4
-              this.router.navigate(['main/nuevo/registro/paso-2', tramiteId]);
-            },
-            error: (error) => {
-              console.error('❌ Error al radicar el trámite:', error);
-              alert('❌ Ocurrió un error al radicar el trámite.');
-            }
-          });
-        } else {
-          console.error('Usuario ID es null');
-          alert('Error: No se pudo obtener el ID del usuario.');
-        }
-      },
-      error: (err) => {
-        console.error('Error al obtener usuario ID', err);
-        alert('Error al obtener el ID del usuario.');
-      }
-    });
-  }
-
-  /**
-   * Obtiene productos disponibles para registro
-   */
-  obtenerProductos(): void {
-    this.authService.getUsuarioId().subscribe({
-      next: (usuarioId) => {
-        if (usuarioId !== null) {
-          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
-            next: (empresa) => {
-              const empresaId = empresa.id;
-              this.productoService.getProductosSinTramites(empresaId).subscribe({
-                next: (productos) => {
-                  this.productos = productos;
-                },
-                error: (err) => {
-                  console.error('Error al obtener productos sin trámites', err);
-                }
-              });
-            },
-            error: (err) => {
-              console.error('Error al obtener empresa del usuario', err);
-            }
-          });
-        } else {
-          console.error('Usuario ID es null');
-        }
-      },
-      error: (err) => {
-        console.error('Error al obtener usuario ID', err);
-      }
-    });
   }
 }
