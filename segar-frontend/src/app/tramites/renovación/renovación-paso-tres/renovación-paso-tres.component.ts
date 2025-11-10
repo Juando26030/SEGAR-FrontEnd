@@ -244,13 +244,28 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
    * Autollena el formulario con la clasificación existente del backend
    */
   private autoLlenarFormularioDesdeClasificacion(clasificacion: any): void {
-    // Mapear los campos del backend al formulario
-    this.classificationForm.productCategory = this.mapearCategoriaBackend(clasificacion.categoriaAlimento);
-    this.classificationForm.riskLevel = this.mapearRiesgoBackend(clasificacion.riesgoSanitario);
-    this.classificationForm.targetPopulation = this.mapearDestinoConsumo(clasificacion.destinoConsumo);
-    this.classificationForm.processingType = this.inferirProcesamientoDesdeClasificacion(clasificacion);
+    console.log('🔄 Mapeando clasificación del backend al formulario...');
+
+    // Mapear categoría (ej: "Lácteos y derivados" -> "lacteos")
+    this.classificationForm.productCategory = this.mapearCategoriaBackendAFormulario(clasificacion.categoria);
+
+    // Mapear nivel de riesgo (ej: "MEDIO" -> "medio")
+    this.classificationForm.riskLevel = this.mapearNivelRiesgoBackendAFormulario(clasificacion.nivelRiesgo);
+
+    // Mapear población objetivo (ej: "Población general adulta" -> "general")
+    this.classificationForm.targetPopulation = this.mapearPoblacionBackendAFormulario(clasificacion.poblacionObjetivo);
+
+    // Mapear procesamiento (ej: "Pasteurización" -> "pasteurizado")
+    this.classificationForm.processingType = this.mapearProcesamientoBackendAFormulario(clasificacion.procesamiento);
 
     this.solicitudForm.isImported = clasificacion.esImportado || false;
+
+    console.log('✅ Valores mapeados al formulario:', {
+      productCategory: this.classificationForm.productCategory,
+      riskLevel: this.classificationForm.riskLevel,
+      targetPopulation: this.classificationForm.targetPopulation,
+      processingType: this.classificationForm.processingType
+    });
 
     // Aplicar reglas de negocio automáticas
     this.aplicarReglasDeNegocio();
@@ -288,58 +303,213 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
 
   /**
    * Mapea la categoría del backend al valor del formulario
+   * Backend: "Lácteos y derivados", "Productos cárnicos", etc.
+   * Formulario: "lacteos", "carnicos", etc.
    */
-  private mapearCategoriaBackend(categoriaBackend: string): string {
+  private mapearCategoriaBackendAFormulario(categoriaBackend: string): string {
+    if (!categoriaBackend) return 'otros';
+
     const mapeo: Record<string, string> = {
-      'BEBIDAS': 'bebidas',
-      'LACTEOS': 'lacteos',
-      'CARNICOS': 'carnicos',
-      'PANIFICACION': 'panificacion',
-      'CONSERVAS': 'conservas',
-      'CONDIMENTOS': 'condimentos',
-      'SNACKS': 'snacks',
-      'CEREALES': 'cereales',
-      'ACEITES': 'aceites',
-      'INFANTILES': 'infantiles',
-      'COMIDAS_LISTAS': 'comidas-listas',
-      'OTROS': 'otros'
+      // Mapeos directos desde el backend
+      'Lácteos y derivados': 'lacteos',
+      'Lácteos': 'lacteos',
+      'Productos lácteos': 'lacteos',
+
+      'Productos cárnicos': 'carnicos',
+      'Cárnicos': 'carnicos',
+      'Cárnicos y derivados': 'carnicos',
+
+      'Bebidas': 'bebidas',
+      'Bebidas no alcohólicas': 'bebidas',
+
+      'Productos de panificación': 'panificacion',
+      'Panificación': 'panificacion',
+
+      'Conservas': 'conservas',
+      'Conservas alimenticias': 'conservas',
+
+      'Condimentos': 'condimentos',
+      'Condimentos y especias': 'condimentos',
+
+      'Snacks': 'snacks',
+      'Snacks y productos de confitería': 'snacks',
+
+      'Cereales': 'cereales',
+      'Cereales y derivados': 'cereales',
+
+      'Aceites': 'aceites',
+      'Aceites y grasas': 'aceites',
+
+      'Alimentos infantiles': 'infantiles',
+      'Infantiles': 'infantiles',
+
+      'Comidas listas': 'comidas-listas',
+      'Comidas preparadas': 'comidas-listas',
+
+      'Otros': 'otros',
+      'Otros alimentos procesados': 'otros'
     };
 
-    return mapeo[categoriaBackend] || 'otros';
+    // Buscar coincidencia exacta
+    if (mapeo[categoriaBackend]) {
+      return mapeo[categoriaBackend];
+    }
+
+    // Buscar coincidencia parcial (insensible a mayúsculas)
+    const categoriaLower = categoriaBackend.toLowerCase();
+    for (const [key, value] of Object.entries(mapeo)) {
+      if (key.toLowerCase() === categoriaLower) {
+        return value;
+      }
+    }
+
+    console.warn(`⚠️ Categoría no mapeada: "${categoriaBackend}", usando "otros"`);
+    return 'otros';
   }
 
   /**
-   * Mapea el riesgo sanitario del backend al valor del formulario
+   * Mapea el nivel de riesgo del backend al valor del formulario
+   * Backend: "ALTO", "MEDIO", "BAJO"
+   * Formulario: "alto", "medio", "bajo"
    */
-  private mapearRiesgoBackend(riesgoBackend: string): string {
-    const riesgo = riesgoBackend?.toLowerCase() || '';
-    if (riesgo.includes('alto') || riesgo === 'ALTO') return 'alto';
-    if (riesgo.includes('medio') || riesgo === 'MEDIO') return 'medio';
-    if (riesgo.includes('bajo') || riesgo === 'BAJO') return 'bajo';
-    return '';
+  private mapearNivelRiesgoBackendAFormulario(nivelRiesgo: string): string {
+    if (!nivelRiesgo) return '';
+
+    const riesgoUpper = nivelRiesgo.toUpperCase();
+
+    const mapeo: Record<string, string> = {
+      'ALTO': 'alto',
+      'MEDIO': 'medio',
+      'BAJO': 'bajo'
+    };
+
+    return mapeo[riesgoUpper] || '';
   }
 
   /**
-   * Mapea el destino de consumo a población objetivo
+   * Mapea la población objetivo del backend al valor del formulario
+   * Backend: "Población general adulta", "Niños", etc.
+   * Formulario: "general", "infantil", etc.
    */
-  private mapearDestinoConsumo(destinoConsumo: string): string {
-    const destino = destinoConsumo?.toLowerCase() || '';
+  private mapearPoblacionBackendAFormulario(poblacionObjetivo: string): string {
+    if (!poblacionObjetivo) return 'general';
 
-    if (destino.includes('infant')) return 'infantil';
-    if (destino.includes('gestant') || destino.includes('lactant')) return 'gestantes';
-    if (destino.includes('adulto') && destino.includes('mayor')) return 'adultos mayores';
-    if (destino.includes('deport')) return 'deportistas';
-    if (destino.includes('especial') || destino.includes('dieta')) return 'dietas especiales';
+    const poblacionLower = poblacionObjetivo.toLowerCase();
 
+    const mapeo: Record<string, string> = {
+      'población general adulta': 'general',
+      'población general': 'general',
+      'general': 'general',
+      'adultos': 'general',
+
+      'niños': 'infantil',
+      'infantil': 'infantil',
+      'bebés': 'infantil',
+      'alimentación infantil': 'infantil',
+      'lactantes': 'infantil',
+
+      'mujeres gestantes': 'gestantes',
+      'gestantes': 'gestantes',
+      'mujeres lactantes': 'gestantes',
+      'embarazadas': 'gestantes',
+
+      'adultos mayores': 'adultos mayores',
+      'tercera edad': 'adultos mayores',
+      'personas mayores': 'adultos mayores',
+
+      'deportistas': 'deportistas',
+      'atletas': 'deportistas',
+
+      'dietas especiales': 'dietas especiales',
+      'personas con necesidades especiales': 'dietas especiales',
+      'dietas médicas': 'dietas especiales'
+    };
+
+    // Buscar coincidencia exacta
+    if (mapeo[poblacionLower]) {
+      return mapeo[poblacionLower];
+    }
+
+    // Buscar coincidencia parcial
+    for (const [key, value] of Object.entries(mapeo)) {
+      if (poblacionLower.includes(key)) {
+        return value;
+      }
+    }
+
+    console.warn(`⚠️ Población objetivo no mapeada: "${poblacionObjetivo}", usando "general"`);
     return 'general';
   }
 
   /**
-   * Infiere el procesamiento desde la clasificación del backend
+   * Mapea el tipo de procesamiento del backend al valor del formulario
+   * Backend: "Pasteurización", "Esterilización", etc.
+   * Formulario: "pasteurizado", "esterilizado", etc.
    */
-  private inferirProcesamientoDesdeClasificacion(clasificacion: any): string {
-    if (clasificacion.requiereRefrigeracion) return 'refrigerado';
-    // Aquí se pueden agregar más lógicas según los campos disponibles
+  private mapearProcesamientoBackendAFormulario(procesamiento: string): string {
+    if (!procesamiento) return 'otro';
+
+    const procesamientoLower = procesamiento.toLowerCase();
+
+    const mapeo: Record<string, string> = {
+      // Procesamiento de alto riesgo
+      'esterilización': 'esterilizado',
+      'esterilizado': 'esterilizado',
+
+      'atmósfera modificada': 'atmósfera modificada',
+      'atmosfera modificada': 'atmósfera modificada',
+
+      'congelación': 'congelado',
+      'congelado': 'congelado',
+      'ultra congelado': 'congelado',
+
+      'envasado al vacío': 'vacio',
+      'vacío': 'vacio',
+      'al vacío': 'vacio',
+
+      'proceso combinado': 'combinado',
+      'térmico combinado': 'combinado',
+
+      // Procesamiento de riesgo medio
+      'pasteurización': 'pasteurizado',
+      'pasteurizado': 'pasteurizado',
+
+      'refrigeración': 'refrigerado',
+      'refrigerado': 'refrigerado',
+
+      'cocción': 'cocido',
+      'cocido': 'cocido',
+
+      'fermentación': 'fermentado',
+      'fermentado': 'fermentado',
+
+      // Procesamiento de bajo riesgo
+      'horneado': 'horneado',
+      'al horno': 'horneado',
+
+      'deshidratación': 'deshidratado',
+      'deshidratado': 'deshidratado',
+      'secado': 'deshidratado',
+
+      'secado natural': 'secado natural',
+
+      'otro': 'otro',
+      'otros': 'otro'
+    };
+
+    // Buscar coincidencia exacta
+    if (mapeo[procesamientoLower]) {
+      return mapeo[procesamientoLower];
+    }
+
+    // Buscar coincidencia parcial
+    for (const [key, value] of Object.entries(mapeo)) {
+      if (procesamientoLower.includes(key)) {
+        return value;
+      }
+    }
+
+    console.warn(`⚠️ Procesamiento no mapeado: "${procesamiento}", usando "otro"`);
     return 'otro';
   }
 
