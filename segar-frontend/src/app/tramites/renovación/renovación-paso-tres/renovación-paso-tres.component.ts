@@ -6,6 +6,7 @@ import { Location } from '@angular/common';
 // Importar componente del sistema de documentos dinámicos
 import { DocumentosDinamicosComponent } from '../../../components/documentos-dinamicos/documentos-dinamicos.component';
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
+import { ClasificacionProductoService, ClasificacionProductoDTO } from '../../../core/services/clasificacion-producto.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
@@ -109,8 +110,14 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
   productos: any[] = [];
   productoSeleccionado: any = '';
 
+  // Propiedades para el autocompletado de clasificación
+  cargandoClasificacion = false;
+  errorClasificacion = '';
+  clasificacionCargada = false;
+
   constructor(
     private tramiteService: TramiteInvimaService,
+    private clasificacionProductoService: ClasificacionProductoService,
     private http: HttpClient,
     private authService: AuthService,
     private router: Router,
@@ -200,6 +207,210 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
 
   onProductoSeleccionado(): void {
     console.log('Producto seleccionado:', this.productoSeleccionado);
+
+    if (this.productoSeleccionado && this.productoSeleccionado.id) {
+      this.cargarClasificacionProducto(this.productoSeleccionado.id);
+    } else {
+      // Limpiar el formulario si no hay producto seleccionado
+      this.limpiarFormularioClasificacion();
+    }
+  }
+
+  /**
+   * Carga la clasificación de un producto desde el backend y autollena el formulario
+   */
+  private cargarClasificacionProducto(productoId: number): void {
+    this.cargandoClasificacion = true;
+    this.errorClasificacion = '';
+    this.clasificacionCargada = false;
+
+    this.clasificacionProductoService.obtenerClasificacion(productoId).subscribe({
+      next: (clasificacion) => {
+        console.log('✅ Clasificación cargada desde el backend:', clasificacion);
+        this.autoLlenarFormularioDesdeClasificacion(clasificacion);
+        this.clasificacionCargada = true;
+        this.cargandoClasificacion = false;
+      },
+      error: (error) => {
+        console.warn('⚠️ No se encontró clasificación previa para este producto:', error);
+        // Si no existe clasificación, intentar inferir desde los datos del producto
+        this.autoLlenarFormularioDesdeProducto();
+        this.cargandoClasificacion = false;
+      }
+    });
+  }
+
+  /**
+   * Autollena el formulario con la clasificación existente del backend
+   */
+  private autoLlenarFormularioDesdeClasificacion(clasificacion: any): void {
+    // Mapear los campos del backend al formulario
+    this.classificationForm.productCategory = this.mapearCategoriaBackend(clasificacion.categoriaAlimento);
+    this.classificationForm.riskLevel = this.mapearRiesgoBackend(clasificacion.riesgoSanitario);
+    this.classificationForm.targetPopulation = this.mapearDestinoConsumo(clasificacion.destinoConsumo);
+    this.classificationForm.processingType = this.inferirProcesamientoDesdeClasificacion(clasificacion);
+
+    this.solicitudForm.isImported = clasificacion.esImportado || false;
+
+    // Aplicar reglas de negocio automáticas
+    this.aplicarReglasDeNegocio();
+
+    console.log('📋 Formulario autollenado con clasificación existente');
+  }
+
+  /**
+   * Autollena el formulario infiriendo datos del producto cuando no existe clasificación previa
+   */
+  private autoLlenarFormularioDesdeProducto(): void {
+    if (!this.productoSeleccionado) return;
+
+    console.log('🔍 Infiriendo clasificación desde datos del producto...');
+
+    // Inferir categoría del producto
+    this.classificationForm.productCategory = this.inferirCategoriaProducto(this.productoSeleccionado);
+
+    // Inferir procesamiento desde descripción
+    this.classificationForm.processingType = this.inferirProcesamientoDesdeDescripcion(this.productoSeleccionado);
+
+    // Población objetivo por defecto
+    this.classificationForm.targetPopulation = 'general';
+
+    // Detectar si es importado
+    if (this.productoSeleccionado.paisOrigen && this.productoSeleccionado.paisOrigen !== 'Colombia') {
+      this.solicitudForm.isImported = true;
+    }
+
+    // Aplicar reglas de negocio
+    this.aplicarReglasDeNegocio();
+
+    console.log('📝 Formulario prellenado con inferencias del producto');
+  }
+
+  /**
+   * Mapea la categoría del backend al valor del formulario
+   */
+  private mapearCategoriaBackend(categoriaBackend: string): string {
+    const mapeo: Record<string, string> = {
+      'BEBIDAS': 'bebidas',
+      'LACTEOS': 'lacteos',
+      'CARNICOS': 'carnicos',
+      'PANIFICACION': 'panificacion',
+      'CONSERVAS': 'conservas',
+      'CONDIMENTOS': 'condimentos',
+      'SNACKS': 'snacks',
+      'CEREALES': 'cereales',
+      'ACEITES': 'aceites',
+      'INFANTILES': 'infantiles',
+      'COMIDAS_LISTAS': 'comidas-listas',
+      'OTROS': 'otros'
+    };
+
+    return mapeo[categoriaBackend] || 'otros';
+  }
+
+  /**
+   * Mapea el riesgo sanitario del backend al valor del formulario
+   */
+  private mapearRiesgoBackend(riesgoBackend: string): string {
+    const riesgo = riesgoBackend?.toLowerCase() || '';
+    if (riesgo.includes('alto') || riesgo === 'ALTO') return 'alto';
+    if (riesgo.includes('medio') || riesgo === 'MEDIO') return 'medio';
+    if (riesgo.includes('bajo') || riesgo === 'BAJO') return 'bajo';
+    return '';
+  }
+
+  /**
+   * Mapea el destino de consumo a población objetivo
+   */
+  private mapearDestinoConsumo(destinoConsumo: string): string {
+    const destino = destinoConsumo?.toLowerCase() || '';
+
+    if (destino.includes('infant')) return 'infantil';
+    if (destino.includes('gestant') || destino.includes('lactant')) return 'gestantes';
+    if (destino.includes('adulto') && destino.includes('mayor')) return 'adultos mayores';
+    if (destino.includes('deport')) return 'deportistas';
+    if (destino.includes('especial') || destino.includes('dieta')) return 'dietas especiales';
+
+    return 'general';
+  }
+
+  /**
+   * Infiere el procesamiento desde la clasificación del backend
+   */
+  private inferirProcesamientoDesdeClasificacion(clasificacion: any): string {
+    if (clasificacion.requiereRefrigeracion) return 'refrigerado';
+    // Aquí se pueden agregar más lógicas según los campos disponibles
+    return 'otro';
+  }
+
+  /**
+   * Infiere la categoría del producto desde su nombre o descripción
+   */
+  private inferirCategoriaProducto(producto: any): string {
+    const nombre = (producto.nombre || '').toLowerCase();
+    const descripcion = (producto.descripcion || '').toLowerCase();
+    const texto = `${nombre} ${descripcion}`;
+
+    // Mapeo de palabras clave a categorías
+    const mapeo = [
+      { palabras: ['leche', 'queso', 'yogurt', 'mantequilla', 'crema'], categoria: 'lacteos' },
+      { palabras: ['carne', 'pollo', 'cerdo', 'res', 'embutido', 'salchicha'], categoria: 'carnicos' },
+      { palabras: ['pan', 'galleta', 'torta', 'pastel'], categoria: 'panificacion' },
+      { palabras: ['conserva', 'enlatado', 'mermelada'], categoria: 'conservas' },
+      { palabras: ['bebida', 'jugo', 'refresco', 'agua'], categoria: 'bebidas' },
+      { palabras: ['aceite', 'grasa', 'manteca'], categoria: 'aceites' },
+      { palabras: ['cereal', 'avena', 'arroz', 'trigo'], categoria: 'cereales' },
+      { palabras: ['condimento', 'especia', 'sal', 'pimienta'], categoria: 'condimentos' },
+      { palabras: ['snack', 'papas', 'chips', 'dulce', 'chocolate'], categoria: 'snacks' },
+      { palabras: ['infantil', 'bebé', 'formula'], categoria: 'infantiles' },
+      { palabras: ['comida lista', 'plato preparado', 'listo para consumir'], categoria: 'comidas-listas' }
+    ];
+
+    for (const item of mapeo) {
+      if (item.palabras.some(palabra => texto.includes(palabra))) {
+        return item.categoria;
+      }
+    }
+
+    return 'otros';
+  }
+
+  /**
+   * Infiere el tipo de procesamiento desde la descripción del producto
+   */
+  private inferirProcesamientoDesdeDescripcion(producto: any): string {
+    const descripcion = (producto.descripcion || '').toLowerCase();
+    const especificaciones = (producto.especificaciones || '').toLowerCase();
+    const texto = `${descripcion} ${especificaciones}`;
+
+    // Mapeo de palabras clave a tipos de procesamiento
+    if (texto.includes('esterilizado') || texto.includes('esterilización')) return 'esterilizado';
+    if (texto.includes('pasteurizado') || texto.includes('pasteurización')) return 'pasteurizado';
+    if (texto.includes('congelado') || texto.includes('ultracongelado')) return 'congelado';
+    if (texto.includes('refrigerado') || texto.includes('refrigeración')) return 'refrigerado';
+    if (texto.includes('vacío') || texto.includes('envasado al vacío')) return 'vacio';
+    if (texto.includes('atmósfera modificada') || texto.includes('map')) return 'atmósfera modificada';
+    if (texto.includes('horneado') || texto.includes('cocido al horno')) return 'horneado';
+    if (texto.includes('deshidratado') || texto.includes('seco')) return 'deshidratado';
+    if (texto.includes('fermentado') || texto.includes('fermentación')) return 'fermentado';
+
+    return 'otro';
+  }
+
+  /**
+   * Limpia el formulario de clasificación
+   */
+  private limpiarFormularioClasificacion(): void {
+    this.classificationForm = {
+      productCategory: '',
+      riskLevel: '',
+      targetPopulation: '',
+      processingType: ''
+    };
+    this.clasificacionCompleta = false;
+    this.clasificacionCargada = false;
+    this.riskLevelDisabled = false;
+    this.mensajeReglaActiva = '';
   }
 
   readonly tabs: Tab[] = [
@@ -648,6 +859,12 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validar que se haya seleccionado un producto
+    if (!this.productoSeleccionado || !this.productoSeleccionado.id) {
+      alert('Por favor seleccione un producto antes de clasificar.');
+      return;
+    }
+
     // Aplicar reglas de negocio antes de clasificar
     this.aplicarReglasDeNegocio();
 
@@ -660,7 +877,7 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
       nivel_riesgo: this.classificationForm.riskLevel as 'bajo' | 'medio' | 'alto',
       poblacion_objetivo: this.classificationForm.targetPopulation,
       procesamiento: this.classificationForm.processingType,
-      tipo_accion: 'registro',
+      tipo_accion: 'renovacion',
       es_importado: this.solicitudForm.isImported
     };
 
