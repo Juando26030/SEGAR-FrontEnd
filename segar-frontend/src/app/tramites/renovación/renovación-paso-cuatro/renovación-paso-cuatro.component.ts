@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute } from '@angular/router'; // Agrega esta importación
-import { RegistroPasoCuatroService } from './registro-paso-cuatro.service';
+import { RenovaciNPasoCuatroService } from './renovación-paso-cuatro.service';
 
 interface Tab {
   id: string;
@@ -68,20 +68,20 @@ interface HelpDocument {
 
 @Component({
   standalone: true,
-  selector: 'app-registro-paso-cuatro',
+  selector: 'app-renovación-paso-cuatro',
   imports: [
     CommonModule,
     FormsModule,
     RouterModule
   ],
-  templateUrl: './registro-paso-cuatro.component.html',
-  styleUrls: ['./registro-paso-cuatro.component.css']
+  templateUrl: './renovación-paso-cuatro.component.html',
+  styleUrls: ['./renovación-paso-cuatro.component.css']
 })
-export class RegistroPasoCuatroComponent implements OnInit {
+export class RenovaciNPasoCuatroComponent implements OnInit {
   activeTab = 'seguimiento';
-  tramiteId: number = 0; // Inicializa en 0, debe ser público para acceder en el template
+  private tramiteId: number = 0; // Inicializa en 0
 
-  constructor(private paso4: RegistroPasoCuatroService, private route: ActivatedRoute) {} // Inyecta ActivatedRoute
+  constructor(private paso4: RenovaciNPasoCuatroService, private route: ActivatedRoute) {} // Inyecta ActivatedRoute
 
   readonly tabs: Tab[] = [
     { id: 'seguimiento', label: 'Seguimiento' },

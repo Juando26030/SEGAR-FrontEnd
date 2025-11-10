@@ -22,7 +22,21 @@ import { AuthGuard } from './auth/guard/auth.guard';  // <- IMPORTAR EL GUARD
 import { CorreosComponent } from './pages/correos/correos.component';  // <- IMPORTAR COMPONENTE DE CORREOS
 import { NuevoProductoComponent } from './pages/nuevo-producto/nuevo-producto.component';
 import { ProductosComponent } from './pages/productos/productos.component';
+import { RenovaciNPasoTresComponent } from './tramites/renovación/renovación-paso-tres/renovación-paso-tres.component';
+import { RenovaciNPasoCuatroComponent } from './tramites/renovación/renovación-paso-cuatro/renovación-paso-cuatro.component';
+import { RenovaciNPasoCincoComponent } from './tramites/renovación/renovación-paso-cinco/renovación-paso-cinco.component';
+
+
 import { TramitesComponent } from './pages/tramites/tramites.component';
+import {
+  ModificacionPasoTresComponent
+} from './tramites/modificación/modificación-paso-tres/modificación-paso-tres.component';
+import {
+  ModificacionPasoCuatroService
+} from './tramites/modificación/modificación-paso-cuatro/modificación-paso-cuatro.service';
+import {
+  ModificacionPasoCincoComponent
+} from './tramites/modificación/modificación-paso-cinco/modificación-paso-cinco.component';
 
 export const routes: Routes = [
   {
@@ -62,7 +76,25 @@ export const routes: Routes = [
         children: [
           { path: 'paso-1', component: RegistroPasoTresComponent },
           { path: 'paso-2/:id', component: RegistroPasoCuatroComponent },
-          { path: 'paso-3', component: RegistroPasoCincoComponent },
+          { path: 'paso-3/:id', component: RegistroPasoCincoComponent },
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+        ]
+      },
+      {
+        path: 'nuevo/renovacion',
+        children: [
+          { path: 'paso-1', component: RenovaciNPasoTresComponent },
+          { path: 'paso-2/:id', component: RenovaciNPasoCuatroComponent },
+          { path: 'paso-3', component: RenovaciNPasoCincoComponent },
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+        ]
+      },
+      {
+        path: 'nuevo/modificación',
+        children: [
+          { path: 'paso-1', component: ModificacionPasoTresComponent },
+          { path: 'paso-2/:id', component: ModificacionPasoCuatroService },
+          { path: 'paso-3', component: ModificacionPasoCincoComponent },
           { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       }

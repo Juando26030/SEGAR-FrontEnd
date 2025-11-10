@@ -92,4 +92,19 @@ export class ProductoService {
     console.error('Error en ProductoService:', error);
     return throwError(() => new Error(errorMessage));
   }
+
+
+  /**
+   * Obtiene los productos de una empresa con registro sanitario vigente
+   */
+  getProductosConRegistroVigente(empresaId: number): Observable<any[]> {
+    const url = `${this.baseUrl}/empresa/${empresaId}/con-registro-vigente`;
+    return this.http.get<any[]>(url).pipe(
+      catchError(error => {
+        console.error('Error al obtener productos con registro vigente:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
 }
