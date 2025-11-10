@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Producto } from '../DTOs/solicitud.dto';
 import { environment } from '../../../environments/environment';
+import { TramiteDto } from '../DTOs/tramite.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +16,8 @@ export class TramiteService {
   /**
    * Obtiene todos los tramites disponibles
    */
-  getAllTramites(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.baseUrl}/all`)
+  getAllTramites(): Observable<TramiteDto[]> {
+    return this.http.get<TramiteDto[]>(`${this.baseUrl}/all`)
       .pipe(
         catchError(this.handleError)
       );

@@ -912,4 +912,27 @@ export class DocumentService {
       return null;
     }
   }
+
+  getSignedUrl(bucketName: string, objectName: string, contentType: string, token: string): Observable<string> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    const requestBody = {
+      bucketName,
+      objectName,
+      contentType
+    };
+
+    return this.http.post<string>(
+      `${this.apiUrl}/documentos/get-signed-url`,
+      requestBody,
+      {
+        headers,
+        responseType: 'text' as 'json'
+      }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
 }
