@@ -329,6 +329,7 @@
           <app-documentos-dinamicos
             [producto]="productoSeleccionado"
             [resultado]="resultadoClasificacion"
+            [soloLectura]="true"
             (documentoCompletado)="onDocumentoCompletado($event)"
             (todosCompletados)="onTodosDocumentosCompletos($event)">
           </app-documentos-dinamicos>

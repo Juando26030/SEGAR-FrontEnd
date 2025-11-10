@@ -19,6 +19,7 @@ export class DocumentosDinamicosComponent implements OnInit {
   @Input() modoRenovacion: boolean = false;
   @Input() documentosOriginales: any[] = [];
   @Input() reglasBloqueo: string[] = [];
+  @Input() soloLectura: boolean = false; // Modo solo lectura - bloquea todo
   @Output() documentoCompletado = new EventEmitter<{ documentoId: string; datos: any }>();
   @Output() todosCompletados = new EventEmitter<boolean>();
 
@@ -137,6 +138,9 @@ export class DocumentosDinamicosComponent implements OnInit {
   }
 
   seleccionarDocumento(documento: DocumentoRequerido) {
+    // No permitir seleccionar documentos en modo solo lectura
+    if (this.soloLectura) return;
+
     this.documentoSeleccionado = documento;
     // Si es externo, mostrar vista de upload, si es autogenerado mostrar formulario
     this.vistaActual = documento.tipo === 'externo' ? 'upload' : 'formulario';
