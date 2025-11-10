@@ -1,0 +1,231 @@
+/* Eliminado slide-container para integración completa */
+
+/* Estilos para el sistema de pestañas */
+.tabs {
+  @apply flex border-b border-gray-200 mb-4 overflow-x-auto;
+}
+
+.tab {
+  @apply px-6 py-3 font-medium cursor-pointer transition-all duration-300 whitespace-nowrap border-0 bg-transparent text-gray-600 hover:text-blue-600;
+}
+
+.tab-active {
+  @apply text-green-600 font-semibold;
+  border-bottom: 3px solid #10b981;
+}
+
+.tab-content {
+  @apply pt-4;
+}
+
+.section-card {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6;
+}
+
+/* Navegación entre pasos */
+.step-navigation {
+  @apply flex justify-between items-center p-4 bg-gray-50 border-t border-gray-200 rounded-b-xl mt-8;
+}
+
+.nav-btn {
+  @apply inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium no-underline transition-all duration-300 border-0 cursor-pointer;
+}
+
+.nav-btn-primary {
+  @apply bg-green-500 text-white hover:bg-green-600;
+  transform: translateY(0);
+}
+
+.nav-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.nav-btn-secondary {
+  @apply bg-gray-200 text-gray-600 hover:bg-gray-300;
+}
+
+.nav-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none !important;
+}
+
+.step-indicator-nav {
+  @apply flex items-center gap-2 text-sm text-gray-600;
+}
+
+.step-indicator-nav .current-step {
+  @apply font-semibold text-green-600;
+}
+
+/* Checkmark circle animation */
+.checkmark-circle {
+  @apply bg-green-500 rounded-full flex items-center justify-center opacity-0;
+  width: 60px;
+  height: 60px;
+  transform: scale(0);
+  transition: all 0.5s ease;
+}
+
+.checkmark-circle.show {
+  @apply opacity-100;
+  transform: scale(1);
+}
+
+/* Validacion items */
+.validacion-item {
+  @apply transition-all duration-300 rounded-lg;
+}
+
+.validacion-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Clases de animación */
+.fade-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.slide-in {
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.bounce-in {
+  animation: bounceIn 0.8s ease-out;
+}
+
+/* Estilos para los botones mejorados */
+.btn-radicar {
+  @apply bg-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center justify-center mx-auto;
+  min-width: 280px;
+}
+
+.btn-radicar:hover:not(:disabled) {
+  @apply bg-green-700;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-radicar:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none;
+}
+
+.btn-action {
+  @apply transition-all duration-300;
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estados de loading */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Pantalla de confirmación */
+.success-card {
+  animation: bounceIn 0.8s ease-out;
+}
+
+.success-icon {
+  animation: fadeInUp 2s infinite alternate;
+}
+
+/* Número de radicado destacado */
+.numero-radicado {
+  @apply font-mono tracking-wide font-bold;
+  letter-spacing: 0.1em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tabs {
+    @apply flex-wrap;
+  }
+
+  .tab {
+    @apply flex-1 text-center text-sm px-4 py-2;
+    min-width: 120px;
+  }
+
+  .section-card {
+    @apply p-4;
+  }
+
+  .step-navigation {
+    @apply flex-col gap-4 text-center;
+  }
+
+  .nav-btn {
+    @apply w-full justify-center;
+  }
+
+  .grid {
+    @apply grid-cols-1;
+  }
+
+  .checkmark-circle {
+    width: 48px;
+    height: 48px;
+  }
+}

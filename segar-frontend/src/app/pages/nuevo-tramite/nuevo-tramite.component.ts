@@ -22,7 +22,7 @@ export class NuevoTramiteComponent {
         this.router.navigate(['/main/nuevo/renovacion/paso-1']);
         break;
       case 'modificacion':
-        alert(`Has seleccionado: ${tipo}. En la próxima versión se mostrará el formulario correspondiente.`);
+        this.router.navigate(['/main/nuevo/modificación/paso-1']);
         break;
     }
   }

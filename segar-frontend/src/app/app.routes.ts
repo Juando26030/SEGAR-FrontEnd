@@ -28,6 +28,15 @@ import { RenovaciNPasoCincoComponent } from './tramites/renovación/renovación-
 
 
 import { TramitesComponent } from './pages/tramites/tramites.component';
+import {
+  ModificacionPasoTresComponent
+} from './tramites/modificación/modificación-paso-tres/modificación-paso-tres.component';
+import {
+  ModificacionPasoCuatroService
+} from './tramites/modificación/modificación-paso-cuatro/modificación-paso-cuatro.service';
+import {
+  ModificacionPasoCincoComponent
+} from './tramites/modificación/modificación-paso-cinco/modificación-paso-cinco.component';
 
 export const routes: Routes = [
   {
@@ -67,7 +76,7 @@ export const routes: Routes = [
         children: [
           { path: 'paso-1', component: RegistroPasoTresComponent },
           { path: 'paso-2/:id', component: RegistroPasoCuatroComponent },
-          { path: 'paso-3', component: RegistroPasoCincoComponent },
+          { path: 'paso-3/:id', component: RegistroPasoCincoComponent },
           { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       },
@@ -77,6 +86,15 @@ export const routes: Routes = [
           { path: 'paso-1', component: RenovaciNPasoTresComponent },
           { path: 'paso-2/:id', component: RenovaciNPasoCuatroComponent },
           { path: 'paso-3', component: RenovaciNPasoCincoComponent },
+          { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
+        ]
+      },
+      {
+        path: 'nuevo/modificación',
+        children: [
+          { path: 'paso-1', component: ModificacionPasoTresComponent },
+          { path: 'paso-2/:id', component: ModificacionPasoCuatroService },
+          { path: 'paso-3', component: ModificacionPasoCincoComponent },
           { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]
       }
