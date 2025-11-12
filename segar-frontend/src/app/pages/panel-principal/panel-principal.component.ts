@@ -406,10 +406,8 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     console.log('Editar trámite con ID:', id);
     console.log("El estado del tramite es: ", tramite.estado, "")
     if (tramite.estado === 'Radicado' || tramite.estado === 'En Evaluación Técnica' || tramite.estado === 'Requiere Información') {
-      console.log("llegaste hasta aqui primer if")
       this.router.navigate(['/main/nuevo/registro/paso-2', id]);
     } else if (tramite.estado === 'Aprobado' || tramite.estado === 'Rechazado') {
-      console.log("llegaste hasta aqui segundo if")
       this.router.navigate(['/main/nuevo/registro/paso-3', id]);
     }
   }
