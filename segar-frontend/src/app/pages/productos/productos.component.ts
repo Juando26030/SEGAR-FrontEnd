@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProductoService } from '../../core/services/producto.service';
 import { ProductoDetalleModalComponent } from '../../shared/producto-detalle-modal/producto-detalle-modal.component';
+import { AuthService } from '../../auth/services/auth.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 
 @Component({
   selector: 'app-productos',
@@ -15,6 +17,7 @@ export class ProductosComponent implements OnInit {
   productos: any[] = [];
   cargando = false;
   error: string | null = null;
+  empresaId: number | null = null;
 
   // Propiedades para el modal
   modalVisible: boolean = false;
@@ -22,18 +25,54 @@ export class ProductosComponent implements OnInit {
 
   constructor(
     private productoService: ProductoService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private usuarioService: UsuarioService
   ) {}
 
   ngOnInit(): void {
-    this.obtenerProductos();
+    this.cargarProductosDeEmpresa();
   }
 
-  obtenerProductos() {
+  private cargarProductosDeEmpresa(): void {
     this.cargando = true;
     this.error = null;
 
-    this.productoService.getAllProductos().subscribe({
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId) {
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+            next: (empresa) => {
+              this.empresaId = empresa.id;
+              this.obtenerProductos();
+            },
+            error: (err) => {
+              console.error('Error al obtener empresa del usuario:', err);
+              this.error = 'No se pudo obtener la información de la empresa.';
+              this.cargando = false;
+            }
+          });
+        } else {
+          this.error = 'No se pudo identificar al usuario.';
+          this.cargando = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener usuario:', err);
+        this.error = 'No se pudo obtener la información del usuario.';
+        this.cargando = false;
+      }
+    });
+  }
+
+  private obtenerProductos(): void {
+    if (!this.empresaId) {
+      this.error = 'No se pudo identificar la empresa.';
+      this.cargando = false;
+      return;
+    }
+
+    this.productoService.getProductosByEmpresaId(this.empresaId).subscribe({
       next: (data) => {
         this.productos = data;
         this.cargando = false;
@@ -46,7 +85,7 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  irANuevoProducto() {
+  irANuevoProducto(): void {
     this.router.navigate(['main/nuevo/producto']);
   }
 

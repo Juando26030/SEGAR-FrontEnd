@@ -68,26 +68,46 @@ export class TramitesComponent implements OnInit {
     this.cargando = true;
     this.error = null;
 
-    this.tramiteService.getAllTramites().subscribe({
-      next: (data) => {
-        this.tramites = data;
-        this.cargando = false;
-        for (let tramite of data) {
-          if (Array.isArray(tramite.eventos) && tramite.eventos.length > 3) {
-            const evento = tramite.eventos[3];
-            if (evento.completed === true && evento.currentEvent === true) {
-              this.cantidadAprobados++;
+    // Primero obtenemos el ID del usuario actual
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId) {
+          // Ahora obtenemos los trámites del usuario
+          this.tramiteService.getTramitesByUsuarioId(usuarioId).subscribe({
+            next: (data) => {
+              this.tramites = data;
+              this.cargando = false;
+
+              // Calcular trámites aprobados
+              this.cantidadAprobados = 0;
+              for (let tramite of data) {
+                if (Array.isArray(tramite.eventos) && tramite.eventos.length > 3) {
+                  const evento = tramite.eventos[3];
+                  if (evento.completed === true && evento.currentEvent === true) {
+                    this.cantidadAprobados++;
+                  }
+                }
+              }
+            },
+            error: (err) => {
+              console.error('Error al obtener trámites del usuario:', err);
+              this.error = 'No se pudieron cargar los trámites.';
+              this.cargando = false;
             }
-          }
+          });
+        } else {
+          this.error = 'No se pudo identificar al usuario.';
+          this.cargando = false;
         }
       },
       error: (err) => {
-        console.error('Error al obtener tramites:', err);
-        this.error = 'No se pudieron cargar los tramites.';
+        console.error('Error al obtener usuario:', err);
+        this.error = 'No se pudo obtener la información del usuario.';
         this.cargando = false;
       }
     });
   }
+
 
   irANuevoTramite() {
     this.router.navigate(['main/nuevo/tramite']);
