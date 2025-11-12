@@ -319,7 +319,8 @@
           <button class="btn-ver-todo" (click)="verCalendario()">Ver Todo</button>
         </div>
         <div class="events-list">
-          <div class="event-item" *ngFor="let evento of eventosRecientes" (click)="verCalendario()">
+          <!-- En dashboard.component.html -->
+          <div class="event-item" *ngFor="let evento of eventosRecientes" (click)="verCalendario(evento)">
             <div class="event-indicator" [class]="obtenerClasePrioridad(evento.prioridadEvento)"></div>
             <div class="event-content">
               <div class="event-title">{{ evento.titulo }}</div>
@@ -330,6 +331,7 @@
               </div>
             </div>
           </div>
+
           <div *ngIf="eventosRecientes.length === 0" class="no-events">
             <i class="fas fa-calendar-check" style="font-size: 2rem; color: #dee2e6; margin-bottom: 1rem;"></i>
             <p style="color: #6c757d; text-align: center; margin: 0;">No hay eventos próximos programados</p>
@@ -351,8 +353,8 @@
             <span class="action-text">Nuevo Trámite</span>
           </button>
           <button class="action-btn" (click)="gestionarDocumentos()">
-            <i class="fas fa-file-alt action-icon"></i>
-            <span class="action-text">Documentos</span>
+            <i class="fas fa-boxes action-icon"></i>
+            <span class="action-text">Productos</span>
           </button>
           <button class="action-btn" (click)="verCalendario()">
             <i class="fas fa-calendar action-icon"></i>

@@ -718,16 +718,36 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  verCalendario() {
-    this.router.navigate(['/main/calendario']);
+  verCalendario(evento?: EventoReciente | EventoDTO): void {
+    if (evento) {
+      // Verificar si es EventoReciente o EventoDTO
+      const eventoId = 'id' in evento ? evento.id : undefined;
+      const fechaEvento = evento.fecha;
+
+      if (eventoId && fechaEvento) {
+        this.router.navigate(['/main/calendario'], {
+          queryParams: {
+            eventoId: eventoId,
+            fecha: fechaEvento
+          }
+        });
+      } else {
+        // Si no tiene ID, solo navegar al calendario sin parámetros
+        this.router.navigate(['/main/calendario']);
+      }
+    } else {
+      this.router.navigate(['/main/calendario']);
+    }
   }
 
+
+
   nuevoTramite(): void {
-    this.router.navigate(['/main/nuevo']);
+    this.router.navigate(['/main/tramites']);
   }
 
   gestionarDocumentos(): void {
-    this.router.navigate(['/main/documentos']);
+    this.router.navigate(['/main/productos']);
   }
 
   verNotificaciones(): void {

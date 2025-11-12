@@ -1267,3 +1267,35 @@ button:disabled {
   font-size: 0.8rem;
   opacity: 0.8;
 }
+
+
+/* En calendario.component.css */
+.celda-dia.evento-resaltado {
+  animation: pulseHighlight 2s ease-in-out 3;
+  border: 2px solid #667eea !important;
+}
+
+@keyframes pulseHighlight {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    transform: scale(1.02);
+  }
+}
+
+/* Mejorar el estilo del modal cuando viene desde navegación */
+.modal-overlay.from-navigation {
+  animation: fadeInModal 0.3s ease-in-out;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
