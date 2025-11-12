@@ -59,4 +59,29 @@ export class ProductosComponent implements OnInit {
     this.modalVisible = false;
     this.productoSeleccionadoId = null;
   }
+
+  eliminarProducto(producto: any, event: Event): void {
+    event.stopPropagation();
+
+    const confirmacion = confirm(
+      `¿Está seguro de eliminar el producto "${producto.nombre}"?\n\n` +
+      `Esta acción no se puede deshacer.`
+    );
+
+    if (confirmacion) {
+      this.cargando = true;
+      this.productoService.deleteProducto(producto.id).subscribe({
+        next: () => {
+          this.productos = this.productos.filter(p => p.id !== producto.id);
+          this.cargando = false;
+          alert('Producto eliminado exitosamente');
+        },
+        error: (err) => {
+          console.error('Error al eliminar producto:', err);
+          this.cargando = false;
+          alert('Error al eliminar el producto. Por favor, intente nuevamente.');
+        }
+      });
+    }
+  }
 }
