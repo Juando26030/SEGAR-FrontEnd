@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaginaRegistroComponent } from './pagina-registro.component';
 
 describe('PaginaRegistroComponent', () => {
-  let component: PaginaRegistroComponent;
-  let fixture: ComponentFixture<PaginaRegistroComponent>;
+  let component: PaginaRegistroComponent = null as any;
+  let fixture: ComponentFixture<PaginaRegistroComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

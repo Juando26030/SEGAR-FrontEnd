@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AuthNavbarComponent } from './auth-navbar.component';
 
 describe('AuthNavbarComponent', () => {
-  let component: AuthNavbarComponent;
-  let fixture: ComponentFixture<AuthNavbarComponent>;
+  let component: AuthNavbarComponent = null as any;
+  let fixture: ComponentFixture<AuthNavbarComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserInfoComponent } from './user-info.component';
 
 describe('UserInfoComponent', () => {
-  let component: UserInfoComponent;
-  let fixture: ComponentFixture<UserInfoComponent>;
+  let component: UserInfoComponent = null as any;
+  let fixture: ComponentFixture<UserInfoComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

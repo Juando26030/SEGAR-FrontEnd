@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MenuLateralComponent } from './menu-lateral.component';
 
 describe('MenuLateralComponent', () => {
-  let component: MenuLateralComponent;
-  let fixture: ComponentFixture<MenuLateralComponent>;
+  let component: MenuLateralComponent = null as any;
+  let fixture: ComponentFixture<MenuLateralComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

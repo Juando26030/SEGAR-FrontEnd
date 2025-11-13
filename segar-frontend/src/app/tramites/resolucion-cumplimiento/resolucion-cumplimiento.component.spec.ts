@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ResolucionCumplimientoComponent } from './resolucion-cumplimiento.component';
 
 describe('ResolucionCumplimientoComponent', () => {
-  let component: ResolucionCumplimientoComponent;
-  let fixture: ComponentFixture<ResolucionCumplimientoComponent>;
+  let component: ResolucionCumplimientoComponent = null as any;
+  let fixture: ComponentFixture<ResolucionCumplimientoComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

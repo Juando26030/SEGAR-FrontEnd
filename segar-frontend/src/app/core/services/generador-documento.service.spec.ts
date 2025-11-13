@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 
-import { GeneradorDocumentoService } from './generador-documento.service';
+import { DocumentGeneratorService } from './generador-documento.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-describe('GeneradorDocumentoService', () => {
-  let service: GeneradorDocumentoService;
+describe('DocumentGeneratorService', () => {
+  let service: DocumentGeneratorService = null as any;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(GeneradorDocumentoService);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
+    service = TestBed.inject(DocumentGeneratorService);
   });
 
   it('should be created', () => {

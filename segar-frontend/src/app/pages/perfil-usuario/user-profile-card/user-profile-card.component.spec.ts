@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserProfileCardComponent } from './user-profile-card.component';
 
 describe('UserProfileCardComponent', () => {
-  let component: UserProfileCardComponent;
-  let fixture: ComponentFixture<UserProfileCardComponent>;
+  let component: UserProfileCardComponent = null as any;
+  let fixture: ComponentFixture<UserProfileCardComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

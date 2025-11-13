@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NuevoProductoComponent } from './nuevo-producto.component';
 
 describe('NuevoProductoComponent', () => {
-  let component: NuevoProductoComponent;
-  let fixture: ComponentFixture<NuevoProductoComponent>;
+  let component: NuevoProductoComponent = null as any;
+  let fixture: ComponentFixture<NuevoProductoComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

@@ -15,11 +15,11 @@ export class UsuarioService {
   // ========== CONSULTAS ==========
 
   getUsuariosByEmpresaId(empresaId: number): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/empresa/${empresaId}`);
+    return this.http.get<Usuario[]>(`${this.baseUrl}/empresa/${empresaId}`);
   }
 
   getEmpresaByUsuarioId(usuarioId: number): Observable<Empresa> {
-    return this.http.get<Empresa>(`${this.apiUrl}/${usuarioId}/empresa`).pipe(
+    return this.http.get<Empresa>(`${this.baseUrl}/${usuarioId}/empresa`).pipe(
       tap(empresa => console.log('✅ Empresa obtenida por usuario ID:', empresa))
     );
   }

@@ -7,7 +7,7 @@ import {
   DocumentoRequestDTO,
   DocumentoResponseDTO,
   ProductoAlimentarioDTO
-} from '../DTOs/documento-generator.dto';
+} from '../DTOs/generador-documento.dto';
 
 @Injectable({
   providedIn: 'root'

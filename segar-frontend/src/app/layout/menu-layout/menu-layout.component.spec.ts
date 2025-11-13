@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MenuLayoutComponent } from './menu-layout.component';
 
 describe('MenuLayoutComponent', () => {
-  let component: MenuLayoutComponent;
-  let fixture: ComponentFixture<MenuLayoutComponent>;
+  let component: MenuLayoutComponent = null as any;
+  let fixture: ComponentFixture<MenuLayoutComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

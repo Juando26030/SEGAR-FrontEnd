@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PanelPrincipalComponent } from './panel-principal.component';
 
 describe('PanelPrincipalComponent', () => {
-  let component: PanelPrincipalComponent;
-  let fixture: ComponentFixture<PanelPrincipalComponent>;
+  let component: PanelPrincipalComponent = null as any;
+  let fixture: ComponentFixture<PanelPrincipalComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

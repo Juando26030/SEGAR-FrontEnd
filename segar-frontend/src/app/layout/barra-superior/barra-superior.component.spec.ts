@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BarraSuperiorComponent } from './barra-superior.component';
 
 describe('BarraSuperiorComponent', () => {
-  let component: BarraSuperiorComponent;
-  let fixture: ComponentFixture<BarraSuperiorComponent>;
+  let component: BarraSuperiorComponent = null as any;
+  let fixture: ComponentFixture<BarraSuperiorComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

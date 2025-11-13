@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserFilterComponent } from './user-filter.component';
 
 describe('UserFilterComponent', () => {
-  let component: UserFilterComponent;
-  let fixture: ComponentFixture<UserFilterComponent>;
+  let component: UserFilterComponent = null as any;
+  let fixture: ComponentFixture<UserFilterComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

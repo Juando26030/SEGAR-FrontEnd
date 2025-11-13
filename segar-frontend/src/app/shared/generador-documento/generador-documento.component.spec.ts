@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GeneradorDocumentoComponent } from './generador-documento.component';
 
 describe('GeneradorDocumentoComponent', () => {
-  let component: GeneradorDocumentoComponent;
-  let fixture: ComponentFixture<GeneradorDocumentoComponent>;
+  let component: GeneradorDocumentoComponent = null as any;
+  let fixture: ComponentFixture<GeneradorDocumentoComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

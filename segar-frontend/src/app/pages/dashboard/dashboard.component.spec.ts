@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
 
 describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+  let component: DashboardComponent = null as any;
+  let fixture: ComponentFixture<DashboardComponent> = null as any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
