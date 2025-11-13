@@ -1,254 +1,390 @@
-/* Eliminado slide-container para integración completa */
+/* Contenedor principal */
+.main-container {
+  @apply max-w-4xl mx-auto p-6;
+}
 
+/* Sistema de pestañas */
 .tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1rem;
-  overflow-x: auto;
+  @apply flex bg-white rounded-lg shadow-sm mb-6 overflow-x-auto;
 }
 
 .tab {
-  padding: 0.75rem 1.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  @apply flex-1 px-6 py-3 text-center font-medium transition-all duration-300 cursor-pointer border-b-2 border-transparent;
+  min-width: 150px;
 }
 
 .tab:hover {
-  color: #2563eb;
+  @apply bg-gray-50;
 }
 
 .tab-active {
-  border-bottom: 3px solid #2563eb;
-  color: #2563eb;
+  @apply text-blue-600 border-blue-600 bg-blue-50;
 }
 
 .tab-content {
-  padding-top: 1rem;
+  @apply animate-fadeIn;
 }
 
+/* Cards y secciones */
 .section-card {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  @apply bg-white rounded-lg shadow-md p-6 mb-6;
 }
 
-.slide-footer {
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-  padding: 0.75rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 0 0 12px 12px;
+.info-card {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4;
 }
 
-/* Navegación entre pasos */
+.status-card {
+  @apply rounded-lg p-6 border-2 transition-all duration-300;
+}
+
+/* Badges de estado */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold inline-block;
+}
+
+.status-aprobada {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-rechazada {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-en-revision {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-pendiente {
+  @apply bg-orange-100 text-orange-800;
+}
+
+/* Navegación de pasos */
 .step-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-radius: 0 0 12px 12px;
+  @apply flex justify-between items-center mt-8 pt-6 border-t border-gray-200;
 }
 
 .nav-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
+  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2;
 }
 
 .nav-btn-primary {
-  background-color: #1e40af;
-  color: white;
+  @apply bg-blue-600 text-white hover:bg-blue-700;
 }
 
-.nav-btn-primary:hover {
-  background-color: #1e3a8a;
-  transform: translateY(-1px);
+.nav-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .nav-btn-secondary {
-  background-color: #e2e8f0;
-  color: #64748b;
-}
-
-.nav-btn-secondary:hover {
-  background-color: #cbd5e1;
+  @apply bg-gray-200 text-gray-600 hover:bg-gray-300;
 }
 
 .nav-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+  @apply opacity-50 cursor-not-allowed;
+  transform: none !important;
 }
 
 .step-indicator-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #64748b;
+  @apply flex items-center gap-2 text-sm text-gray-600;
 }
 
 .step-indicator-nav .current-step {
-  font-weight: 600;
-  color: #1e40af;
+  @apply font-semibold text-green-600;
 }
 
-.progress-bar {
-  height: 8px;
-  background-color: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin: 20px 0;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(to right, #3b82f6, #1e40af);
-  border-radius: 4px;
-  transition: width 1s ease;
-}
-
-.tramite-card {
-  background-color: white;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
-
-.tramite-card:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.progress-bar-small {
-  height: 4px;
-  background-color: #e5e7eb;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progress-fill-small {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-review {
-  background-color: #e0f2fe;
-  color: #0369a1;
-}
-
-.status-approved {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-.status-rejected {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
-.requerimiento-card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.verification-box {
-  position: relative;
-  transition: all 0.3s ease;
-}
-
+/* Checkmark circle animation */
 .checkmark-circle {
-  width: 3rem;
-  height: 3rem;
-  background-color: #10b981;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
+  @apply bg-green-500 rounded-full flex items-center justify-center opacity-0;
+  width: 60px;
+  height: 60px;
   transform: scale(0);
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
 
 .checkmark-circle.show {
-  opacity: 1;
+  @apply opacity-100;
   transform: scale(1);
 }
 
+/* Timeline */
+.timeline-item {
+  @apply relative pl-8 pb-8 border-l-2 border-gray-200;
+}
+
+.timeline-item:last-child {
+  @apply border-l-0 pb-0;
+}
+
+.timeline-dot {
+  @apply absolute left-0 w-4 h-4 rounded-full border-2 bg-white;
+  transform: translateX(-50%);
+}
+
+.timeline-dot-completed {
+  @apply bg-green-500 border-green-500;
+}
+
+.timeline-dot-current {
+  @apply bg-blue-500 border-blue-500;
+}
+
+.timeline-dot-pending {
+  @apply border-gray-300;
+}
+
+/* Requirement items */
+.requirement-item {
+  @apply bg-white border border-gray-200 rounded-lg p-4 mb-3 transition-all duration-300;
+}
+
+.requirement-item:hover {
+  @apply shadow-md;
+  transform: translateY(-2px);
+}
+
+/* Notification items */
 .notification-item {
-  background-color: white;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+  @apply border-b border-gray-100 p-4 transition-colors duration-200;
 }
 
-.action-button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: between;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
+.notification-item:hover {
+  @apply bg-gray-50;
 }
 
-.help-card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1rem;
+.notification-unread {
+  @apply bg-blue-50;
 }
 
-.faq-item {
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
+/* Validacion items */
+.validacion-item {
+  @apply transition-all duration-300 rounded-lg;
 }
 
-.faq-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.validacion-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.contact-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Añade estos estilos al archivo registro-paso-cuatro.component.css */
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Clases de animación */
+.fade-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.slide-in {
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.bounce-in {
+  animation: bounceIn 0.8s ease-out;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Estilos para los botones mejorados */
+.btn-radicar {
+  @apply bg-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center justify-center mx-auto;
+  min-width: 280px;
+}
+
+.btn-radicar:hover:not(:disabled) {
+  @apply bg-green-700;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-radicar:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none;
+}
+
+.btn-action {
+  @apply transition-all duration-300;
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estados de loading */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Pantalla de confirmación */
+.success-card {
+  animation: bounceIn 0.8s ease-out;
+}
+
+.success-icon {
+  animation: fadeInUp 2s infinite alternate;
+}
+
+/* Número de radicado destacado */
+.numero-radicado {
+  @apply font-mono tracking-wide font-bold;
+  letter-spacing: 0.1em;
+}
+
+/* Alert boxes */
+.alert-box {
+  @apply border-l-4 p-4 rounded-r-lg;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-400;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-400;
+}
+
+.alert-error {
+  @apply bg-red-50 border-red-400;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-400;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply bg-gray-200 rounded-full h-2 overflow-hidden;
+}
+
+.progress-fill {
+  @apply bg-blue-600 h-full transition-all duration-500 ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tabs {
+    @apply flex-wrap;
+  }
+
+  .tab {
+    @apply flex-1 text-center text-sm px-4 py-2;
+    min-width: 120px;
+  }
+
+  .section-card {
+    @apply p-4;
+  }
+
+  .step-navigation {
+    @apply flex-col gap-4 text-center;
+  }
+
+  .nav-btn {
+    @apply w-full justify-center;
+  }
+
+  .grid {
+    @apply grid-cols-1;
+  }
+
+  .checkmark-circle {
+    width: 48px;
+    height: 48px;
+  }
+
+  .timeline-item {
+    @apply pl-6;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-container {
+    @apply p-4;
+  }
+
+  .tab {
+    @apply text-xs px-2 py-2;
+    min-width: 100px;
+  }
+
+  .section-card {
+    @apply p-3;
+  }
+}
 /* Timeline mejorado */
 .timeline-container {
   position: relative;
@@ -373,30 +509,4 @@
 .status-badge-timeline.pending {
   background-color: #f3f4f6;
   color: #6b7280;
-}
-
-/* Asegurar que el contenedor principal use flex */
-:host {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.max-w-4xl {
-  flex: 1;
-}
-
-/* Navegación entre pasos - siempre abajo */
-.step-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-radius: 0 0 12px 12px;
-  margin-top: auto; /* Esto empuja la navegación hacia abajo */
-  position: sticky;
-  bottom: 0;
-  z-index: 50;
 }

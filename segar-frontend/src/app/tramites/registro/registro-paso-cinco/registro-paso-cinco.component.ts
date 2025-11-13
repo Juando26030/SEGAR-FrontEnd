@@ -313,8 +313,6 @@ export class RegistroPasoCincoComponent implements OnInit {
 		// Obtener datos del trámite en proceso para personalizar la demostración
 		const tramiteEnProceso = this.tramiteEstadoService.getTramiteActual();
 
-		this.mensajeExito = '📋 Mostrando datos de demostración - El backend está siendo configurado';
-
 		// Datos de demostración realistas
 		this.tramiteCompleto = {
 			id: this.tramiteId!,
@@ -465,7 +463,7 @@ export class RegistroPasoCincoComponent implements OnInit {
 
 	nuevaSolicitud(): void {
 		this.tramiteEstadoService.limpiarTramite();
-		this.router.navigate(['/main/nuevo/registro/paso-1']);
+		this.router.navigate(['/main/nuevo/tramite']);
 	}
 
 	// Métodos de utilidad
