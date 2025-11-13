@@ -107,4 +107,11 @@ export class ProductoService {
     );
   }
 
+  getProductosByEmpresaId(empresaId: number): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.baseUrl}/empresa/${empresaId}`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
 }

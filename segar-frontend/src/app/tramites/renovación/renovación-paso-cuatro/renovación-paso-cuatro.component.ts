@@ -365,4 +365,8 @@ export class RenovaciNPasoCuatroComponent implements OnInit {
   trackByHelpDoc(index: number, doc: HelpDocument): string {
     return doc.name;
   }
+  canContinueToNextStep(): boolean {
+    return this.trackingInfo.currentStatus === 'Aprobado' ||
+      this.trackingInfo.currentStatus === 'Rechazado';
+  }
 }

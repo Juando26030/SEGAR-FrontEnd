@@ -96,12 +96,6 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <button class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all duration-200 backdrop-blur-sm">
-              <i class="fas fa-edit text-white text-sm"></i>
-            </button>
-            <button class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all duration-200 backdrop-blur-sm">
-              <i class="fas fa-ellipsis-v text-white text-sm"></i>
-            </button>
           </div>
         </div>
       </div>
@@ -115,7 +109,9 @@
 
         <!-- Footer con acciones -->
         <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-          <button class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
+          <button
+            (click)="verDetalleProducto(producto)"
+            class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
             <i class="fas fa-eye"></i>
             <span>Ver detalles</span>
           </button>
@@ -142,3 +138,11 @@
     </button>
   </div>
 </div>
+
+<!-- Modal de detalles del producto -->
+<app-producto-detalle-modal
+  [productoId]="productoSeleccionadoId"
+  [isVisible]="modalVisible"
+  (cerrar)="cerrarModal()">
+</app-producto-detalle-modal>
+

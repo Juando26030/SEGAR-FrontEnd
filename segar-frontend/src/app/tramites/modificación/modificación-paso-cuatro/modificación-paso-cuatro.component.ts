@@ -68,7 +68,7 @@ interface HelpDocument {
 
 @Component({
   standalone: true,
-  selector: 'app-modificación-paso-cuatro',
+  selector: 'app-modificacion-paso-cuatro',
   imports: [
     CommonModule,
     FormsModule,
@@ -364,5 +364,10 @@ export class ModificacionPasoCuatroComponent implements OnInit {
 
   trackByHelpDoc(index: number, doc: HelpDocument): string {
     return doc.name;
+  }
+
+  canContinueToNextStep(): boolean {
+    return this.trackingInfo.currentStatus === 'Aprobado' ||
+      this.trackingInfo.currentStatus === 'Rechazado';
   }
 }

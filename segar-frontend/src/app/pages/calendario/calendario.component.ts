@@ -6,6 +6,7 @@ import { AuthService } from '../../auth/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { EventoDTO, CrearEventoDTO, EstadisticasCalendarioDTO } from '../../core/DTOs/calendario.dto';
 import { Subscription, switchMap, of, catchError, finalize } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 interface CalendarDay {
   dia: number;
@@ -55,18 +56,110 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   constructor(
     private calendarioService: CalendarioService,
     private authService: AuthService,
-    private usuarioService: UsuarioService
+    private usuarioService: UsuarioService,
+    private route: ActivatedRoute
+
   ) {}
 
   ngOnInit(): void {
     console.log('🔄 Inicializando CalendarioComponent...');
     this.actualizarNombreMes();
-    this.cargarDatos();
+
+    // Verificar si hay parámetros en la URL
+    this.route.queryParams.subscribe(params => {
+      const eventoId = params['eventoId'];
+      const fechaParam = params['fecha'];
+
+      if (eventoId && fechaParam) {
+        // Navegar al mes del evento
+        const fechaEvento = new Date(fechaParam);
+        this.mes = fechaEvento.getMonth();
+        this.anio = fechaEvento.getFullYear();
+        this.actualizarNombreMes();
+
+        // Cargar datos y luego mostrar el evento
+        this.cargarDatosYMostrarEvento(parseInt(eventoId));
+      } else {
+        this.cargarDatos();
+      }
+    });
   }
 
   ngOnDestroy(): void {
     console.log('🛑 Destruyendo CalendarioComponent...');
     this.subscriptions.unsubscribe();
+  }
+
+  private cargarDatosYMostrarEvento(eventoId: number): void {
+    this.cargando = true;
+
+    const sub = this.authService.getUsuarioId().pipe(
+      switchMap(usuarioId => {
+        this.usuarioId = usuarioId;
+        if (!usuarioId) {
+          return of({ eventos: [], estadisticas: null, esAdmin: false });
+        }
+
+        return this.usuarioService.esAdmin(usuarioId).pipe(
+          switchMap(esAdmin => {
+            this.esAdmin = esAdmin;
+            const eventosObs = esAdmin
+              ? this.calendarioService.obtenerEventosPorMes(this.mes + 1, this.anio)
+              : this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio);
+
+            const estadisticasObs = esAdmin
+              ? this.calendarioService.obtenerEstadisticas()
+              : this.calendarioService.obtenerEstadisticasUsuario(usuarioId);
+
+            return eventosObs.pipe(
+              switchMap(eventos =>
+                estadisticasObs.pipe(
+                  switchMap(estadisticas =>
+                    of({ eventos, estadisticas, esAdmin })
+                  )
+                )
+              )
+            );
+          }),
+          catchError(() => of({ eventos: [], estadisticas: null, esAdmin: false }))
+        );
+      }),
+      finalize(() => this.cargando = false)
+    ).subscribe({
+      next: ({ eventos, estadisticas, esAdmin }) => {
+        this.eventos = eventos;
+        this.estadisticas = estadisticas;
+        this.esAdmin = esAdmin;
+        this.generarCalendario();
+
+        // Buscar y mostrar el evento específico
+        const eventoEncontrado = eventos.find(e => e.id === eventoId);
+        if (eventoEncontrado) {
+          // Esperar un momento para que el calendario se renderice
+          setTimeout(() => {
+            this.seleccionarEvento(eventoEncontrado);
+            this.resaltarDiaEvento(eventoEncontrado.fecha);
+          }, 100);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error en la carga de datos:', error);
+      }
+    });
+
+    this.subscriptions.add(sub);
+  }
+
+  private resaltarDiaEvento(fecha: string): void {
+    const fechaEvento = new Date(fecha + 'T00:00:00');
+    this.calendarDays.forEach(dia => {
+      if (dia.fecha.getDate() === fechaEvento.getDate() &&
+        dia.fecha.getMonth() === fechaEvento.getMonth() &&
+        dia.fecha.getFullYear() === fechaEvento.getFullYear()) {
+        // Agregar clase temporal para resaltar
+        dia.esHoy = true; // Reutilizar la clase de resaltado
+      }
+    });
   }
 
   // ========== CARGA DE DATOS ==========

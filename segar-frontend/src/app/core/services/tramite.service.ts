@@ -22,6 +22,19 @@ export class TramiteService {
         catchError(this.handleError)
       );
   }
+
+  // obtiene trámites por empresa
+  getTramitesByEmpresaId(empresaId: number): Observable<TramiteDto[]> {
+    return this.http.get<TramiteDto[]>(`${this.baseUrl}/empresa/${empresaId}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  //obtiene trámites por usuario
+  getTramitesByUsuarioId(usuarioId: number): Observable<TramiteDto[]> {
+    return this.http.get<TramiteDto[]>(`${this.baseUrl}/usuario/${usuarioId}`)
+      .pipe(catchError(this.handleError));
+  }
+
   /**
    * Maneja los errores de la API
    */

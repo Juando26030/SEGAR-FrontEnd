@@ -286,7 +286,7 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
 
   verTodosTramites(): void {
     console.log('Navegar a todos los trámites');
-    this.router.navigate(['/main/busqueda-global']);
+    this.router.navigate(['/main/tramites']);
   }
 
   exportarDatos(): void {
@@ -399,6 +399,19 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     this.modalVisible = false;
     this.tramiteSeleccionadoId = null;
   }
+
+  // Método para editar trámite
+  editarTramite(tramite: any): void {
+    const id = +tramite.id;
+    console.log('Editar trámite con ID:', id);
+    console.log("El estado del tramite es: ", tramite.estado, "")
+    if (tramite.estado === 'Radicado' || tramite.estado === 'En Evaluación Técnica' || tramite.estado === 'Requiere Información') {
+      this.router.navigate(['/main/nuevo/registro/paso-2', id]);
+    } else if (tramite.estado === 'Aprobado' || tramite.estado === 'Rechazado') {
+      this.router.navigate(['/main/nuevo/registro/paso-3', id]);
+    }
+  }
+
 
 }
 

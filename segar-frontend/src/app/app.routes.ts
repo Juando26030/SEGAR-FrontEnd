@@ -32,8 +32,8 @@ import {
   ModificacionPasoTresComponent
 } from './tramites/modificación/modificación-paso-tres/modificación-paso-tres.component';
 import {
-  ModificacionPasoCuatroService
-} from './tramites/modificación/modificación-paso-cuatro/modificación-paso-cuatro.service';
+  ModificacionPasoCuatroComponent
+} from './tramites/modificación/modificación-paso-cuatro/modificación-paso-cuatro.component';
 import {
   ModificacionPasoCincoComponent
 } from './tramites/modificación/modificación-paso-cinco/modificación-paso-cinco.component';
@@ -93,7 +93,7 @@ export const routes: Routes = [
         path: 'nuevo/modificación',
         children: [
           { path: 'paso-1', component: ModificacionPasoTresComponent },
-          { path: 'paso-2/:id', component: ModificacionPasoCuatroService },
+          { path: 'paso-2/:id', component: ModificacionPasoCuatroComponent },
           { path: 'paso-3', component: ModificacionPasoCincoComponent },
           { path: '', redirectTo: 'paso-1', pathMatch: 'full' }
         ]

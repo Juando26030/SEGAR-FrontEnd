@@ -445,16 +445,16 @@
   <!-- Navigation -->
   <div class="step-navigation">
     <div class="step-indicator-nav">
-      Paso <span class="current-step">5</span> de 5
+      Paso <span class="current-step">3</span> de 3
     </div>
     <div class="flex gap-4">
       <button
-        (click)="router.navigate(['/main/nuevo/registro/paso-2'])"
+        (click)="router.navigate(['/main/tramites'])"
         class="nav-btn nav-btn-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        Paso Anterior
+        Mis Tramites
       </button>
       <button
         *ngIf="tramiteCompleto?.estado !== 'FINALIZADA'"
