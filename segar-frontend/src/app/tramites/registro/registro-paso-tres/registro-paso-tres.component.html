@@ -116,38 +116,37 @@
           </div>
         </div>
 
-        <!-- Selector de Producto con validación -->
-        <div class="mb-6 bg-blue-50 p-6 rounded-xl border border-blue-200">
-          <div class="flex items-center justify-between mb-3">
-            <label class="block text-sm font-semibold text-gray-700">
-              <i class="fas fa-box text-blue-700 mr-2"></i>
-              Producto <span class="text-red-500">*</span>
-            </label>
-            <i *ngIf="productoSeleccionado"
-               class="fas fa-check-circle text-green-500 text-xl animate-scale-in"></i>
-          </div>
-          <select
-            [(ngModel)]="productoSeleccionado"
-            name="productoSeleccionado"
-            (ngModelChange)="onFieldChange()"
-            class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-200 hover:border-blue-400 bg-white"
-            required>
-            <option value="">Seleccione un producto</option>
-            <option *ngFor="let producto of productos" [ngValue]="producto">
-              {{ producto.nombre }}
-            </option>
-          </select>
-        </div>
 
         <form #classificationFormRef="ngForm" (ngSubmit)="onClasificarProducto()" novalidate>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
+            <!-- Selector de Producto con validación -->
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 hover:shadow-md transition-all duration-200"
+                [class.border-blue-300]="!productoSeleccionado"
+                [class.border-green-500]="productoSeleccionado">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold shadow-md">1</div>
+                <h4 class="font-bold text-gray-800 text-lg flex-1">Producto</h4>
+              </div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Seleccione el producto a clasificar</label>
+              <select
+                [(ngModel)]="productoSeleccionado"
+                name="productoSeleccionado"
+                (ngModelChange)="onFieldChange()"
+                class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-200 hover:border-blue-400 bg-white"
+                required>
+                <option value="">Seleccione un producto</option>
+                <option *ngFor="let producto of productos" [ngValue]="producto">
+                  {{ producto.nombre }}
+                </option>
+              </select>
+            </div>
             <!-- Categoría del Alimento -->
             <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 hover:shadow-md transition-all duration-200"
                  [class.border-blue-300]="!classificationForm.productCategory"
                  [class.border-green-500]="classificationForm.productCategory">
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold shadow-md">1</div>
+                <div class="w-10 h-10 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold shadow-md">2</div>
                 <h4 class="font-bold text-gray-800 text-lg flex-1">Categoría del Alimento</h4>
                 <i *ngIf="classificationForm.productCategory"
                    class="fas fa-check-circle text-green-500 text-xl animate-scale-in"></i>
@@ -169,47 +168,6 @@
                 <i class="fas fa-exclamation-circle"></i>
                 La categoría del producto es requerida
               </div>
-            </div>
-
-            <!-- Nivel de Riesgo -->
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 hover:shadow-md transition-all duration-200"
-                 [class.border-blue-300]="!classificationForm.riskLevel"
-                 [class.border-green-500]="classificationForm.riskLevel">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold shadow-md">2</div>
-                <h4 class="font-bold text-gray-800 text-lg flex-1">Nivel de Riesgo</h4>
-                <i *ngIf="classificationForm.riskLevel"
-                   class="fas fa-check-circle text-green-500 text-xl animate-scale-in"></i>
-              </div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Determine el riesgo sanitario</label>
-              <select
-                [(ngModel)]="classificationForm.riskLevel"
-                name="riskLevel"
-                class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-200 bg-white"
-                [class.bg-gray-100]="riskLevelDisabled"
-                [class.cursor-not-allowed]="riskLevelDisabled"
-                required
-                [disabled]="riskLevelDisabled"
-                (ngModelChange)="onFieldChange()"
-                #riskLevel="ngModel">
-                <option value="">Seleccione el nivel de riesgo</option>
-                <option *ngFor="let risk of riskLevels; trackBy: trackByValue" [value]="risk.value">
-                  {{risk.label}}
-                </option>
-              </select>
-              <div *ngIf="riskLevel.invalid && riskLevel.touched" class="mt-2 text-red-600 text-xs flex items-center gap-1">
-                <i class="fas fa-exclamation-circle"></i>
-                El nivel de riesgo es requerido
-              </div>
-              <div *ngIf="riskLevelDisabled && mensajeReglaActiva" class="mt-3 p-3 bg-red-50 border-l-4 border-red-500 rounded">
-                <p class="text-xs text-red-800 font-semibold flex items-center gap-2">
-                  <i class="fas fa-lock"></i>
-                  {{ mensajeReglaActiva }}
-                </p>
-              </div>
-              <p *ngIf="!riskLevelDisabled" class="text-xs text-gray-600 mt-2">
-                El riesgo se determina según la composición y proceso de fabricación
-              </p>
             </div>
 
             <!-- Población Objetivo -->
@@ -277,6 +235,47 @@
                 <span>Los procesamientos marcados con ⚠️ establecerán automáticamente el nivel de riesgo en ALTO</span>
               </p>
             </div>
+          </div>
+          <!-- Nivel de Riesgo -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 hover:shadow-md transition-all duration-200 mb-8"
+               [class.border-blue-300]="!classificationForm.riskLevel"
+               [class.border-green-500]="classificationForm.riskLevel">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-blue-900 text-white rounded-full flex items-center justify-center font-bold shadow-md">5</div>
+              <h4 class="font-bold text-gray-800 text-lg flex-1">Nivel de Riesgo</h4>
+              <i *ngIf="classificationForm.riskLevel"
+                 class="fas fa-check-circle text-green-500 text-xl animate-scale-in"></i>
+            </div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Determine el riesgo sanitario</label>
+            <select
+              [(ngModel)]="classificationForm.riskLevel"
+              name="riskLevel"
+              class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-200 bg-white"
+              [class.bg-gray-100]="riskLevelDisabled"
+              [class.cursor-not-allowed]="riskLevelDisabled"
+              required
+              [disabled]="true"
+              (ngModelChange)="onFieldChange()"
+              #riskLevel="ngModel"
+              disabled>
+              <option value="">Seleccione el nivel de riesgo</option>
+              <option *ngFor="let risk of riskLevels; trackBy: trackByValue" [value]="risk.value">
+                {{risk.label}}
+              </option>
+            </select>
+            <div *ngIf="riskLevel.invalid && riskLevel.touched" class="mt-2 text-red-600 text-xs flex items-center gap-1">
+              <i class="fas fa-exclamation-circle"></i>
+              El nivel de riesgo es requerido
+            </div>
+            <div *ngIf="riskLevelDisabled && mensajeReglaActiva" class="mt-3 p-3 bg-red-50 border-l-4 border-red-500 rounded">
+              <p class="text-xs text-red-800 font-semibold flex items-center gap-2">
+                <i class="fas fa-lock"></i>
+                {{ mensajeReglaActiva }}
+              </p>
+            </div>
+            <p *ngIf="!riskLevelDisabled" class="text-xs text-gray-600 mt-2">
+              El riesgo se determina según la composición y proceso de fabricación
+            </p>
           </div>
 
           <!-- Nota Importante -->

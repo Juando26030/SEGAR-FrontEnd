@@ -249,17 +249,18 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   };
 
   readonly productCategories: OptionItem[] = [
-    { value: 'bebidas', label: 'Bebidas no alcohólicas' },
-    { value: 'lacteos', label: '⚠️ Productos lácteos (Riesgo medio mínimo)' },
-    { value: 'carnicos', label: '⚠️ Productos cárnicos (Riesgo medio mínimo)' },
-    { value: 'panificacion', label: 'Productos de panificación (Riesgo bajo)' },
-    { value: 'conservas', label: '🔴 Conservas alimenticias (Riesgo alto)' },
-    { value: 'condimentos', label: 'Condimentos y especias' },
-    { value: 'snacks', label: 'Snacks y productos de confitería' },
-    { value: 'cereales', label: 'Cereales y derivados' },
-    { value: 'aceites', label: 'Aceites y grasas (Riesgo medio)' },
-    { value: 'infantiles', label: '🔴 Alimentos infantiles (Riesgo alto automático)' },
-    { value: 'comidas-listas', label: '🔴 Comidas listas (Riesgo alto)' },
+    { value: 'panaderia', label: 'Panadería' },
+    { value: 'galleteria', label: 'Galletería' },
+    { value: 'confiteria', label: 'Confiteria' },
+    { value: 'lacteos', label: 'Lácteos y derivados' },
+    { value: 'carnicos', label: 'Productos cárnicos procesados' },
+    { value: 'jugos', label: 'Jugos' },
+    { value: 'nectares', label: 'Néctares' },
+    { value: 'no-alcoholicas', label: 'Bebidas no alcohólicas' },
+    { value: 'infantiles', label: 'bebidas infantiles' },
+    { value: 'conservas', label: 'Conservas' },
+    { value: 'salsas', label: 'salsas y aderezos' },
+    { value: 'listos-consumo', label: 'Alimentos listos para consumo' },
     { value: 'otros', label: 'Otros alimentos procesados' }
   ];
 
@@ -271,31 +272,35 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
 
   readonly targetPopulations: OptionItem[] = [
     { value: 'general', label: 'Población general' },
-    { value: 'infantil', label: '🔴 Alimentación infantil (bebés y niños) - ALTO RIESGO' },
-    { value: 'gestantes', label: '🔴 Mujeres gestantes/lactantes - ALTO RIESGO' },
-    { value: 'adultos mayores', label: '🔴 Adultos mayores - ALTO RIESGO' },
-    { value: 'deportistas', label: '⚠️ Deportistas - MEDIO RIESGO mínimo' },
-    { value: 'dietas especiales', label: '⚠️ Dietas especiales o médicas - MEDIO RIESGO mínimo' }
+    { value: 'infantil', label: 'Alimentación infantil' },
+    { value: 'gestantes', label: 'Mujeres gestantes/lactantes' },
+    { value: 'adultos-mayores', label: 'Adultos mayores' },
+    { value: 'deportistas', label: 'Deportistas' },
+    { value: 'dietas-especiales', label: 'Dietas especiales - condiciones médicas' }
   ];
 
   readonly processingTypes: OptionItem[] = [
-    // Riesgo ALTO (automático)
-    { value: 'esterilizado', label: '🔴 Esterilizado comercialmente (ALTO RIESGO)' },
-    { value: 'atmósfera modificada', label: '🔴 Atmósfera modificada (ALTO RIESGO)' },
-    { value: 'congelado', label: '🔴 Congelado (ALTO RIESGO)' },
-    { value: 'vacio', label: '🔴 Envasado al vacío con conservantes (ALTO RIESGO)' },
-    { value: 'combinado', label: '🔴 Proceso combinado térmico (ALTO RIESGO)' },
-
-    // Riesgo MEDIO
-    { value: 'pasteurizado', label: '⚠️ Pasteurizado (MEDIO RIESGO)' },
-    { value: 'refrigerado', label: '⚠️ Refrigerado (MEDIO RIESGO)' },
-    { value: 'cocido', label: '⚠️ Cocido (MEDIO RIESGO)' },
-    { value: 'fermentado', label: '⚠️ Fermentado (MEDIO RIESGO)' },
-
-    // Riesgo BAJO
-    { value: 'horneado', label: 'Horneado (Bajo riesgo)' },
-    { value: 'deshidratado', label: 'Deshidratado (Bajo riesgo)' },
-    { value: 'secado natural', label: 'Secado natural (Bajo riesgo)' },
+    
+    { value: 'horneado', label: 'Horneado' },
+    { value: 'deshidratado', label: 'Deshidratado' },
+    { value: 'relleno', label: 'Relleno' },
+    { value: 'cubierto', label: 'Cubierto' },
+    { value: 'vacio', label: 'Envasado al vacío' },
+    { value: 'frito', label: 'Frito' },
+    { value: 'congelado', label: 'Congelado' },
+    { value: 'pasteurizado', label: 'Pasteurizado' },
+    { value: 'refrigerado', label: 'Refrigerado' },
+    { value: 'fermentado', label: 'Fermentado' },
+    { value: 'polvo', label: 'En polvo' },
+    { value: 'embutido', label: 'Embutido' },
+    { value: 'cocido', label: 'Cocido' },
+    { value: 'curado', label: 'Curado' },
+    { value: 'precocido', label: 'Precocido congelado' },
+    { value: 'envasado', label: 'Envasado' },
+    { value: 'enlatado', label: 'Enlatado' },
+    { value: 'esterilizado', label: 'Esterilizados' },
+    { value: 'atmosfera', label: 'En atmósfera modificada' },
+    { value: 'secado-natural', label: 'Secado natural' },
 
     { value: 'otro', label: 'Otro método' }
   ];
@@ -474,155 +479,61 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     const procesamiento = this.classificationForm.processingType?.toLowerCase() || '';
     const categoria = this.classificationForm.productCategory?.toLowerCase() || '';
     const riesgoActual = this.classificationForm.riskLevel;
-
-    // ============================================
-    // REGLA 1: POBLACIÓN VULNERABLE → ALTO (RSA) AUTOMÁTICO
-    // ============================================
-    const poblacionesVulnerables = [
-      'infantil', 'bebés', 'bebes', 'niños', 'ninos',
-      'gestantes', 'gestante', 'lactantes', 'lactante',
-      'adultos mayores', 'adulto mayor', 'tercera-edad', 'especial'
-    ];
-
-    if (poblacionesVulnerables.some(pob => poblacion.includes(pob))) {
-      this.classificationForm.riskLevel = 'alto';
-      this.riskLevelDisabled = true;
-      this.riskLevelForzado = 'alto';
-      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Población vulnerable requiere Registro Sanitario (RSA) - Riesgo ALTO obligatorio [Res. 719/2015]';
-      return;
-    }
-
-    // ============================================
-    // REGLA ESPECIAL: DEPORTISTAS Y DIETAS ESPECIALES → MEDIO MÍNIMO
-    // ============================================
-    const poblacionesEspeciales = ['deportistas', 'deportista', 'dietas especiales', 'dieta especial', 'dietas médicas'];
-
-    if (poblacionesEspeciales.some(pob => poblacion.includes(pob))) {
-      // Si el riesgo es bajo, lo eleva a medio
-      if (!riesgoActual || riesgoActual === 'bajo') {
-        this.classificationForm.riskLevel = 'medio';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Población especial requiere mínimo Permiso Sanitario (PSA) - Riesgo MEDIO mínimo';
-        return;
+    
+    // 🧁 Panadería / Galletería / Confitería
+    if (categoria.includes('panaderia') || categoria.includes('galleteria') || categoria.includes('confiteria')) {
+      if (procesamiento.includes('horneado') || procesamiento.includes('deshidratado')) {
+        
+        this.classificationForm.riskLevel = "bajo";
+      } else if (procesamiento.includes('relleno') || procesamiento.includes('cubierto') || procesamiento.includes('vacio')) {
+        this.classificationForm.riskLevel = "medio";
+      } else if (poblacion.includes('infantil') || poblacion.includes('sensible') || procesamiento.includes('fritos') || procesamiento.includes('congelados')) {
+        this.classificationForm.riskLevel = "alto";
       }
     }
 
-    // ============================================
-    // REGLA 2: CATEGORÍAS DE ALTO RIESGO AUTOMÁTICO
-    // ============================================
-    const categoriasAltoRiesgo = [
-      'infantiles', 'alimentos infantiles', 'formula infantil',
-      'conservas', 'comidas listas', 'comidas-listas',
-      'esterilizados', 'productos esterilizados'
-    ];
-
-    if (categoriasAltoRiesgo.some(cat => categoria.includes(cat))) {
-      this.classificationForm.riskLevel = 'alto';
-      this.riskLevelDisabled = true;
-      this.riskLevelForzado = 'alto';
-      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Esta categoría requiere Registro Sanitario (RSA) - Riesgo ALTO por complejidad sanitaria';
-      return;
-    }
-
-    // ============================================
-    // REGLA 3: PROCESAMIENTO DE ALTO RIESGO → ALTO AUTOMÁTICO
-    // ============================================
-    const procesamientosAltoRiesgo = [
-      'esterilizado', 'esterilización', 'esterilizacion',
-      'atmósfera modificada', 'atmosfera modificada', 'map',
-      'congelado', 'congelación', 'congelacion', 'ultra congelado', 'ultracongelado',
-      'vacio', 'vacío', 'al vacio', 'al vacío',
-      'combinado', 'proceso combinado', 'térmico combinado'
-    ];
-
-    if (procesamientosAltoRiesgo.some(proc => procesamiento.includes(proc))) {
-      this.classificationForm.riskLevel = 'alto';
-      this.riskLevelDisabled = true;
-      this.riskLevelForzado = 'alto';
-      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Procesamiento de alto riesgo requiere Registro Sanitario (RSA) - Riesgo ALTO obligatorio';
-      return;
-    }
-
-    // ============================================
-    // REGLA 4: PROCESAMIENTOS DE RIESGO MEDIO → MEDIO MÍNIMO
-    // ============================================
-    const procesamientosMedioRiesgo = [
-      'pasteurizado', 'pasteurización',
-      'refrigerado', 'refrigeración',
-      'cocido', 'cocción',
-      'fermentado', 'fermentación'
-    ];
-
-    if (procesamientosMedioRiesgo.some(proc => procesamiento.includes(proc))) {
-      // Si el riesgo es bajo, lo eleva a medio
-      if (!riesgoActual || riesgoActual === 'bajo') {
-        this.classificationForm.riskLevel = 'medio';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Este procesamiento requiere mínimo Permiso Sanitario (PSA) - Riesgo MEDIO mínimo';
-        return;
+    // 🥛 Lácteos y derivados
+    if (categoria.includes('lacteos')) {
+      if (poblacion.includes('infantil') || poblacion.includes('gestante') || poblacion.includes('adulto mayor') ||
+          procesamiento.includes('fermentado') || procesamiento.includes('polvo')) {
+        this.classificationForm.riskLevel = "alto";
+      } else if (procesamiento.includes('pasteurizado') || procesamiento.includes('refrigerado')) {
+        this.classificationForm.riskLevel = "medio";
       }
     }
 
-    // ============================================
-    // REGLA 5: CATEGORÍAS CON RIESGO MEDIO MÍNIMO
-    // ============================================
-    const categoriasMedioRiesgo = [
-      'lacteos', 'lácteos', 'derivados lácteos', 'derivados lacteos',
-      'carnicos', 'cárnicos', 'productos cárnicos', 'productos carnicos',
-      'aceites', 'grasas', 'aceites y grasas'
-    ];
-
-    const esCategoriaMediaRiesgo = categoriasMedioRiesgo.some(cat => categoria.includes(cat));
-
-    if (esCategoriaMediaRiesgo) {
-      // No pueden ser de riesgo bajo
-      if (riesgoActual === 'bajo') {
-        this.classificationForm.riskLevel = 'medio';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Esta categoría NO puede ser de riesgo bajo - Riesgo MEDIO mínimo obligatorio';
-        return;
-      }
-
-      // Si es riesgo medio, se eleva a alto
-      if (riesgoActual === 'medio') {
-        this.classificationForm.riskLevel = 'alto';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Lácteos/Cárnicos con riesgo medio se elevan a Registro Sanitario (RSA) - Riesgo ALTO';
-        return;
+    // 🥩 Productos cárnicos procesados
+    if (categoria.includes('carnicos')) {
+      if (procesamiento.includes('listos-consumo') || procesamiento.includes('precocido') || procesamiento.includes('congelado')) {
+        this.classificationForm.riskLevel = "alto";
+      } else if (procesamiento.includes('cocido') || procesamiento.includes('curado') || procesamiento.includes('embutido')) {
+        this.classificationForm.riskLevel = "medio";
       }
     }
 
-    // ============================================
-    // REGLA 6: CATEGORÍAS DE RIESGO BAJO PREDEFINIDO
-    // ============================================
-    const categoriasRiesgoBajo = [
-      'panificacion', 'panificación', 'panadería', 'panaderia',
-      'galletería', 'galleteria', 'confitería', 'confiteria'
-    ];
-
-    if (categoriasRiesgoBajo.some(cat => categoria.includes(cat))) {
-      // Solo si no hay otras reglas que lo eleven
-      if (!riesgoActual && poblacion === 'general' &&
-          (procesamiento === 'horneado' || procesamiento === 'deshidratado' || procesamiento === 'secado natural')) {
-        this.classificationForm.riskLevel = 'bajo';
-        this.riskLevelDisabled = false;
-        this.mensajeReglaActiva = '';
-        return;
+    // 🍹 Jugos, néctares, bebidas
+    if (categoria.includes('jugos') || categoria.includes('nectares') || categoria.includes('no-alcohólicas') || categoria.includes('infantiles')) {
+      if (poblacion.includes('infantil')) {
+        this.classificationForm.riskLevel = "alto";
+      } else if (procesamiento.includes('pasteurizado') || procesamiento.includes('refrigerado')) {
+        this.classificationForm.riskLevel = "medio";
       }
     }
 
-    // ============================================
-    // SI NO APLICA NINGUNA REGLA AUTOMÁTICA
-    // ============================================
-    this.riskLevelDisabled = false;
-    this.riskLevelForzado = '';
-    this.mensajeReglaActiva = '';
-
-    // Pero validar coherencia si ya hay un valor seleccionado
-    if (riesgoActual) {
-      this.validarCoherenciaRiesgo();
+    // 🥫 Conservas, salsas y aderezos
+    if (categoria.includes('conservas') || categoria.includes('salsas')) {
+      if (procesamiento.includes('enlatado') || procesamiento.includes('frasco')) {
+        this.classificationForm.riskLevel = "medio";
+      } else if (procesamiento.includes('esterilizado') || procesamiento.includes('atmósfera modificada')) {
+        this.classificationForm.riskLevel = "alto";
+      }
+    }
+    
+    if (this.classificationForm.riskLevel == ''){
+      this.classificationForm.riskLevel = "alto";
     }
   }
+  
 
   /**
    * Valida que el riesgo seleccionado manualmente sea coherente con la categoría
