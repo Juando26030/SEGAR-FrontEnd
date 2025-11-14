@@ -13,7 +13,8 @@ import { environment } from '../../../../environments/environment';
 import { ProductoService } from '../../../core/services/producto.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { DocumentoService } from '../../../core/services/documento.service';
-import { catchError, switchMap } from 'rxjs';
+import { catchError, of, switchMap, tap } from 'rxjs';
+import { DocumentService } from '../../../core/services/document.service';
 
 
 interface OptionItem {
@@ -98,7 +99,7 @@ interface TramiteResponse {
 })
 export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
   activeTab = 'clasificacion';
-
+  documentosCargados: { documentoId: string; archivo: File }[] = [];
 
   // Propiedades para el sistema de documentos dinámicos
   tramiteId: number = 1; // TODO: obtener desde ruta o contexto
@@ -121,7 +122,7 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
   constructor(
     private tramiteService: TramiteInvimaService,
     private clasificacionProductoService: ClasificacionProductoService,
-    private documentoService: DocumentoService,
+    private documentoService: DocumentService,
     private http: HttpClient,
     private authService: AuthService,
     private router: Router,
@@ -229,36 +230,33 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
     this.clasificacionCargada = false;
 
     this.clasificacionProductoService.obtenerClasificacion(productoId).pipe(
-      // Si la clasificación llega correctamente:
-      switchMap((clasificacion) => {
-        console.log('✅ Clasificación cargada desde el backend:', clasificacion);
-        this.autoLlenarFormularioDesdeClasificacion(clasificacion);
-        this.clasificacionCargada = true;
 
-        // Después de actualizar la UI, llamar al segundo servicio
-        return this.documentoService.getDocumentoPorTramite(productoId);
-      }),
+    // Si la clasificación llega correctamente:
+    tap((clasificacion) => {
+      console.log('✅ Clasificación cargada desde el backend:', clasificacion);
+      this.autoLlenarFormularioDesdeClasificacion(clasificacion);
+      this.clasificacionCargada = true;
+    }),
 
-      // Si la clasificación NO existe:
-      catchError((error) => {
-        console.warn('⚠️ No se encontró clasificación previa para este producto:', error);
-        this.autoLlenarFormularioDesdeProducto();
+    // Manejar error SIN llamar al servicio de documentos
+    catchError((error) => {
+      console.warn('⚠️ No se encontró clasificación previa para este producto:', error);
+      this.autoLlenarFormularioDesdeProducto();
 
-        // Igual llamamos al segundo servicio
-        return this.documentoService.getDocumentoPorTramite(productoId);
-      })
+      // Como ya no quieres llamar al otro servicio, emitimos un valor vacío
+      return of(null);
+    })
 
-    ).subscribe({
-      next: (documentos) => {
-        console.log('📄 Documentos cargados:', documentos);
-        this.documentosTramite = documentos;
-        this.cargandoClasificacion = false;
-      },
-      error: (err) => {
-        console.error('❌ Error obteniendo documentos:', err);
-        this.cargandoClasificacion = false;
-      }
-    });
+  ).subscribe({
+    next: () => {
+      this.cargandoClasificacion = false;
+    },
+    error: (err) => {
+      console.error('❌ Error inesperado:', err);
+      this.cargandoClasificacion = false;
+    }
+  });
+
   }
 
   /**
@@ -1119,8 +1117,24 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
   }
 
   onDocumentoCompletado(evento: { documentoId: string; datos: any }): void {
-    console.log('Documento completado:', evento);
-    // Aquí se podría guardar en el backend o en el estado local
+    const { documentoId, datos } = evento;
+    const nuevoDoc = { documentoId, archivo: datos.archivo };
+
+    // Verificar si el documento ya existe
+    const index = this.documentosCargados.findIndex(d => d.documentoId === documentoId);
+
+    if (index !== -1) {
+      // Si existe, reemplazar el documento
+      this.documentosCargados[index] = nuevoDoc;
+      console.log(`🔁 Documento "${documentoId}" actualizado.`);
+    } else {
+      // Si no existe, agregarlo a la lista
+      this.documentosCargados.push(nuevoDoc);
+      console.log(`✅ Documento "${documentoId}" agregado.`);
+    }
+
+    // Mostrar la lista completa
+    console.log('📄 Lista actualizada de documentos:', this.documentosCargados);
   }
 
   onTodosDocumentosCompletos(completos: boolean): void {
@@ -1161,19 +1175,16 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
             usuarioId: usuarioId
           };
 
-          const url = `${environment.apiUrl}/api/tramites/create`;
+          const url = `${environment.apiUrl}/api/tramites/revenue`;
 
-          this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
-            next: (response: TramiteResponse) => {
-              console.log('✅ Trámite creado exitosamente:', response);
+          this.http.post(url, body, { headers }).subscribe({
+            next: () => {
+              console.log('✅ Trámite creado exitosamente:');
               alert('✅ Trámite radicado correctamente.');
-              const tramiteId = response.id;
               // Navegar al paso 4
-              this.router.navigate(['main/nuevo/registro/paso-2', tramiteId]);
+              console.log('viajando a main/tramites');
             },
             error: (error) => {
-              console.error('❌ Error al radicar el trámite:', error);
-              alert('❌ Ocurrió un error al radicar el trámite.');
             }
           });
         } else {
@@ -1186,6 +1197,22 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
         alert('Error al obtener el ID del usuario.');
       }
     });
+
+
+    const token = this.authService.getToken();
+
+    for (const doc of this.documentosCargados) {
+      console.log("documentos a cargar:", doc);
+      
+      this.documentoService
+        .cargarDocumento(doc.documentoId, doc.archivo, token!, this.productoSeleccionado)
+        .subscribe({
+          next: (res) => console.log(`📤 Documento ${doc.documentoId} cargado correctamente`),
+          error: (err) => console.error(`❌ Error al subir documento ${doc.documentoId}:`, err),
+          complete: () => console.log(`✅ Flujo completado para ${doc.documentoId}`)
+        });
+    }
+    this.router.navigate(['main/tramites' ]);
   }
 
 
