@@ -892,8 +892,16 @@ export class UsuariosComponent implements OnInit {
 
   cambiarPassword() {
     if (!this.usuarioPasswordModal || !this.nuevaPassword) {
+      console.warn('⚠️ No se puede cambiar contraseña: datos faltantes');
       return;
     }
+
+    console.log('🔑 ========== CAMBIAR CONTRASEÑA ==========');
+    console.log('🔑 Usuario ID:', this.usuarioPasswordModal.id);
+    console.log('🔑 Username:', this.usuarioPasswordModal.username);
+    console.log('🔑 Email:', this.usuarioPasswordModal.email);
+    console.log('🔑 Rol:', this.usuarioPasswordModal.role);
+    console.log('🔑 =========================================');
 
     this.guardando = true;
     this.limpiarMensajes();
@@ -903,13 +911,20 @@ export class UsuariosComponent implements OnInit {
       this.nuevaPassword
     ).subscribe({
       next: () => {
+        console.log('✅ Contraseña actualizada exitosamente');
         this.mensajeExito = `Contraseña actualizada para "${this.usuarioPasswordModal!.username}"`;
         this.cerrarModalPassword();
         this.guardando = false;
         this.autoOcultarMensaje();
       },
       error: (error) => {
-        console.error('❌ Error al cambiar contraseña:', error);
+        console.error('❌ ========== ERROR AL CAMBIAR CONTRASEÑA ==========');
+        console.error('❌ Status:', error.status);
+        console.error('❌ Status Text:', error.statusText);
+        console.error('❌ Error completo:', error);
+        console.error('❌ Error.error:', error.error);
+        console.error('❌ Mensaje:', error.error?.message || error.message);
+        console.error('❌ ==================================================');
         this.mensajeError = 'Error al cambiar contraseña: ' + (error.error?.message || error.message);
         this.guardando = false;
       }
