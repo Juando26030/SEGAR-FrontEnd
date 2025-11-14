@@ -40,6 +40,17 @@
     </div>
   </div>
 
+  <!-- Mensaje de modo solo lectura -->
+  <div *ngIf="soloLectura" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r-lg">
+    <div class="flex items-start gap-3">
+      <i class="fas fa-lock text-blue-600 text-xl mt-0.5"></i>
+      <div>
+        <h4 class="font-bold text-blue-900 mb-1">Documentación bloqueada</h4>
+        <p class="text-blue-800 text-sm">Los documentos están en modo solo lectura y no pueden ser modificados en este momento.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Vista Lista de Documentos -->
   <div *ngIf="vistaActual === 'lista'" class="documentos-lista">
     <!-- Controles de filtrado y búsqueda -->
@@ -86,9 +97,11 @@
             class="documento-card"
             [ngClass]="{
               'documento-completo': estadoDocumentos[documento.id].completo,
-              'documento-obligatorio': documento.obligatorio
+              'documento-obligatorio': documento.obligatorio,
+              'cursor-not-allowed': soloLectura,
+              'opacity-75': soloLectura
             }"
-            (click)="seleccionarDocumento(documento)"
+            (click)="!soloLectura && seleccionarDocumento(documento)"
           >
             <!-- Badge de estado -->
             <div class="documento-badges">
@@ -138,9 +151,13 @@
             </div>
 
             <!-- Botón de acción -->
-            <button class="documento-btn" (click)="seleccionarDocumento(documento); $event.stopPropagation()">
-              <i class="fas" [ngClass]="estadoDocumentos[documento.id].completo ? 'fa-edit' : (documento.tipo === 'externo' ? 'fa-paperclip' : 'fa-plus-circle')"></i>
-              {{ estadoDocumentos[documento.id].completo ? 'Editar' : (documento.tipo === 'externo' ? 'Adjuntar' : 'Completar') }}
+            <button class="documento-btn"
+                    (click)="seleccionarDocumento(documento); $event.stopPropagation()"
+                    [disabled]="soloLectura"
+                    [class.cursor-not-allowed]="soloLectura"
+                    [class.opacity-50]="soloLectura">
+              <i class="fas" [ngClass]="soloLectura ? 'fa-lock' : (estadoDocumentos[documento.id].completo ? 'fa-edit' : (documento.tipo === 'externo' ? 'fa-paperclip' : 'fa-plus-circle'))"></i>
+              {{ soloLectura ? 'Bloqueado' : (estadoDocumentos[documento.id].completo ? 'Editar' : (documento.tipo === 'externo' ? 'Adjuntar' : 'Completar')) }}
             </button>
           </div>
         </div>

@@ -1,0 +1,116 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="cerrarModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="header-content">
+        <div class="header-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h2 class="modal-title">Detalle del Producto</h2>
+      </div>
+      <button class="btn-close" (click)="cerrarModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Cargando información del producto...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="error && !isLoading">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h3>Error al cargar</h3>
+      <p>{{ error }}</p>
+      <button class="btn-retry" (click)="cargarDetalle()">Reintentar</button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-body" *ngIf="detalle && !isLoading && !error">
+      <!-- Información General -->
+      <div class="section">
+        <h3 class="section-title">
+          <i class="fas fa-info-circle"></i>
+          Información General
+        </h3>
+        <div class="info-grid">
+          <div class="info-item full-width">
+            <label>
+              <i class="fas fa-tag"></i>
+              Nombre del Producto:
+            </label>
+            <span class="producto-nombre">{{ detalle.nombre }}</span>
+          </div>
+          <div class="info-item full-width">
+            <label>
+              <i class="fas fa-align-left"></i>
+              Descripción:
+            </label>
+            <span class="producto-descripcion">{{ detalle.descripcion }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información Técnica -->
+      <div class="section">
+        <h3 class="section-title">
+          <i class="fas fa-cogs"></i>
+          Información Técnica
+        </h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>
+              <i class="fas fa-barcode"></i>
+              Referencia:
+            </label>
+            <span>{{ detalle.referencia }}</span>
+          </div>
+          <div class="info-item">
+            <label>
+              <i class="fas fa-industry"></i>
+              Fabricante:
+            </label>
+            <span>{{ detalle.fabricante }}</span>
+          </div>
+          <div class="info-item full-width">
+            <label>
+              <i class="fas fa-clipboard-list"></i>
+              Especificaciones:
+            </label>
+            <div class="especificaciones-content">
+              {{ detalle.especificaciones }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Identificación -->
+      <div class="section">
+        <h3 class="section-title">
+          <i class="fas fa-hashtag"></i>
+          Identificación
+        </h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>
+              <i class="fas fa-key"></i>
+              ID del Producto:
+            </label>
+            <span class="producto-id">#{{ detalle.id }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer" *ngIf="detalle && !isLoading && !error">
+      <button class="btn-secondary" (click)="cerrarModal()">
+        <i class="fas fa-times"></i>
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -79,7 +79,7 @@ interface HelpDocument {
 })
 export class RegistroPasoCuatroComponent implements OnInit {
   activeTab = 'seguimiento';
-  private tramiteId: number = 0; // Inicializa en 0
+  tramiteId: number = 0; // Inicializa en 0, debe ser público para acceder en el template
 
   constructor(private paso4: RegistroPasoCuatroService, private route: ActivatedRoute) {} // Inyecta ActivatedRoute
 
@@ -365,4 +365,10 @@ export class RegistroPasoCuatroComponent implements OnInit {
   trackByHelpDoc(index: number, doc: HelpDocument): string {
     return doc.name;
   }
+
+  canContinueToNextStep(): boolean {
+    return this.trackingInfo.currentStatus === 'Aprobado' ||
+      this.trackingInfo.currentStatus === 'Rechazado';
+  }
+
 }

@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+          <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-lg flex items-center justify-center">
             <i class="fas fa-utensils text-white"></i>
           </div>
           Productos Alimenticios
@@ -80,10 +80,10 @@
   <!-- Grid de productos mejorado -->
   <div *ngIf="!cargando && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <div *ngFor="let producto of productos"
-         class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-300 transform hover:-translate-y-1">
+         class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-cyan-300 transform hover:-translate-y-1">
 
       <!-- Header de la tarjeta con gradiente -->
-      <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4 relative overflow-hidden">
+      <div class="bg-gradient-to-r from-cyan-500 to-cyan-400 p-4 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
         <div class="absolute bottom-0 left-0 w-20 h-20 bg-white opacity-10 rounded-full -ml-10 -mb-10"></div>
 
@@ -96,12 +96,6 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <button class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all duration-200 backdrop-blur-sm">
-              <i class="fas fa-edit text-white text-sm"></i>
-            </button>
-            <button class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all duration-200 backdrop-blur-sm">
-              <i class="fas fa-ellipsis-v text-white text-sm"></i>
-            </button>
           </div>
         </div>
       </div>
@@ -109,63 +103,23 @@
       <!-- Contenido de la tarjeta -->
       <div class="p-5 space-y-4">
         <!-- Descripción -->
-        <div class="border-l-4 border-blue-500 pl-3">
+        <div class="border-l-4 border-cyan-500 pl-3">
           <p class="text-gray-700 text-sm leading-relaxed line-clamp-3">{{ producto.descripcion }}</p>
-        </div>
-
-        <!-- Detalles del producto -->
-        <div class="space-y-3">
-          <!-- Referencia -->
-          <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200">
-            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-barcode text-blue-600 text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs text-gray-500 font-medium">Referencia</p>
-              <p class="text-sm font-semibold text-gray-900 truncate">{{ producto.referencia }}</p>
-            </div>
-          </div>
-
-          <!-- Fabricante -->
-          <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200">
-            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-industry text-purple-600 text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs text-gray-500 font-medium">Fabricante</p>
-              <p class="text-sm font-semibold text-gray-900 truncate">{{ producto.fabricante }}</p>
-            </div>
-          </div>
-
-          <!-- Especificaciones -->
-          <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200">
-            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-clipboard-list text-orange-600 text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs text-gray-500 font-medium">Especificaciones</p>
-              <p class="text-sm font-semibold text-gray-900 truncate">{{ producto.especificaciones }}</p>
-            </div>
-          </div>
         </div>
 
         <!-- Footer con acciones -->
         <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-          <button class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
+          <button
+            (click)="verDetalleProducto(producto)"
+            class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200">
             <i class="fas fa-eye"></i>
             <span>Ver detalles</span>
           </button>
-
-          <div class="flex items-center gap-2">
-            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-              Activo
-            </span>
-          </div>
         </div>
       </div>
 
       <!-- Efecto hover -->
-      <div class="absolute inset-0 border-2 border-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      <div class="absolute inset-0 border-2 border-cyan-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
     </div>
   </div>
 
@@ -184,3 +138,11 @@
     </button>
   </div>
 </div>
+
+<!-- Modal de detalles del producto -->
+<app-producto-detalle-modal
+  [productoId]="productoSeleccionadoId"
+  [isVisible]="modalVisible"
+  (cerrar)="cerrarModal()">
+</app-producto-detalle-modal>
+

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
 
 import {
 	ResolucionService,
@@ -70,7 +69,7 @@ export class RegistroPasoCincoComponent implements OnInit {
 
 	// Estados del componente
 	cargando = false;
-	tramiteId: number | null = null;
+	tramiteId: number = 0; // Inicializa en 0 como en paso cuatro
 
 	// Datos del backend
 	tramiteCompleto: TramiteCompleto | null = null;
@@ -238,88 +237,79 @@ export class RegistroPasoCincoComponent implements OnInit {
 		private tramiteEstadoService: TramiteEstadoService
 	) {}
 
-	async ngOnInit(): Promise<void> {
-		// Obtener el ID del trámite desde la ruta o desde el servicio de estado
-		this.tramiteId = this.obtenerTramiteId();
-
-		if (this.tramiteId) {
-			await this.cargarDatosTramite();
-		} else {
-			this.errorMessage = 'No se encontró un trámite válido para consultar la resolución.';
-		}
+	ngOnInit(): void {
+		// Obtener tramiteId desde la ruta de forma reactiva
+		this.route.params.subscribe(params => {
+			this.tramiteId = +params['id']; // Asume que la ruta es /paso-5/:id
+			if (this.tramiteId) {
+				this.cargarDatosTramite();
+			} else {
+				console.error('No se proporcionó un ID de trámite válido');
+				this.errorMessage = 'No se encontró un trámite válido para consultar la resolución.';
+			}
+		});
 	}
 
-	private obtenerTramiteId(): number | null {
-		// Intentar obtener desde parámetros de ruta
-		const routeId = this.route.snapshot.paramMap.get('id');
-		if (routeId) {
-			return parseInt(routeId, 10);
-		}
-
-		// Para efectos de demostración, usar un ID simulado
-		// En producción, esto vendría del estado persistido o parámetros de ruta
-		return 1; // ID simulado para pruebas
-	}
-
-	private async cargarDatosTramite(): Promise<void> {
+	private cargarDatosTramite(): void {
 		if (!this.tramiteId) return;
 
 		this.cargando = true;
 		this.errorMessage = '';
 
-		try {
-			// Intentar cargar datos reales del backend
-			try {
-				// Cargar información completa del trámite
-				this.tramiteCompleto = await firstValueFrom(
-					this.resolucionService.obtenerTramiteCompleto(this.tramiteId)
-				);
+		// Cargar información completa del trámite
+		this.resolucionService.obtenerTramiteCompleto(this.tramiteId).subscribe({
+			next: (tramite) => {
+				this.tramiteCompleto = tramite;
+				console.log('Trámite completo cargado:', tramite);
+			},
+			error: (error) => {
+				console.error('Error cargando información del trámite:', error);
+				this.cargarDatosSimulados();
+			}
+		});
 
-				// Cargar resolución
-				this.resolucion = await firstValueFrom(
-					this.resolucionService.obtenerResolucion(this.tramiteId)
-				);
+		// Cargar resolución
+		this.resolucionService.obtenerResolucion(this.tramiteId).subscribe({
+			next: (resolucion) => {
+				this.resolucion = resolucion;
+				console.log('Resolución cargada:', resolucion);
 
 				// Si está aprobado, cargar registro sanitario
-				if (this.resolucion.estado === 'APROBADA') {
-					try {
-						this.registroSanitario = await firstValueFrom(
-							this.resolucionService.obtenerRegistroSanitario(this.tramiteId)
-						);
-					} catch (error) {
-						console.warn('Registro sanitario no disponible aún:', error);
-					}
+				if (resolucion.estado === 'APROBADA') {
+					this.resolucionService.obtenerRegistroSanitario(this.tramiteId).subscribe({
+						next: (registro) => {
+							this.registroSanitario = registro;
+							console.log('Registro sanitario cargado:', registro);
+						},
+						error: (error) => {
+							console.warn('Registro sanitario no disponible aún:', error);
+						}
+					});
 				}
-
-				// Cargar historial
-				this.historial = await firstValueFrom(
-					this.resolucionService.obtenerHistorial(this.tramiteId)
-				);
-
-				console.log('Datos del trámite cargados desde backend:', {
-					tramite: this.tramiteCompleto,
-					resolucion: this.resolucion,
-					registro: this.registroSanitario,
-					historial: this.historial
-				});
-			} catch (backendError: any) {
-				console.warn('Backend no disponible o sin datos, usando datos de demostración:', backendError);
-
-				// Usar datos de demostración para mostrar la funcionalidad
-				this.cargarDatosDemostracion();
-
-				this.mensajeExito = '📋 Mostrando datos de demostración - El backend está siendo configurado';
+			},
+			error: (error) => {
+				console.error('Error cargando resolución:', error);
+				this.cargarDatosSimulados();
 			}
+		});
 
-		} catch (error: any) {
-			console.error('Error general cargando datos del trámite:', error);
-			this.errorMessage = error.message || 'Error al cargar la información del trámite.';
-		} finally {
-			this.cargando = false;
-		}
+		// Cargar historial
+		this.resolucionService.obtenerHistorial(this.tramiteId).subscribe({
+			next: (historial) => {
+				this.historial = historial;
+				console.log('Historial cargado:', historial);
+			},
+			error: (error) => {
+				console.error('Error cargando historial:', error);
+			}
+		});
+
+		this.cargando = false;
 	}
 
-	private cargarDatosDemostracion(): void {
+	private cargarDatosSimulados(): void {
+		console.log('Cargando datos simulados para demostración');
+
 		// Obtener datos del trámite en proceso para personalizar la demostración
 		const tramiteEnProceso = this.tramiteEstadoService.getTramiteActual();
 
@@ -410,34 +400,32 @@ export class RegistroPasoCincoComponent implements OnInit {
 		});
 	}
 
-	async descargarResolucion(): Promise<void> {
+	descargarResolucion(): void {
 		if (!this.tramiteId) return;
 
-		try {
-			const blob = await firstValueFrom(
-				this.resolucionService.descargarResolucion(this.tramiteId)
-			);
-
-			this.descargarArchivo(blob, `resolucion-${this.resolucion?.numeroResolucion || this.tramiteId}.pdf`);
-		} catch (error: any) {
-			console.error('Error descargando resolución:', error);
-			alert('Error al descargar la resolución: ' + (error.message || 'Error desconocido'));
-		}
+		this.resolucionService.descargarResolucion(this.tramiteId).subscribe({
+			next: (blob) => {
+				this.descargarArchivo(blob, `resolucion-${this.resolucion?.numeroResolucion || this.tramiteId}.pdf`);
+			},
+			error: (error) => {
+				console.error('Error descargando resolución:', error);
+				alert('Error al descargar la resolución: ' + (error.message || 'Error desconocido'));
+			}
+		});
 	}
 
-	async descargarRegistroSanitario(): Promise<void> {
+	descargarRegistroSanitario(): void {
 		if (!this.tramiteId || !this.registroSanitario) return;
 
-		try {
-			const blob = await firstValueFrom(
-				this.resolucionService.descargarRegistroSanitario(this.tramiteId)
-			);
-
-			this.descargarArchivo(blob, `registro-sanitario-${this.registroSanitario.numeroRegistro}.pdf`);
-		} catch (error: any) {
-			console.error('Error descargando registro sanitario:', error);
-			alert('Error al descargar el registro sanitario: ' + (error.message || 'Error desconocido'));
-		}
+		this.resolucionService.descargarRegistroSanitario(this.tramiteId).subscribe({
+			next: (blob) => {
+				//this.descargarArchivo(blob, `registro-sanitario-${this.registroSanitario.numeroRegistro}.pdf`);
+			},
+			error: (error) => {
+				console.error('Error descargando registro sanitario:', error);
+				alert('Error al descargar el registro sanitario: ' + (error.message || 'Error desconocido'));
+			}
+		});
 	}
 
 	private descargarArchivo(blob: Blob, nombreArchivo: string): void {
@@ -449,24 +437,23 @@ export class RegistroPasoCincoComponent implements OnInit {
 		window.URL.revokeObjectURL(url);
 	}
 
-	async finalizarTramite(): Promise<void> {
+	finalizarTramite(): void {
 		if (!this.tramiteId) return;
 
 		if (confirm('¿Está seguro de que desea finalizar este trámite? Esta acción no se puede deshacer.')) {
-			try {
-				await firstValueFrom(
-					this.resolucionService.finalizarTramite(this.tramiteId)
-				);
+			this.resolucionService.finalizarTramite(this.tramiteId).subscribe({
+				next: () => {
+					this.mensajeExito = 'Trámite finalizado exitosamente.';
+					this.tramiteEstadoService.actualizarEstado('FINALIZADA');
 
-				this.mensajeExito = 'Trámite finalizado exitosamente.';
-				this.tramiteEstadoService.actualizarEstado('FINALIZADA');
-
-				// Recargar datos
-				await this.cargarDatosTramite();
-			} catch (error: any) {
-				console.error('Error finalizando trámite:', error);
-				this.errorMessage = error.message || 'Error al finalizar el trámite.';
-			}
+					// Recargar datos
+					this.cargarDatosTramite();
+				},
+				error: (error) => {
+					console.error('Error finalizando trámite:', error);
+					this.errorMessage = error.message || 'Error al finalizar el trámite.';
+				}
+			});
 		}
 	}
 
@@ -476,7 +463,7 @@ export class RegistroPasoCincoComponent implements OnInit {
 
 	nuevaSolicitud(): void {
 		this.tramiteEstadoService.limpiarTramite();
-		this.router.navigate(['/main/nuevo/registro/paso-1']);
+		this.router.navigate(['/main/nuevo/tramite']);
 	}
 
 	// Métodos de utilidad

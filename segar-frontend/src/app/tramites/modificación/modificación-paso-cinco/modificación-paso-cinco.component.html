@@ -1,0 +1,470 @@
+<div class="max-w-4xl mx-auto p-6">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Paso 5: Resolución y Cumplimiento</h2>
+  <p class="text-gray-600 mb-8">Consulta el estado final de su trámite y gestione su registro sanitario</p>
+
+  <!-- Loading principal -->
+  <div *ngIf="cargando" class="text-center py-12">
+    <div class="inline-flex items-center">
+      <svg class="animate-spin h-12 w-12 text-blue-600 mr-4" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-xl text-gray-600">Consultando estado del trámite...</span>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ errorMessage }}</p>
+        <div class="mt-3">
+          <button class="bg-red-100 hover:bg-red-200 text-red-800 text-sm px-3 py-1 rounded"
+                  (click)="consultarNuevoEstado()">
+            Reintentar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success message -->
+  <div *ngIf="mensajeExito" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+    <p class="text-green-700">{{ mensajeExito }}</p>
+  </div>
+
+  <!-- Contenido principal cuando hay datos -->
+  <div *ngIf="!cargando && (tramiteCompleto || resolucion)">
+
+    <!-- Sistema de pestañas -->
+    <div class="tabs">
+      <button
+        *ngFor="let tab of tabs; trackBy: trackByTab"
+        class="tab"
+        [ngClass]="{'tab-active': activeTab === tab.id}"
+        (click)="setActiveTab(tab.id)"
+        [attr.aria-selected]="activeTab === tab.id"
+        role="tab">
+        {{tab.label}}
+      </button>
+    </div>
+
+    <!-- RESOLUCIÓN FINAL -->
+    <div class="tab-content" *ngIf="activeTab === 'resolucion'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Estado de la Resolución</h3>
+
+        <!-- Estado del trámite -->
+        <div class="mb-6 p-6 rounded-lg border-2"
+             [ngClass]="getEstadoColor(resolucion?.estado || 'EN_REVISION')">
+          <div class="flex items-center mb-4">
+            <div class="mr-4" [innerHTML]="getEstadoIcon(resolucion?.estado || 'EN_REVISION')"></div>
+            <div>
+              <h4 class="text-lg font-semibold">
+                <span *ngIf="resolucion?.estado === 'APROBADA'">¡Registro Sanitario Aprobado!</span>
+                <span *ngIf="resolucion?.estado === 'RECHAZADA'">Solicitud Rechazada</span>
+                <span *ngIf="resolucion?.estado === 'EN_REVISION'">Trámite en Revisión</span>
+              </h4>
+              <p class="text-sm opacity-90">
+                <span *ngIf="resolucion?.estado === 'APROBADA'">Su solicitud ha sido aprobada exitosamente</span>
+                <span *ngIf="resolucion?.estado === 'RECHAZADA'">Su solicitud no cumple con los requisitos</span>
+                <span *ngIf="resolucion?.estado === 'EN_REVISION'">Su trámite está siendo evaluado por INVIMA</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalles de la resolución -->
+        <div *ngIf="resolucion" class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <h4 class="font-semibold text-gray-800 mb-4">Detalles de la Resolución</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div><strong>Número de Resolución:</strong> {{resolucion.numeroResolucion}}</div>
+            <div><strong>Fecha de Emisión:</strong> {{formatearFecha(resolucion.fechaEmision)}}</div>
+            <div><strong>Autoridad:</strong> {{resolucion.autoridad}}</div>
+            <div><strong>Estado:</strong>
+              <span class="px-2 py-1 rounded-full text-xs font-medium ml-2"
+                    [ngClass]="getEstadoColor(resolucion.estado)">
+                {{resolucion.estado}}
+              </span>
+            </div>
+            <div class="col-span-2" *ngIf="resolucion.observaciones">
+              <strong>Observaciones:</strong>
+              <p class="mt-2 text-gray-600 bg-gray-50 p-3 rounded">{{resolucion.observaciones}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información del trámite -->
+        <div *ngIf="tramiteCompleto" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <h4 class="font-semibold text-blue-800 mb-4">Información del Trámite</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+            <div><strong>Número de Radicado:</strong> {{tramiteCompleto.numeroRadicado}}</div>
+            <div><strong>Fecha de Radicación:</strong> {{formatearFecha(tramiteCompleto.fechaCreacion)}}</div>
+            <div><strong>Estado del Trámite:</strong> {{tramiteCompleto.estado}}</div>
+          </div>
+        </div>
+
+        <!-- Acciones disponibles -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            *ngIf="resolucion?.documentoUrl"
+            (click)="descargarResolucion()"
+            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Descargar Resolución
+          </button>
+
+          <button
+            (click)="consultarNuevoEstado()"
+            class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Actualizar Estado
+          </button>
+
+          <button
+            *ngIf="resolucion?.estado === 'APROBADA'"
+            (click)="finalizarTramite()"
+            class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Finalizar Trámite
+          </button>
+        </div>
+
+        <!-- Historial del trámite -->
+        <div *ngIf="historial.length > 0" class="mt-8">
+          <h4 class="font-semibold text-gray-800 mb-4">📋 Historial del Trámite</h4>
+          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div class="max-h-64 overflow-y-auto">
+              <div *ngFor="let evento of historial; trackBy: trackByHistorial"
+                   class="border-b border-gray-100 p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <h5 class="font-medium text-gray-900">{{evento.accion}}</h5>
+                    <p class="text-sm text-gray-600 mt-1">{{evento.descripcion}}</p>
+                    <p class="text-xs text-gray-500 mt-2">Por: {{evento.usuario}}</p>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-xs text-gray-500">{{formatearFecha(evento.fecha)}}</span>
+                    <div class="text-xs font-medium mt-1"
+                         [ngClass]="getEstadoColor(evento.estado)">
+                      {{evento.estado}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTRO SANITARIO -->
+    <div class="tab-content" *ngIf="activeTab === 'registro'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Registro Sanitario</h3>
+
+        <div *ngIf="!registroSanitario && resolucion?.estado === 'APROBADA'"
+             class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h4 class="font-semibold text-yellow-800">Registro en Proceso</h4>
+              <p class="text-yellow-700 text-sm mt-1">
+                Su solicitud ha sido aprobada. El registro sanitario está siendo generado y estará disponible en breve.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!registroSanitario && resolucion?.estado === 'RECHAZADA'"
+             class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h4 class="font-semibold text-red-800">Solicitud No Aprobada</h4>
+              <p class="text-red-700 text-sm mt-1">
+                Su solicitud no fue aprobada. No se emitirá registro sanitario. Consulte las observaciones en la resolución.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!registroSanitario && resolucion?.estado === 'EN_REVISION'"
+             class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h4 class="font-semibold text-blue-800">Trámite en Evaluación</h4>
+              <p class="text-blue-700 text-sm mt-1">
+                Su trámite está siendo evaluado por INVIMA. El registro sanitario se emitirá una vez aprobado.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos del registro sanitario -->
+        <div *ngIf="registroSanitario" class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center mb-4">
+            <div class="checkmark-circle show mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold text-green-700">Registro Sanitario Emitido</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div><strong>Número de Registro:</strong> {{registroSanitario.numeroRegistro}}</div>
+            <div><strong>Fecha de Expedición:</strong> {{formatearFecha(registroSanitario.fechaExpedicion)}}</div>
+            <div><strong>Fecha de Vencimiento:</strong> {{formatearFecha(registroSanitario.fechaVencimiento)}}</div>
+            <div><strong>Estado:</strong>
+              <span class="px-2 py-1 rounded-full text-xs font-medium ml-2"
+                    [ngClass]="getEstadoColor(registroSanitario.estado)">
+                {{registroSanitario.estado}}
+              </span>
+            </div>
+            <div><strong>Días Restantes:</strong>
+              <span [ngClass]="getDiasRestantes() < 180 ? 'text-red-600 font-semibold' : 'text-green-600'">
+                {{getDiasRestantes()}} días
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button
+              (click)="descargarRegistroSanitario()"
+              class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Descargar Certificado
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OBLIGACIONES -->
+    <div class="tab-content" *ngIf="activeTab === 'obligaciones'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Obligaciones Post-Registro</h3>
+        <p class="text-gray-700 mb-6">Cumplir con estas obligaciones es fundamental para mantener la validez de su registro sanitario.</p>
+
+        <div class="space-y-6">
+          <div *ngFor="let obligation of obligations; trackBy: trackByObligation"
+               class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="flex items-start">
+              <div class="bg-yellow-100 rounded-full p-2 mr-4 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-2">{{obligation.title}}</h4>
+                <p class="text-gray-600 text-sm mb-3">{{obligation.description}}</p>
+                <div class="text-xs text-gray-500">
+                  <strong>Periodicidad:</strong> {{obligation.frequency}} |
+                  <strong>Plazo:</strong> {{obligation.deadline}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMERCIALIZACIÓN -->
+    <div class="tab-content" *ngIf="activeTab === 'comercializacion'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Requisitos para Comercialización</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div *ngFor="let requirement of commercializationRequirements; trackBy: trackByRequirement"
+               class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <div class="bg-blue-100 rounded-full p-2 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-800">{{requirement.title}}</h4>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li *ngFor="let item of requirement.items; trackBy: trackByString" class="flex items-start">
+                <span class="text-green-500 mr-2 mt-0.5">•</span>
+                <span>{{item}}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <h4 class="font-semibold text-red-800">Advertencia Importante</h4>
+              <p class="text-red-700 text-sm mt-1">
+                La comercialización sin registro sanitario vigente constituye una violación a la normativa sanitaria y puede resultar en sanciones administrativas, decomiso del producto y cierre temporal del establecimiento.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RENOVACIÓN -->
+    <div class="tab-content" *ngIf="activeTab === 'renovacion'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Proceso de Renovación</h3>
+
+        <div *ngIf="registroSanitario" class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center mb-4">
+            <div class="bg-yellow-100 rounded-full p-2 mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h4 class="font-semibold text-yellow-800">Recordatorio de Renovación</h4>
+          </div>
+          <p class="text-yellow-700 text-sm mb-3">
+            Su registro sanitario vence el <strong>{{formatearFechaCorta(registroSanitario.fechaVencimiento)}}</strong>.
+            La renovación debe solicitarse con <strong>6 meses de anticipación</strong> al vencimiento.
+          </p>
+          <div class="text-sm text-yellow-600">
+            <strong>Fecha límite para solicitar renovación:</strong> {{getRenewalDeadline()}}
+          </div>
+          <div class="text-sm text-yellow-600 mt-2">
+            <strong>Días restantes:</strong>
+            <span [ngClass]="getDiasRestantes() < 180 ? 'text-red-600 font-bold' : 'text-green-600'">
+              {{getDiasRestantes()}} días
+            </span>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div *ngFor="let step of renewalSteps; let i = index; trackBy: trackByRenewalStep"
+               class="flex items-start">
+            <div class="flex-shrink-0 mr-4">
+              <div class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center font-semibold">
+                {{i + 1}}
+              </div>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-800 mb-2">{{step.title}}</h4>
+              <p class="text-gray-600 text-sm mb-2">{{step.description}}</p>
+              <div class="text-xs text-gray-500">
+                <strong>Tiempo estimado:</strong> {{step.timeframe}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
+          <h4 class="font-semibold text-blue-800 mb-2">Documentos Requeridos para Renovación</h4>
+          <ul class="text-blue-700 text-sm space-y-1">
+            <li *ngFor="let doc of renewalDocuments; trackBy: trackByString" class="flex items-start">
+              <span class="text-blue-500 mr-2 mt-0.5">•</span>
+              <span>{{doc}}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="text-center mt-6">
+          <button
+            (click)="startRenewalProcess()"
+            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 mr-4">
+            Iniciar Proceso de Renovación
+          </button>
+          <button
+            (click)="setRenewalReminder()"
+            class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700">
+            Configurar Recordatorio
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACTO -->
+    <div class="tab-content" *ngIf="activeTab === 'contacto'" role="tabpanel">
+      <div class="section-card">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Información de Contacto y Soporte</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div *ngFor="let contact of contactInfo; trackBy: trackByContact"
+               class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="flex items-center mb-4">
+              <div class="bg-green-100 rounded-full p-3 mr-4" [innerHTML]="getContactIcon(contact.type)"></div>
+              <h4 class="font-semibold text-gray-800">{{contact.title}}</h4>
+            </div>
+            <div class="space-y-2 text-sm text-gray-600">
+              <div *ngFor="let detail of contact.details; trackBy: trackByString">
+                {{detail}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Enlaces Útiles</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let link of usefulLinks; trackBy: trackByLink">
+              <a [href]="link.url" target="_blank"
+                 class="flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                {{link.title}}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="step-navigation">
+    <div class="step-indicator-nav">
+      Paso <span class="current-step">3</span> de 3
+    </div>
+    <div class="flex gap-4">
+      <button
+        (click)="router.navigate(['/main/tramites'])"
+        class="nav-btn nav-btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Mis Tramites
+      </button>
+      <button
+        *ngIf="tramiteCompleto?.estado !== 'FINALIZADA'"
+        (click)="nuevaSolicitud()"
+        class="nav-btn nav-btn-primary">
+        Nueva Solicitud
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
