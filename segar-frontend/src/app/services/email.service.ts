@@ -469,4 +469,424 @@ export class EmailService {
       sortDirection: "DESC"
     });
   }
+
+  /**
+   * Envía solicitud formal de trámite al INVIMA
+   * @param datosTramite Todos los datos necesarios para la carta formal
+   */
+  async enviarSolicitudFormalInvima(datosTramite: {
+    numeroRadicado: string;
+    tipoTramite: string;
+    empresa: {
+      razonSocial: string;
+      nit: string;
+      direccion: string;
+      ciudad: string;
+      telefono: string;
+      email: string;
+    };
+    representanteLegal: {
+      nombre: string;
+      cedula: string;
+    };
+    producto: {
+      nombre: string;
+      marca: string;
+      categoria: string;
+      presentacion: string;
+    };
+    fabricacion: {
+      nombrePlanta: string;
+      direccionPlanta: string;
+      ciudadPlanta: string;
+      departamentoPlanta: string;
+    };
+    documentosAdjuntos: string[];
+    alcanceComercializacion: string;
+  }): Promise<void> {
+    console.log('📧 Enviando solicitud formal al INVIMA...');
+    console.log('   Empresa:', datosTramite.empresa.razonSocial);
+    console.log('   Producto:', datosTramite.producto.nombre);
+    console.log('   Radicado:', datosTramite.numeroRadicado);
+    console.log('   Tipo:', datosTramite.tipoTramite);
+
+    const destinatario = 'juando02603spam@gmail.com';
+
+    // Determinar el tipo de trámite para el asunto
+    let tipoTramiteCorto = 'Registro Sanitario';
+    if (datosTramite.tipoTramite.toLowerCase().includes('renovación') ||
+        datosTramite.tipoTramite.toLowerCase().includes('renovacion')) {
+      tipoTramiteCorto = 'Renovación de Registro Sanitario';
+    } else if (datosTramite.tipoTramite.toLowerCase().includes('modificación') ||
+               datosTramite.tipoTramite.toLowerCase().includes('modificacion')) {
+      tipoTramiteCorto = 'Modificación de Registro Sanitario';
+    }
+
+    const asunto = `Solicitud de ${tipoTramiteCorto} - ${datosTramite.producto.nombre}`;
+
+    // Generar fecha en formato colombiano
+    const fechaActual = new Date().toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const contenidoHtml = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+          }
+          .carta {
+            border: 3px solid #0066cc;
+            border-radius: 8px;
+            padding: 40px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          }
+          .encabezado {
+            text-align: right;
+            margin-bottom: 30px;
+            font-size: 14px;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 15px;
+          }
+          .destinatario {
+            margin-bottom: 30px;
+            font-size: 14px;
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+          }
+          .asunto {
+            margin: 30px 0;
+            font-weight: bold;
+            font-size: 16px;
+            color: #0066cc;
+            text-decoration: underline;
+          }
+          .cuerpo {
+            text-align: justify;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+          }
+          .cuerpo p {
+            margin-bottom: 15px;
+          }
+          .seccion-titulo {
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 15px;
+            color: #0066cc;
+            background-color: #e6f2ff;
+            padding: 10px;
+            border-left: 5px solid #0066cc;
+          }
+          .lista-documentos {
+            margin-left: 0;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          }
+          .lista-documentos li {
+            margin-bottom: 8px;
+            padding-left: 10px;
+            color: #555;
+          }
+          .firma {
+            margin-top: 60px;
+            text-align: center;
+          }
+          .firma-linea {
+            border-top: 3px solid #0066cc;
+            width: 350px;
+            margin: 50px auto 15px auto;
+          }
+          .firma-nombre {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: #000;
+          }
+          .firma-cargo {
+            font-style: italic;
+            color: #666;
+            font-size: 14px;
+          }
+          .datos-empresa {
+            margin: 10px 0;
+            line-height: 1.8;
+          }
+          .dato-label {
+            font-weight: bold;
+            color: #0066cc;
+          }
+          .numero-radicado {
+            text-align: right;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #fff;
+            background-color: #0066cc;
+            padding: 12px 20px;
+            border-radius: 4px;
+          }
+          .declaracion {
+            background-color: #fff8e1;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 25px 0;
+            font-style: italic;
+          }
+          strong {
+            color: #0066cc;
+          }
+          .tabla-info {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .tabla-info td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          .tabla-info td:first-child {
+            font-weight: bold;
+            color: #0066cc;
+            width: 200px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="carta">
+          <div class="numero-radicado">
+            📋 Radicado No. ${datosTramite.numeroRadicado}
+          </div>
+
+          <div class="encabezado">
+            ${datosTramite.empresa.ciudad}, ${fechaActual}
+          </div>
+
+          <div class="destinatario">
+            <strong>A la atención del Departamento de Trámites Sanitarios</strong><br>
+            <strong>INVIMA</strong><br>
+            Calle 26 No. 51-20<br>
+            Bogotá D.C., Colombia
+          </div>
+
+          <div class="asunto">
+            <strong>Asunto:</strong> Solicitud de ${tipoTramiteCorto} de Alimentos Procesados
+          </div>
+
+          <div class="cuerpo">
+            <p>
+              Por medio de la presente, la empresa <strong>${datosTramite.empresa.razonSocial}</strong>,
+              identificada con NIT <strong>${datosTramite.empresa.nit}</strong>, se permite presentar ante
+              ustedes la solicitud de ${tipoTramiteCorto.toLowerCase()} correspondiente al producto:
+            </p>
+
+            <p style="text-align: center; margin: 25px 0; font-size: 18px; background-color: #e6f2ff; padding: 15px; border-radius: 4px;">
+              <strong>"${datosTramite.producto.nombre}"</strong><br>
+              <span style="font-size: 16px; color: #666;">Marca: ${datosTramite.producto.marca}</span>
+            </p>
+
+            <div class="seccion-titulo">📋 Información de la Empresa Solicitante</div>
+            <table class="tabla-info">
+              <tr>
+                <td><span class="dato-label">Razón Social:</span></td>
+                <td>${datosTramite.empresa.razonSocial}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">NIT:</span></td>
+                <td>${datosTramite.empresa.nit}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Dirección:</span></td>
+                <td>${datosTramite.empresa.direccion}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Ciudad:</span></td>
+                <td>${datosTramite.empresa.ciudad}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Teléfono:</span></td>
+                <td>${datosTramite.empresa.telefono}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Correo Electrónico:</span></td>
+                <td>${datosTramite.empresa.email}</td>
+              </tr>
+            </table>
+
+            <div class="seccion-titulo">👤 Representante Legal</div>
+            <table class="tabla-info">
+              <tr>
+                <td><span class="dato-label">Nombre:</span></td>
+                <td>${datosTramite.representanteLegal.nombre}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Cédula de Ciudadanía:</span></td>
+                <td>${datosTramite.representanteLegal.cedula}</td>
+              </tr>
+            </table>
+
+            <div class="seccion-titulo">🏭 Información del Producto y Fabricación</div>
+            <table class="tabla-info">
+              <tr>
+                <td><span class="dato-label">Producto:</span></td>
+                <td><strong>${datosTramite.producto.nombre}</strong></td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Marca:</span></td>
+                <td>${datosTramite.producto.marca}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Categoría:</span></td>
+                <td>${datosTramite.producto.categoria}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Presentación:</span></td>
+                <td>${datosTramite.producto.presentacion}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Planta de Producción:</span></td>
+                <td>${datosTramite.fabricacion.nombrePlanta}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Dirección de la Planta:</span></td>
+                <td>${datosTramite.fabricacion.direccionPlanta}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Ubicación:</span></td>
+                <td>${datosTramite.fabricacion.ciudadPlanta}, ${datosTramite.fabricacion.departamentoPlanta}</td>
+              </tr>
+              <tr>
+                <td><span class="dato-label">Alcance de Comercialización:</span></td>
+                <td><strong>${datosTramite.alcanceComercializacion}</strong></td>
+              </tr>
+            </table>
+
+            <div class="seccion-titulo">📎 Documentos Anexos</div>
+            <ul class="lista-documentos">
+              ${datosTramite.documentosAdjuntos.map((doc, index) => `<li><strong>${index + 1}.</strong> ${doc}</li>`).join('')}
+            </ul>
+
+            <div class="declaracion">
+              <strong>⚖️ Declaración de Veracidad:</strong> Declaramos que los datos consignados en esta solicitud
+              y los documentos anexos son veraces y nos comprometemos a cumplir con la normativa sanitaria aplicable,
+              así como a permitir la inspección y verificación de nuestras instalaciones si así lo requiere el INVIMA.
+            </div>
+
+            <p>
+              Quedamos atentos a cualquier requerimiento adicional que se nos formule y agradecemos de
+              antemano la atención prestada.
+            </p>
+
+            <p style="margin-top: 30px;">
+              <strong>Atentamente,</strong>
+            </p>
+          </div>
+
+          <div class="firma">
+            <div class="firma-linea"></div>
+            <div class="firma-nombre">${datosTramite.representanteLegal.nombre}</div>
+            <div class="firma-cargo">Representante Legal</div>
+            <div class="firma-cargo">${datosTramite.empresa.razonSocial}</div>
+            <div class="datos-empresa" style="margin-top: 20px; font-size: 12px;">
+              ${datosTramite.empresa.direccion}<br>
+              ${datosTramite.empresa.ciudad}<br>
+              Tel: ${datosTramite.empresa.telefono}<br>
+              Email: ${datosTramite.empresa.email}
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      // Crear el request para enviar el correo
+      const emailRequest = {
+        toAddresses: [destinatario],
+        subject: asunto,
+        content: contenidoHtml,
+        isHtml: true
+      };
+
+      const headers = this.getAuthHeaders();
+
+      console.log('');
+      console.log('========================================');
+      console.log('📧 ENVIANDO CORREO FORMAL AL INVIMA');
+      console.log('========================================');
+      console.log('');
+      console.log('📤 DESTINATARIO:', destinatario);
+      console.log('📋 ASUNTO:', asunto);
+      console.log('📋 RADICADO:', datosTramite.numeroRadicado);
+      console.log('🏢 EMPRESA:', datosTramite.empresa.razonSocial);
+      console.log('📦 PRODUCTO:', datosTramite.producto.nombre);
+      console.log('🏷️  MARCA:', datosTramite.producto.marca);
+      console.log('📑 TIPO TRÁMITE:', datosTramite.tipoTramite);
+      console.log('');
+      console.log('📎 DOCUMENTOS ANEXOS:');
+      datosTramite.documentosAdjuntos.forEach((doc, index) => {
+        console.log(`   ${index + 1}. ${doc}`);
+      });
+      console.log('');
+      console.log('🌐 URL DEL BACKEND:', `${environment.apiUrl}/api/notifications/emails/send`);
+      console.log('');
+      console.log('📧 PAYLOAD COMPLETO:');
+      console.log(JSON.stringify(emailRequest, null, 2));
+      console.log('');
+      console.log('⏳ Enviando solicitud al servidor...');
+      console.log('');
+
+      // Usar el endpoint correcto del backend
+      const response = await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/api/notifications/emails/send`, emailRequest, { headers })
+      );
+
+      console.log('');
+      console.log('========================================');
+      console.log('✅ CORREO ENVIADO EXITOSAMENTE');
+      console.log('========================================');
+      console.log('');
+      console.log('📧 RESPUESTA DEL SERVIDOR:');
+      console.log(JSON.stringify(response, null, 2));
+      console.log('');
+      console.log('✅ El correo formal fue enviado a:', destinatario);
+      console.log('✅ Radicado:', datosTramite.numeroRadicado);
+      console.log('');
+
+    } catch (error: any) {
+      console.log('');
+      console.log('========================================');
+      console.error('❌ ERROR AL ENVIAR CORREO');
+      console.log('========================================');
+      console.log('');
+      console.error('❌ Destinatario:', destinatario);
+      console.error('❌ Asunto:', asunto);
+      console.error('❌ Error completo:', error);
+      console.error('❌ Mensaje:', error.message);
+      console.error('❌ Status:', error.status);
+      console.error('❌ Error del servidor:', error.error);
+      console.log('');
+
+      // No lanzar error para no interrumpir el flujo de radicación
+      // El correo es secundario, la radicación es lo principal
+    }
+  }
 }

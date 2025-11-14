@@ -12,6 +12,7 @@ import { environment } from '../../../../environments/environment';
 import { ProductoService } from '../../../core/services/producto.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { DocumentService } from '../../../core/services/document.service';
+import { EmailService } from '../../../services/email.service';
 
 
 interface OptionItem {
@@ -79,6 +80,7 @@ interface SolicitudForm {
 
 interface TramiteResponse {
   id: number;
+  radicadoNumber?: string; // Opcional, el backend puede devolverlo o no
   // Agrega otras propiedades si el backend las devuelve
 }
 
@@ -121,7 +123,8 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     private location: Location,
     private productoService: ProductoService,
     private usuarioService: UsuarioService,
-    private documentService: DocumentService
+    private documentService: DocumentService,
+    private emailService: EmailService
   ) {}
 
   ngOnInit() {
@@ -280,7 +283,7 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   ];
 
   readonly processingTypes: OptionItem[] = [
-    
+
     { value: 'horneado', label: 'Horneado' },
     { value: 'deshidratado', label: 'Deshidratado' },
     { value: 'relleno', label: 'Relleno' },
@@ -479,11 +482,11 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     const procesamiento = this.classificationForm.processingType?.toLowerCase() || '';
     const categoria = this.classificationForm.productCategory?.toLowerCase() || '';
     const riesgoActual = this.classificationForm.riskLevel;
-    
+
     // 🧁 Panadería / Galletería / Confitería
     if (categoria.includes('panaderia') || categoria.includes('galleteria') || categoria.includes('confiteria')) {
       if (procesamiento.includes('horneado') || procesamiento.includes('deshidratado')) {
-        
+
         this.classificationForm.riskLevel = "bajo";
       } else if (procesamiento.includes('relleno') || procesamiento.includes('cubierto') || procesamiento.includes('vacio')) {
         this.classificationForm.riskLevel = "medio";
@@ -528,12 +531,12 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
         this.classificationForm.riskLevel = "alto";
       }
     }
-    
+
     if (this.classificationForm.riskLevel == ''){
       this.classificationForm.riskLevel = "alto";
     }
   }
-  
+
 
   /**
    * Valida que el riesgo seleccionado manualmente sea coherente con la categoría
@@ -659,8 +662,9 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     this.authService.getUsuarioId().subscribe({
       next: (usuarioId) => {
         if (usuarioId !== null) {
-          console.log("📨 AQUI SE RADICA LA SOLICITUD");
+          console.log("📨 ========== INICIANDO RADICACIÓN ==========");
           console.log("🆔 ID del producto:", this.productoSeleccionado.id);
+          console.log("📦 Nombre del producto:", this.productoSeleccionado.nombre);
           console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
           console.log("👤 ID del usuario:", usuarioId);
 
@@ -680,10 +684,77 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
           const url = `${environment.apiUrl}/api/tramites/create`;
 
           this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
-            next: (response: TramiteResponse) => {
+            next: async (response: TramiteResponse) => {
               console.log('✅ Trámite creado exitosamente:', response);
-              alert('✅ Trámite radicado correctamente.');
+
               const tramiteId = response.id;
+              const numeroRadicado = response.radicadoNumber || `TEMP-${tramiteId}`;
+
+              // Obtener datos de la empresa y usuario para enviar carta formal
+              console.log('📧 Preparando solicitud formal al INVIMA...');
+              try {
+                // Obtener datos de la empresa
+                const empresa = await this.usuarioService.getEmpresaByUsuarioId(usuarioId).toPromise();
+                const usuario = await this.usuarioService.getUsuarioById(usuarioId).toPromise();
+
+                if (!empresa || !usuario) {
+                  throw new Error('No se pudieron obtener los datos de la empresa o usuario');
+                }
+
+                // Preparar lista de documentos adjuntos
+                const documentosAdjuntos = [
+                  'Ficha técnica del producto',
+                  'Certificado de Buenas Prácticas de Manufactura (BPM)',
+                  'Resultados de análisis microbiológico y fisicoquímico',
+                  'Análisis nutricional del producto',
+                  'Etiqueta del producto conforme a la normativa vigente',
+                  'Diagrama de flujo del proceso de producción',
+                  'Plan HACCP (Análisis de Peligros y Puntos Críticos de Control)',
+                  'Estudios de validación y estabilidad del producto',
+                  'Manual de calidad',
+                  'Certificado de calidad del proveedor',
+                  'Ficha técnica de materias primas'
+                ];
+
+                // Preparar datos completos para la carta formal
+                await this.emailService.enviarSolicitudFormalInvima({
+                  numeroRadicado: numeroRadicado,
+                  tipoTramite: this.resultadoClasificacion?.tramite_descripcion || 'Registro Sanitario de Alimentos',
+                  empresa: {
+                    razonSocial: empresa.razonSocial || empresa.nombreComercial || 'Empresa',
+                    nit: empresa.nit || 'N/A',
+                    direccion: empresa.direccion || 'Dirección no especificada',
+                    ciudad: empresa.ciudad || 'Ciudad',
+                    telefono: empresa.telefono || 'N/A',
+                    email: empresa.email || 'correo@empresa.com'
+                  },
+                  representanteLegal: {
+                    nombre: usuario.fullName || `${usuario.firstName} ${usuario.lastName}` || 'Representante Legal',
+                    cedula: usuario.idNumber || 'N/A'
+                  },
+                  producto: {
+                    nombre: this.productoSeleccionado.nombre || this.solicitudForm.productName,
+                    marca: this.solicitudForm.brandName || 'N/A',
+                    categoria: this.classificationForm.productCategory || 'Alimentos',
+                    presentacion: this.solicitudForm.presentation || 'Presentación estándar'
+                  },
+                  fabricacion: {
+                    nombrePlanta: this.solicitudForm.manufacturer.name || 'Planta de Producción',
+                    direccionPlanta: this.solicitudForm.manufacturer.address || 'Dirección de planta',
+                    ciudadPlanta: this.solicitudForm.manufacturer.city || 'Ciudad',
+                    departamentoPlanta: this.solicitudForm.manufacturer.department || 'Departamento'
+                  },
+                  documentosAdjuntos: documentosAdjuntos,
+                  alcanceComercializacion: 'Nacional'
+                });
+
+                console.log('✅ Solicitud formal enviada al INVIMA correctamente');
+                alert('✅ Trámite radicado correctamente.\n📧 Se ha enviado la solicitud formal al INVIMA.');
+              } catch (emailError) {
+                console.warn('⚠️ El trámite se radicó pero hubo un problema al enviar la solicitud:', emailError);
+                alert('✅ Trámite radicado correctamente.\n⚠️ Nota: No se pudo enviar la solicitud formal al INVIMA.');
+              }
+
               // Navegar al paso 4
               this.router.navigate(['main/nuevo/registro/paso-2', tramiteId]);
             },
@@ -706,8 +777,8 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     const token = this.authService.getToken();
 
     for (const doc of this.documentosCargados) {
-      console.log("documentos a cargar:", doc);
-      
+      console.log("📄 Documento a cargar:", doc.documentoId);
+
       this.documentService
         .cargarDocumento(doc.documentoId, doc.archivo, token!, this.productoSeleccionado)
         .subscribe({
@@ -716,7 +787,6 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
           complete: () => console.log(`✅ Flujo completado para ${doc.documentoId}`)
         });
     }
-
 
   }
 
