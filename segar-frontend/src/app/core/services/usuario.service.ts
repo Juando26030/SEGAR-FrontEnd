@@ -1,25 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError } from 'rxjs';
 import { Usuario } from '../DTOs/usuario.dto';
-import { Empresa } from '../DTOs/empresa.dto'; // Ajusta la ruta si es necesario
+import { Empresa } from '../DTOs/empresa.dto';
+import { environment } from '../../../environments/environment';
+import { map } from 'rxjs/operators';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-  private baseUrl = 'http://35.238.19.224:8090/api/usuarios';
+  private baseUrl = `${environment.apiUrl}/api/usuarios`;
+
 
   constructor(private http: HttpClient) {}
 
   // ========== CONSULTAS ==========
 
+  esAdmin(usuarioId: number): Observable<boolean> {
+    return this.http.get<Usuario>(`${this.baseUrl}/${usuarioId}`).pipe(
+      map(usuario => usuario.role === 'Administrador')
+    );
+  }
+
+
   getUsuariosByEmpresaId(empresaId: number): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/empresa/${empresaId}`);
+    return this.http.get<Usuario[]>(`${this.baseUrl}/empresa/${empresaId}`);
   }
 
   getEmpresaByUsuarioId(usuarioId: number): Observable<Empresa> {
-    return this.http.get<Empresa>(`${this.apiUrl}/${usuarioId}/empresa`).pipe(
+    return this.http.get<Empresa>(`${this.baseUrl}/${usuarioId}/empresa`).pipe(
       tap(empresa => console.log('✅ Empresa obtenida por usuario ID:', empresa))
     );
   }
@@ -91,11 +102,21 @@ export class UsuarioService {
 
   // Cambiar contraseña de usuario (ADMIN) - Solo en Keycloak
   cambiarPassword(id: number, newPassword: string, temporary: boolean = false): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${id}/password`, {
-      newPassword,
-      temporary
-    }).pipe(
-      tap(() => console.log('✅ Contraseña actualizada para usuario ID:', id))
+    const url = `${this.baseUrl}/${id}/password`;
+    const body = { newPassword, temporary };
+
+    console.log('🔐 Enviando petición de cambio de contraseña:');
+    console.log('   URL:', url);
+    console.log('   Body:', { newPassword: '***', temporary });
+
+    return this.http.patch<void>(url, body).pipe(
+      tap(() => {
+        console.log('✅ Contraseña actualizada exitosamente para usuario ID:', id);
+      }),
+      catchError(error => {
+        console.error('❌ Error en servicio cambiarPassword:', error);
+        throw error;
+      })
     );
   }
 }

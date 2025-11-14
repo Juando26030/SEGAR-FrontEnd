@@ -10,7 +10,7 @@
           <h1 class="text-2xl font-bold text-gray-900">Perfil de Usuario</h1>
           <p class="mt-1 text-sm text-gray-500">Gestiona tu información personal y configuración de cuenta</p>
         </div>
-        <button 
+        <button
           (click)="openEditModal()"
           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,26 +34,19 @@
     <!-- Right Column - Info and Stats -->
     <div class="lg:col-span-2 space-y-8">
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <app-user-stat-card 
-          title="Trámites Activos" 
-          value="12" 
-          icon="document" 
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <app-user-stat-card
+          title="Trámites Activos"
+          [value]="isLoadingStats ? 'Cargando...' : tramitesActivos.toString()"
+          icon="document"
           color="blue">
         </app-user-stat-card>
-        
-        <app-user-stat-card 
-          title="Trámites Completados" 
-          value="45" 
-          icon="check" 
+
+        <app-user-stat-card
+          title="Trámites Completados"
+          [value]="isLoadingStats ? 'Cargando...' : tramitesCompletados.toString()"
+          icon="check"
           color="green">
-        </app-user-stat-card>
-        
-        <app-user-stat-card 
-          title="Tiempo Promedio" 
-          value="2.5 días" 
-          icon="clock" 
-          color="purple">
         </app-user-stat-card>
       </div>
 
@@ -64,7 +57,7 @@
 </div>
 
 <!-- Edit Modal -->
-<app-user-edit 
-  [isVisible]="showEditModal" 
+<app-user-edit
+  [isVisible]="showEditModal"
   (close)="closeEditModal()">
 </app-user-edit>

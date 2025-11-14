@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 // Interfaces para la integración con el backend de radicación
 export interface RadicacionRequest {
@@ -47,7 +48,7 @@ export interface SolicitudResponse {
   providedIn: 'root'
 })
 export class RadicacionService {
-  private apiUrl = 'http://35.238.19.224:8090/api/radicacion';
+  private apiUrl = `${environment.apiUrl}/api/radicacion`;
 
   private httpOptions = {
     headers: new HttpHeaders({

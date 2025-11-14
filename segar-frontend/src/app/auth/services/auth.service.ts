@@ -3,6 +3,7 @@ import Keycloak from 'keycloak-js';
 import { BehaviorSubject } from 'rxjs';
 import { Observable, of, map, catchError } from 'rxjs';
 import { UsuarioService } from '../../core/services/usuario.service'; // Ajusta la ruta si es necesario
+import { environment } from '../../../environments/environment';
 
 
 export interface UserInfo {
@@ -55,9 +56,9 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Inicializando Keycloak en modo silencioso...');
         this.keycloak = new Keycloak({
-          url: 'https://35.238.19.224',
-          realm: 'segar',
-          clientId: 'segar-frontend'
+          url: environment.keycloak.url,
+          realm: environment.keycloak.realm,
+          clientId: environment.keycloak.clientId
         });
 
         // Inicialización silenciosa - NO redirige automáticamente
@@ -77,9 +78,9 @@ export class AuthService {
   async initKeycloak(): Promise<boolean> {
     try {
       this.keycloak = new Keycloak({
-        url: 'https://35.238.19.224',
-        realm: 'segar',
-        clientId: 'segar-frontend'
+        url: environment.keycloak.url,
+        realm: environment.keycloak.realm,
+        clientId: environment.keycloak.clientId
       });
 
       const authenticated = await this.keycloak.init({
@@ -105,6 +106,8 @@ export class AuthService {
     }
   }
 
+
+
   private async loadUserProfile() {
     try {
       console.log('👤 =================================');
@@ -117,18 +120,26 @@ export class AuthService {
 
       const tokenParsed = this.keycloak.tokenParsed as any;
       console.log('👤 Token parseado completo:', tokenParsed);
+      console.log('👤 Realm access:', tokenParsed?.realm_access);
       console.log('👤 Resource access:', tokenParsed?.resource_access);
 
-      // Extraer roles de resource_access.segar-backend.roles
-      const roles = tokenParsed?.resource_access?.['segar-backend']?.roles || [];
-      console.log('👤 Roles extraídos de segar-backend:', roles);
+      // Extraer roles - buscar en realm_access y resource_access
+      const realmRoles = tokenParsed?.realm_access?.roles || [];
+      const backendRoles = tokenParsed?.resource_access?.['segar-backend']?.roles || [];
+
+      // Combinar roles de ambas fuentes y eliminar duplicados
+      const allRoles = [...new Set([...realmRoles, ...backendRoles])];
+
+      console.log('👤 Roles de realm_access:', realmRoles);
+      console.log('👤 Roles de resource_access.segar-backend:', backendRoles);
+      console.log('👤 Todos los roles combinados:', allRoles);
 
       // Usar datos del token en lugar de loadUserProfile() que puede fallar
       const userInfo: UserInfo = {
         username: tokenParsed.preferred_username || '',
         email: tokenParsed.email || '',
         fullName: tokenParsed.name || `${tokenParsed.given_name || ''} ${tokenParsed.family_name || ''}`.trim(),
-        roles: roles,
+        roles: allRoles,
         firstName: tokenParsed.given_name,
         lastName: tokenParsed.family_name,
         // user_created_timestamp viene del mapper personalizado de Keycloak (en milisegundos)
@@ -253,14 +264,14 @@ export class AuthService {
       console.log('🔄 Renovando token con Refresh Token...');
 
       // Hacer petición de renovación con el Refresh Token
-      const response = await fetch('http://localhost:8080/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch(`${environment.keycloak.url}/realms/${environment.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           grant_type: 'refresh_token',
-          client_id: 'segar-frontend',
+          client_id: environment.keycloak.clientId,
           refresh_token: this.keycloak.refreshToken
         })
       });
@@ -376,22 +387,22 @@ export class AuthService {
       if (!this.keycloak) {
         console.log('🔧 Creando instancia básica de Keycloak...');
         this.keycloak = new Keycloak({
-          url: 'https://35.238.19.224',
-          realm: 'segar',
-          clientId: 'segar-frontend'
+          url: environment.keycloak.url,
+          realm: environment.keycloak.realm,
+          clientId: environment.keycloak.clientId
         });
         console.log('✅ Instancia de Keycloak creada');
       }
 
       console.log('📡 Haciendo petición al servidor de tokens...');
-      const response = await fetch('https://35.238.19.224/realms/segar/protocol/openid-connect/token', {
+      const response = await fetch(`${environment.keycloak.url}/realms/${environment.keycloak.realm}/protocol/openid-connect/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           grant_type: 'password',
-          client_id: 'segar-frontend',
+          client_id: environment.keycloak.clientId,
           username: username,
           password: password,
           scope: 'openid profile email'
@@ -409,9 +420,9 @@ export class AuthService {
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
           this.keycloak = new Keycloak({
-            url: 'https://35.238.19.224',
-            realm: 'segar',
-            clientId: 'segar-frontend'
+            url: environment.keycloak.url,
+            realm: environment.keycloak.realm,
+            clientId: environment.keycloak.clientId
           });
         }
 
@@ -492,18 +503,33 @@ export class AuthService {
       (this.keycloak as any).tokenParsed = undefined;
     }
 
-    // ✅ LIMPIAR COMPLETAMENTE LOCALSTORAGE
+    // ✅ LIMPIAR COMPLETAMENTE LOCALSTORAGE Y SESSIONSTORAGE
     localStorage.removeItem(this.STORAGE_KEY_TOKEN);
     localStorage.removeItem(this.STORAGE_KEY_REFRESH_TOKEN);
     localStorage.removeItem(this.STORAGE_KEY_USER_INFO);
     localStorage.removeItem('userInfo'); // Limpiar también el viejo formato
 
+    // Limpiar también sessionStorage
+    sessionStorage.clear();
+
+    // Limpiar cualquier otra clave relacionada con Keycloak
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('kc-') || key.includes('keycloak')) {
+        localStorage.removeItem(key);
+      }
+    });
+
     console.log('✅ Sesión cerrada completamente');
-    console.log('✅ LocalStorage limpiado');
+    console.log('✅ LocalStorage y SessionStorage limpiados');
     console.log('🚪 =================================');
 
-    // Redirigir al login
-    window.location.href = '/auth/login';
+    // ✅ PREVENIR NAVEGACIÓN HACIA ATRÁS
+    // Reemplazar el historial para que no se pueda volver atrás
+    history.pushState(null, '', '/auth/login');
+
+    // Redirigir al login y recargar completamente la página
+    // Esto asegura que no quede ningún estado en memoria
+    window.location.replace('/auth/login');
   }
 
   // Método para debugging
@@ -567,9 +593,9 @@ export class AuthService {
         if (!this.keycloak) {
           console.warn('⚠️ Keycloak no inicializado, creando instancia');
           this.keycloak = new Keycloak({
-            url: 'http://localhost:8080',
-            realm: 'segar',
-            clientId: 'segar-frontend'
+            url: environment.keycloak.url,
+            realm: environment.keycloak.realm,
+            clientId: environment.keycloak.clientId
           });
         }
 

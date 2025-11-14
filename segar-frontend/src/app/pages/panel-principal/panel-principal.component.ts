@@ -5,6 +5,7 @@ import { Subject, interval, takeUntil, forkJoin, timer } from 'rxjs';
 import { DashboardService, TramiteRecienteDTO } from '../../core/services/dashboard.service';
 import { TramiteDetalleModalComponent } from '../../shared/tramite-detalle-modal/tramite-detalle-modal.component';
 import { AuthService } from '../../auth/services/auth.service';
+import { NavigationGuardService } from '../../core/services/navigation-guard.service';
 
 interface Estadisticas {
   activos: number;
@@ -65,10 +66,21 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
-    private authService: AuthService
+    private authService: AuthService,
+    private navigationGuard: NavigationGuardService
 ) {}
 
   ngOnInit(): void {
+    // Verificar autenticación antes de cualquier cosa
+    if (!this.authService.isAuthenticated()) {
+      console.warn('⚠️ Usuario no autenticado, redirigiendo al login');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    // Prevenir navegación hacia atrás después de logout
+    this.navigationGuard.preventBackNavigation();
+
     this.authService.getUsuarioId().subscribe(id => {
       this.usuarioId = id;
       this.cargarDatos();
@@ -78,6 +90,9 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Limpiar listener de navegación
+    this.navigationGuard.clearBackNavigationPrevention();
+
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -286,6 +301,7 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
 
   verTodosTramites(): void {
     console.log('Navegar a todos los trámites');
+    this.router.navigate(['/main/tramites']);
   }
 
   exportarDatos(): void {
@@ -398,6 +414,19 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     this.modalVisible = false;
     this.tramiteSeleccionadoId = null;
   }
+
+  // Método para editar trámite
+  editarTramite(tramite: any): void {
+    const id = +tramite.id;
+    console.log('Editar trámite con ID:', id);
+    console.log("El estado del tramite es: ", tramite.estado, "")
+    if (tramite.estado === 'Radicado' || tramite.estado === 'En Evaluación Técnica' || tramite.estado === 'Requiere Información') {
+      this.router.navigate(['/main/nuevo/registro/paso-2', id]);
+    } else if (tramite.estado === 'Aprobado' || tramite.estado === 'Rechazado') {
+      this.router.navigate(['/main/nuevo/registro/paso-3', id]);
+    }
+  }
+
 
 }
 

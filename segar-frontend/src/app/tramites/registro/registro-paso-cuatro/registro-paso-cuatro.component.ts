@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router'; // Agrega esta importación
 import { RegistroPasoCuatroService } from './registro-paso-cuatro.service';
-
 
 interface Tab {
   id: string;
@@ -79,9 +79,9 @@ interface HelpDocument {
 })
 export class RegistroPasoCuatroComponent implements OnInit {
   activeTab = 'seguimiento';
-  private tramiteId = 1; // TODO: obtener desde ruta o contexto
+  tramiteId: number = 0; // Inicializa en 0, debe ser público para acceder en el template
 
-  constructor(private paso4: RegistroPasoCuatroService) {}
+  constructor(private paso4: RegistroPasoCuatroService, private route: ActivatedRoute) {} // Inyecta ActivatedRoute
 
   readonly tabs: Tab[] = [
     { id: 'seguimiento', label: 'Seguimiento' },
@@ -119,8 +119,15 @@ export class RegistroPasoCuatroComponent implements OnInit {
   helpDocuments: HelpDocument[] = [];
 
   ngOnInit(): void {
-    // Cargar datos reales desde el backend
-    this.cargarDatosIniciales();
+    // Obtener tramiteId desde la ruta
+    this.route.params.subscribe(params => {
+      this.tramiteId = +params['id']; // Asume que la ruta es /paso-4/:id
+      if (this.tramiteId) {
+        this.cargarDatosIniciales();
+      } else {
+        console.error('No se proporcionó un ID de trámite válido');
+      }
+    });
   }
 
   private cargarDatosIniciales(): void {
@@ -358,4 +365,10 @@ export class RegistroPasoCuatroComponent implements OnInit {
   trackByHelpDoc(index: number, doc: HelpDocument): string {
     return doc.name;
   }
+
+  canContinueToNextStep(): boolean {
+    return this.trackingInfo.currentStatus === 'Aprobado' ||
+      this.trackingInfo.currentStatus === 'Rechazado';
+  }
+
 }

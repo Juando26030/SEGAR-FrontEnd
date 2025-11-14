@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 // Interfaces para Resolución y Cumplimiento
 export interface Resolucion {
@@ -54,7 +55,7 @@ export interface TramiteCompleto {
   providedIn: 'root'
 })
 export class ResolucionService {
-  private apiUrl = 'http://35.238.19.224:8090/api/tramites';
+  private apiUrl = `${environment.apiUrl}/api/tramites`;
 
   private httpOptions = {
     headers: new HttpHeaders({

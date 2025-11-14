@@ -1,5 +1,5 @@
 <div class="max-w-4xl mx-auto p-6">
-  <h2 class="text-2xl font-bold text-gray-800 mb-4">Paso 5: Resolución y Cumplimiento</h2>
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Paso 3: Resolución y Cumplimiento</h2>
   <p class="text-gray-600 mb-8">Consulta el estado final de su trámite y gestione su registro sanitario</p>
 
   <!-- Loading principal -->
@@ -445,16 +445,16 @@
   <!-- Navigation -->
   <div class="step-navigation">
     <div class="step-indicator-nav">
-      Paso <span class="current-step">5</span> de 5
+      Paso <span class="current-step">3</span> de 3
     </div>
     <div class="flex gap-4">
       <button
-        (click)="router.navigate(['/main/nuevo/registro/paso-4'])"
+        (click)="router.navigate(['/main/tramites'])"
         class="nav-btn nav-btn-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        Paso Anterior
+        Mis Tramites
       </button>
       <button
         *ngIf="tramiteCompleto?.estado !== 'FINALIZADA'"

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ProductoService } from '../../core/services/producto.service';
 
 @Component({
   selector: 'app-nuevo-producto',
@@ -13,9 +13,8 @@ import { CommonModule } from '@angular/common';
 })
 export class NuevoProductoComponent {
 
-  // Estructura del JSON que quieres enviar
+  // Estructura del JSON que quieres enviar (sin id, ya que se crea en el backend)
   producto = {
-    id: null,
     nombre: '',
     descripcion: '',
     especificaciones: '',
@@ -24,11 +23,10 @@ export class NuevoProductoComponent {
     empresaId: 1
   };
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private productoService: ProductoService, private router: Router) {}
 
   guardarProducto() {
-    const url = 'http://localhost:8090/api/producto/create';
-    this.http.post(url, this.producto).subscribe({
+    this.productoService.createProducto(this.producto).subscribe({
       next: (response) => {
         console.log('✅ Producto creado correctamente:', response);
         this.router.navigate(['/main/productos']);

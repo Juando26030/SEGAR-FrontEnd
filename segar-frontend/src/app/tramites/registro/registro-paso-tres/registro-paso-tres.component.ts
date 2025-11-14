@@ -8,6 +8,12 @@ import { DocumentosDinamicosComponent } from '../../../components/documentos-din
 import { TramiteInvimaService, ClasificacionProducto, ResultadoClasificacion } from '../../../core/services/tramite-invima.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
+import { environment } from '../../../../environments/environment';
+import { ProductoService } from '../../../core/services/producto.service';
+import { UsuarioService } from '../../../core/services/usuario.service';
+import { DocumentService } from '../../../core/services/document.service';
+import { EmailService } from '../../../services/email.service';
+
 
 interface OptionItem {
   value: string;
@@ -72,6 +78,12 @@ interface SolicitudForm {
   healthClaimsDescription: string;
 }
 
+interface TramiteResponse {
+  id: number;
+  radicadoNumber?: string; // Opcional, el backend puede devolverlo o no
+  // Agrega otras propiedades si el backend las devuelve
+}
+
 @Component({
   standalone: true,
   selector: 'app-registro-paso-tres',
@@ -85,6 +97,9 @@ interface SolicitudForm {
   styleUrls: ['./registro-paso-tres.component.css']
 })
 export class RegistroPasoTresComponent implements OnInit, OnDestroy {
+
+  documentosCargados: { documentoId: string; archivo: File }[] = [];
+
   activeTab = 'clasificacion';
 
 
@@ -105,7 +120,11 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private authService: AuthService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private productoService: ProductoService,
+    private usuarioService: UsuarioService,
+    private documentService: DocumentService,
+    private emailService: EmailService
   ) {}
 
   ngOnInit() {
@@ -149,20 +168,35 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   };
 
   obtenerProductos(): void {
-
-    const token = this.authService.getToken();
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
-    this.http.get<any[]>('http://localhost:8090/api/producto/all', { headers })
-      .subscribe({
-        next: (data) => {
-          this.productos = data;
-        },
-        error: (err) => {
-          console.error('Error al obtener productos', err);
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId !== null) {
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+            next: (empresa) => {
+              const empresaId = empresa.id;
+              this.productoService.getProductosSinTramites(empresaId).subscribe({
+                next: (productos) => {
+                  this.productos = productos;
+                },
+                error: (err) => {
+                  console.error('Error al obtener productos sin trámites', err);
+                }
+              });
+            },
+            error: (err) => {
+              console.error('Error al obtener empresa del usuario', err);
+            }
+          });
+        } else {
+          console.error('Usuario ID es null');
         }
-      });
+      },
+      error: (err) => {
+        console.error('Error al obtener usuario ID', err);
+      }
+    });
   }
+
 
   onProductoSeleccionado(): void {
     console.log('Producto seleccionado:', this.productoSeleccionado);
@@ -218,17 +252,18 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   };
 
   readonly productCategories: OptionItem[] = [
-    { value: 'bebidas', label: 'Bebidas no alcohólicas' },
-    { value: 'lacteos', label: '⚠️ Productos lácteos (Riesgo medio mínimo)' },
-    { value: 'carnicos', label: '⚠️ Productos cárnicos (Riesgo medio mínimo)' },
-    { value: 'panificacion', label: 'Productos de panificación (Riesgo bajo)' },
-    { value: 'conservas', label: '🔴 Conservas alimenticias (Riesgo alto)' },
-    { value: 'condimentos', label: 'Condimentos y especias' },
-    { value: 'snacks', label: 'Snacks y productos de confitería' },
-    { value: 'cereales', label: 'Cereales y derivados' },
-    { value: 'aceites', label: 'Aceites y grasas (Riesgo medio)' },
-    { value: 'infantiles', label: '🔴 Alimentos infantiles (Riesgo alto automático)' },
-    { value: 'comidas-listas', label: '🔴 Comidas listas (Riesgo alto)' },
+    { value: 'panaderia', label: 'Panadería' },
+    { value: 'galleteria', label: 'Galletería' },
+    { value: 'confiteria', label: 'Confiteria' },
+    { value: 'lacteos', label: 'Lácteos y derivados' },
+    { value: 'carnicos', label: 'Productos cárnicos procesados' },
+    { value: 'jugos', label: 'Jugos' },
+    { value: 'nectares', label: 'Néctares' },
+    { value: 'no-alcoholicas', label: 'Bebidas no alcohólicas' },
+    { value: 'infantiles', label: 'bebidas infantiles' },
+    { value: 'conservas', label: 'Conservas' },
+    { value: 'salsas', label: 'salsas y aderezos' },
+    { value: 'listos-consumo', label: 'Alimentos listos para consumo' },
     { value: 'otros', label: 'Otros alimentos procesados' }
   ];
 
@@ -240,31 +275,35 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
 
   readonly targetPopulations: OptionItem[] = [
     { value: 'general', label: 'Población general' },
-    { value: 'infantil', label: '🔴 Alimentación infantil (bebés y niños) - ALTO RIESGO' },
-    { value: 'gestantes', label: '🔴 Mujeres gestantes/lactantes - ALTO RIESGO' },
-    { value: 'adultos mayores', label: '🔴 Adultos mayores - ALTO RIESGO' },
-    { value: 'deportistas', label: '⚠️ Deportistas - MEDIO RIESGO mínimo' },
-    { value: 'dietas especiales', label: '⚠️ Dietas especiales o médicas - MEDIO RIESGO mínimo' }
+    { value: 'infantil', label: 'Alimentación infantil' },
+    { value: 'gestantes', label: 'Mujeres gestantes/lactantes' },
+    { value: 'adultos-mayores', label: 'Adultos mayores' },
+    { value: 'deportistas', label: 'Deportistas' },
+    { value: 'dietas-especiales', label: 'Dietas especiales - condiciones médicas' }
   ];
 
   readonly processingTypes: OptionItem[] = [
-    // Riesgo ALTO (automático)
-    { value: 'esterilizado', label: '🔴 Esterilizado comercialmente (ALTO RIESGO)' },
-    { value: 'atmósfera modificada', label: '🔴 Atmósfera modificada (ALTO RIESGO)' },
-    { value: 'congelado', label: '🔴 Congelado (ALTO RIESGO)' },
-    { value: 'vacio', label: '🔴 Envasado al vacío con conservantes (ALTO RIESGO)' },
-    { value: 'combinado', label: '🔴 Proceso combinado térmico (ALTO RIESGO)' },
 
-    // Riesgo MEDIO
-    { value: 'pasteurizado', label: '⚠️ Pasteurizado (MEDIO RIESGO)' },
-    { value: 'refrigerado', label: '⚠️ Refrigerado (MEDIO RIESGO)' },
-    { value: 'cocido', label: '⚠️ Cocido (MEDIO RIESGO)' },
-    { value: 'fermentado', label: '⚠️ Fermentado (MEDIO RIESGO)' },
-
-    // Riesgo BAJO
-    { value: 'horneado', label: 'Horneado (Bajo riesgo)' },
-    { value: 'deshidratado', label: 'Deshidratado (Bajo riesgo)' },
-    { value: 'secado natural', label: 'Secado natural (Bajo riesgo)' },
+    { value: 'horneado', label: 'Horneado' },
+    { value: 'deshidratado', label: 'Deshidratado' },
+    { value: 'relleno', label: 'Relleno' },
+    { value: 'cubierto', label: 'Cubierto' },
+    { value: 'vacio', label: 'Envasado al vacío' },
+    { value: 'frito', label: 'Frito' },
+    { value: 'congelado', label: 'Congelado' },
+    { value: 'pasteurizado', label: 'Pasteurizado' },
+    { value: 'refrigerado', label: 'Refrigerado' },
+    { value: 'fermentado', label: 'Fermentado' },
+    { value: 'polvo', label: 'En polvo' },
+    { value: 'embutido', label: 'Embutido' },
+    { value: 'cocido', label: 'Cocido' },
+    { value: 'curado', label: 'Curado' },
+    { value: 'precocido', label: 'Precocido congelado' },
+    { value: 'envasado', label: 'Envasado' },
+    { value: 'enlatado', label: 'Enlatado' },
+    { value: 'esterilizado', label: 'Esterilizados' },
+    { value: 'atmosfera', label: 'En atmósfera modificada' },
+    { value: 'secado-natural', label: 'Secado natural' },
 
     { value: 'otro', label: 'Otro método' }
   ];
@@ -444,154 +483,60 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     const categoria = this.classificationForm.productCategory?.toLowerCase() || '';
     const riesgoActual = this.classificationForm.riskLevel;
 
-    // ============================================
-    // REGLA 1: POBLACIÓN VULNERABLE → ALTO (RSA) AUTOMÁTICO
-    // ============================================
-    const poblacionesVulnerables = [
-      'infantil', 'bebés', 'bebes', 'niños', 'ninos',
-      'gestantes', 'gestante', 'lactantes', 'lactante',
-      'adultos mayores', 'adulto mayor', 'tercera-edad', 'especial'
-    ];
+    // 🧁 Panadería / Galletería / Confitería
+    if (categoria.includes('panaderia') || categoria.includes('galleteria') || categoria.includes('confiteria')) {
+      if (procesamiento.includes('horneado') || procesamiento.includes('deshidratado')) {
 
-    if (poblacionesVulnerables.some(pob => poblacion.includes(pob))) {
-      this.classificationForm.riskLevel = 'alto';
-      this.riskLevelDisabled = true;
-      this.riskLevelForzado = 'alto';
-      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Población vulnerable requiere Registro Sanitario (RSA) - Riesgo ALTO obligatorio [Res. 719/2015]';
-      return;
-    }
-
-    // ============================================
-    // REGLA ESPECIAL: DEPORTISTAS Y DIETAS ESPECIALES → MEDIO MÍNIMO
-    // ============================================
-    const poblacionesEspeciales = ['deportistas', 'deportista', 'dietas especiales', 'dieta especial', 'dietas médicas'];
-
-    if (poblacionesEspeciales.some(pob => poblacion.includes(pob))) {
-      // Si el riesgo es bajo, lo eleva a medio
-      if (!riesgoActual || riesgoActual === 'bajo') {
-        this.classificationForm.riskLevel = 'medio';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Población especial requiere mínimo Permiso Sanitario (PSA) - Riesgo MEDIO mínimo';
-        return;
+        this.classificationForm.riskLevel = "bajo";
+      } else if (procesamiento.includes('relleno') || procesamiento.includes('cubierto') || procesamiento.includes('vacio')) {
+        this.classificationForm.riskLevel = "medio";
+      } else if (poblacion.includes('infantil') || poblacion.includes('sensible') || procesamiento.includes('fritos') || procesamiento.includes('congelados')) {
+        this.classificationForm.riskLevel = "alto";
       }
     }
 
-    // ============================================
-    // REGLA 2: CATEGORÍAS DE ALTO RIESGO AUTOMÁTICO
-    // ============================================
-    const categoriasAltoRiesgo = [
-      'infantiles', 'alimentos infantiles', 'formula infantil',
-      'conservas', 'comidas listas', 'comidas-listas',
-      'esterilizados', 'productos esterilizados'
-    ];
-
-    if (categoriasAltoRiesgo.some(cat => categoria.includes(cat))) {
-      this.classificationForm.riskLevel = 'alto';
-      this.riskLevelDisabled = true;
-      this.riskLevelForzado = 'alto';
-      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Esta categoría requiere Registro Sanitario (RSA) - Riesgo ALTO por complejidad sanitaria';
-      return;
-    }
-
-    // ============================================
-    // REGLA 3: PROCESAMIENTO DE ALTO RIESGO → ALTO AUTOMÁTICO
-    // ============================================
-    const procesamientosAltoRiesgo = [
-      'esterilizado', 'esterilización', 'esterilizacion',
-      'atmósfera modificada', 'atmosfera modificada', 'map',
-      'congelado', 'congelación', 'congelacion', 'ultra congelado', 'ultracongelado',
-      'vacio', 'vacío', 'al vacio', 'al vacío',
-      'combinado', 'proceso combinado', 'térmico combinado'
-    ];
-
-    if (procesamientosAltoRiesgo.some(proc => procesamiento.includes(proc))) {
-      this.classificationForm.riskLevel = 'alto';
-      this.riskLevelDisabled = true;
-      this.riskLevelForzado = 'alto';
-      this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Procesamiento de alto riesgo requiere Registro Sanitario (RSA) - Riesgo ALTO obligatorio';
-      return;
-    }
-
-    // ============================================
-    // REGLA 4: PROCESAMIENTOS DE RIESGO MEDIO → MEDIO MÍNIMO
-    // ============================================
-    const procesamientosMedioRiesgo = [
-      'pasteurizado', 'pasteurización',
-      'refrigerado', 'refrigeración',
-      'cocido', 'cocción',
-      'fermentado', 'fermentación'
-    ];
-
-    if (procesamientosMedioRiesgo.some(proc => procesamiento.includes(proc))) {
-      // Si el riesgo es bajo, lo eleva a medio
-      if (!riesgoActual || riesgoActual === 'bajo') {
-        this.classificationForm.riskLevel = 'medio';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Este procesamiento requiere mínimo Permiso Sanitario (PSA) - Riesgo MEDIO mínimo';
-        return;
+    // 🥛 Lácteos y derivados
+    if (categoria.includes('lacteos')) {
+      if (poblacion.includes('infantil') || poblacion.includes('gestante') || poblacion.includes('adulto mayor') ||
+          procesamiento.includes('fermentado') || procesamiento.includes('polvo')) {
+        this.classificationForm.riskLevel = "alto";
+      } else if (procesamiento.includes('pasteurizado') || procesamiento.includes('refrigerado')) {
+        this.classificationForm.riskLevel = "medio";
       }
     }
 
-    // ============================================
-    // REGLA 5: CATEGORÍAS CON RIESGO MEDIO MÍNIMO
-    // ============================================
-    const categoriasMedioRiesgo = [
-      'lacteos', 'lácteos', 'derivados lácteos', 'derivados lacteos',
-      'carnicos', 'cárnicos', 'productos cárnicos', 'productos carnicos',
-      'aceites', 'grasas', 'aceites y grasas'
-    ];
-
-    const esCategoriaMediaRiesgo = categoriasMedioRiesgo.some(cat => categoria.includes(cat));
-
-    if (esCategoriaMediaRiesgo) {
-      // No pueden ser de riesgo bajo
-      if (riesgoActual === 'bajo') {
-        this.classificationForm.riskLevel = 'medio';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '⚠️ REGLA AUTOMÁTICA: Esta categoría NO puede ser de riesgo bajo - Riesgo MEDIO mínimo obligatorio';
-        return;
-      }
-
-      // Si es riesgo medio, se eleva a alto
-      if (riesgoActual === 'medio') {
-        this.classificationForm.riskLevel = 'alto';
-        this.riskLevelDisabled = true;
-        this.mensajeReglaActiva = '🔴 REGLA AUTOMÁTICA: Lácteos/Cárnicos con riesgo medio se elevan a Registro Sanitario (RSA) - Riesgo ALTO';
-        return;
+    // 🥩 Productos cárnicos procesados
+    if (categoria.includes('carnicos')) {
+      if (procesamiento.includes('listos-consumo') || procesamiento.includes('precocido') || procesamiento.includes('congelado')) {
+        this.classificationForm.riskLevel = "alto";
+      } else if (procesamiento.includes('cocido') || procesamiento.includes('curado') || procesamiento.includes('embutido')) {
+        this.classificationForm.riskLevel = "medio";
       }
     }
 
-    // ============================================
-    // REGLA 6: CATEGORÍAS DE RIESGO BAJO PREDEFINIDO
-    // ============================================
-    const categoriasRiesgoBajo = [
-      'panificacion', 'panificación', 'panadería', 'panaderia',
-      'galletería', 'galleteria', 'confitería', 'confiteria'
-    ];
-
-    if (categoriasRiesgoBajo.some(cat => categoria.includes(cat))) {
-      // Solo si no hay otras reglas que lo eleven
-      if (!riesgoActual && poblacion === 'general' &&
-          (procesamiento === 'horneado' || procesamiento === 'deshidratado' || procesamiento === 'secado natural')) {
-        this.classificationForm.riskLevel = 'bajo';
-        this.riskLevelDisabled = false;
-        this.mensajeReglaActiva = '';
-        return;
+    // 🍹 Jugos, néctares, bebidas
+    if (categoria.includes('jugos') || categoria.includes('nectares') || categoria.includes('no-alcohólicas') || categoria.includes('infantiles')) {
+      if (poblacion.includes('infantil')) {
+        this.classificationForm.riskLevel = "alto";
+      } else if (procesamiento.includes('pasteurizado') || procesamiento.includes('refrigerado')) {
+        this.classificationForm.riskLevel = "medio";
       }
     }
 
-    // ============================================
-    // SI NO APLICA NINGUNA REGLA AUTOMÁTICA
-    // ============================================
-    this.riskLevelDisabled = false;
-    this.riskLevelForzado = '';
-    this.mensajeReglaActiva = '';
+    // 🥫 Conservas, salsas y aderezos
+    if (categoria.includes('conservas') || categoria.includes('salsas')) {
+      if (procesamiento.includes('enlatado') || procesamiento.includes('frasco')) {
+        this.classificationForm.riskLevel = "medio";
+      } else if (procesamiento.includes('esterilizado') || procesamiento.includes('atmósfera modificada')) {
+        this.classificationForm.riskLevel = "alto";
+      }
+    }
 
-    // Pero validar coherencia si ya hay un valor seleccionado
-    if (riesgoActual) {
-      this.validarCoherenciaRiesgo();
+    if (this.classificationForm.riskLevel == ''){
+      this.classificationForm.riskLevel = "alto";
     }
   }
+
 
   /**
    * Valida que el riesgo seleccionado manualmente sea coherente con la categoría
@@ -677,8 +622,24 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   }
 
   onDocumentoCompletado(evento: { documentoId: string; datos: any }): void {
-    console.log('Documento completado:', evento);
-    // Aquí se podría guardar en el backend o en el estado local
+    const { documentoId, datos } = evento;
+    const nuevoDoc = { documentoId, archivo: datos.archivo };
+
+    // Verificar si el documento ya existe
+    const index = this.documentosCargados.findIndex(d => d.documentoId === documentoId);
+
+    if (index !== -1) {
+      // Si existe, reemplazar el documento
+      this.documentosCargados[index] = nuevoDoc;
+      console.log(`🔁 Documento "${documentoId}" actualizado.`);
+    } else {
+      // Si no existe, agregarlo a la lista
+      this.documentosCargados.push(nuevoDoc);
+      console.log(`✅ Documento "${documentoId}" agregado.`);
+    }
+
+    // Mostrar la lista completa
+    console.log('📄 Lista actualizada de documentos:', this.documentosCargados);
   }
 
   onTodosDocumentosCompletos(completos: boolean): void {
@@ -698,35 +659,137 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   }
 
   onRadicarSolicitud(): void {
-    console.log("📨 AQUI SE RADICA LA SOLICITUD");
-  console.log("🆔 ID del producto:", this.productoSeleccionado.id);
-  console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
+    this.authService.getUsuarioId().subscribe({
+      next: (usuarioId) => {
+        if (usuarioId !== null) {
+          console.log("📨 ========== INICIANDO RADICACIÓN ==========");
+          console.log("🆔 ID del producto:", this.productoSeleccionado.id);
+          console.log("📦 Nombre del producto:", this.productoSeleccionado.nombre);
+          console.log("📄 Tipo de trámite:", this.resultadoClasificacion?.tramite_descripcion);
+          console.log("👤 ID del usuario:", usuarioId);
 
-  const token = this.authService.getToken();
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+          const token = this.authService.getToken();
+          const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          });
 
-    const body = {
-      productoId: this.productoSeleccionado.id,
-      procedureType: this.resultadoClasificacion?.tramite_descripcion,
-      radicadoNumber: ''
-    };
+          const body = {
+            productoId: this.productoSeleccionado.id,
+            procedureType: this.resultadoClasificacion?.tramite_descripcion,
+            radicadoNumber: '',
+            usuarioId: usuarioId
+          };
 
-    const url = 'http://localhost:8090/api/tramites/create';
+          const url = `${environment.apiUrl}/api/tramites/create`;
 
-    this.http.post(url, body, { headers }).subscribe({
-      next: (response) => {
-        console.log('✅ Trámite creado exitosamente:', response);
-        alert('✅ Trámite radicado correctamente.');
+          this.http.post<TramiteResponse>(url, body, { headers }).subscribe({
+            next: async (response: TramiteResponse) => {
+              console.log('✅ Trámite creado exitosamente:', response);
+
+              const tramiteId = response.id;
+              const numeroRadicado = response.radicadoNumber || `TEMP-${tramiteId}`;
+
+              // Obtener datos de la empresa y usuario para enviar carta formal
+              console.log('📧 Preparando solicitud formal al INVIMA...');
+              try {
+                // Obtener datos de la empresa
+                const empresa = await this.usuarioService.getEmpresaByUsuarioId(usuarioId).toPromise();
+                const usuario = await this.usuarioService.getUsuarioById(usuarioId).toPromise();
+
+                if (!empresa || !usuario) {
+                  throw new Error('No se pudieron obtener los datos de la empresa o usuario');
+                }
+
+                // Preparar lista de documentos adjuntos
+                const documentosAdjuntos = [
+                  'Ficha técnica del producto',
+                  'Certificado de Buenas Prácticas de Manufactura (BPM)',
+                  'Resultados de análisis microbiológico y fisicoquímico',
+                  'Análisis nutricional del producto',
+                  'Etiqueta del producto conforme a la normativa vigente',
+                  'Diagrama de flujo del proceso de producción',
+                  'Plan HACCP (Análisis de Peligros y Puntos Críticos de Control)',
+                  'Estudios de validación y estabilidad del producto',
+                  'Manual de calidad',
+                  'Certificado de calidad del proveedor',
+                  'Ficha técnica de materias primas'
+                ];
+
+                // Preparar datos completos para la carta formal
+                await this.emailService.enviarSolicitudFormalInvima({
+                  numeroRadicado: numeroRadicado,
+                  tipoTramite: this.resultadoClasificacion?.tramite_descripcion || 'Registro Sanitario de Alimentos',
+                  empresa: {
+                    razonSocial: empresa.razonSocial || empresa.nombreComercial || 'Empresa',
+                    nit: empresa.nit || 'N/A',
+                    direccion: empresa.direccion || 'Dirección no especificada',
+                    ciudad: empresa.ciudad || 'Ciudad',
+                    telefono: empresa.telefono || 'N/A',
+                    email: empresa.email || 'correo@empresa.com'
+                  },
+                  representanteLegal: {
+                    nombre: usuario.fullName || `${usuario.firstName} ${usuario.lastName}` || 'Representante Legal',
+                    cedula: usuario.idNumber || 'N/A'
+                  },
+                  producto: {
+                    nombre: this.productoSeleccionado.nombre || this.solicitudForm.productName,
+                    marca: this.solicitudForm.brandName || 'N/A',
+                    categoria: this.classificationForm.productCategory || 'Alimentos',
+                    presentacion: this.solicitudForm.presentation || 'Presentación estándar'
+                  },
+                  fabricacion: {
+                    nombrePlanta: this.solicitudForm.manufacturer.name || 'Planta de Producción',
+                    direccionPlanta: this.solicitudForm.manufacturer.address || 'Dirección de planta',
+                    ciudadPlanta: this.solicitudForm.manufacturer.city || 'Ciudad',
+                    departamentoPlanta: this.solicitudForm.manufacturer.department || 'Departamento'
+                  },
+                  documentosAdjuntos: documentosAdjuntos,
+                  alcanceComercializacion: 'Nacional'
+                });
+
+                console.log('✅ Solicitud formal enviada al INVIMA correctamente');
+                alert('✅ Trámite radicado correctamente.\n📧 Se ha enviado la solicitud formal al INVIMA.');
+              } catch (emailError) {
+                console.warn('⚠️ El trámite se radicó pero hubo un problema al enviar la solicitud:', emailError);
+                alert('✅ Trámite radicado correctamente.\n⚠️ Nota: No se pudo enviar la solicitud formal al INVIMA.');
+              }
+
+              // Navegar al paso 4
+              this.router.navigate(['main/nuevo/registro/paso-2', tramiteId]);
+            },
+            error: (error) => {
+              console.error('❌ Error al radicar el trámite:', error);
+              alert('❌ Ocurrió un error al radicar el trámite.');
+            }
+          });
+        } else {
+          console.error('Usuario ID es null');
+          alert('Error: No se pudo obtener el ID del usuario.');
+        }
       },
-      error: (error) => {
-        console.error('❌ Error al radicar el trámite:', error);
-        alert('❌ Ocurrió un error al radicar el trámite.');
+      error: (err) => {
+        console.error('Error al obtener usuario ID', err);
+        alert('Error al obtener el ID del usuario.');
       }
     });
+
+    const token = this.authService.getToken();
+
+    for (const doc of this.documentosCargados) {
+      console.log("📄 Documento a cargar:", doc.documentoId);
+
+      this.documentService
+        .cargarDocumento(doc.documentoId, doc.archivo, token!, this.productoSeleccionado)
+        .subscribe({
+          next: (res) => console.log(`📤 Documento ${doc.documentoId} cargado correctamente`),
+          error: (err) => console.error(`❌ Error al subir documento ${doc.documentoId}:`, err),
+          complete: () => console.log(`✅ Flujo completado para ${doc.documentoId}`)
+        });
+    }
+
   }
+
 
   isFormCompleteForRadication(): boolean {
     return this.isClassificationComplete() && this.isSolicitudFormValid();

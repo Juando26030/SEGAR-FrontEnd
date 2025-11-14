@@ -55,6 +55,34 @@
     </div>
   </div>
 
+  <!-- Modal de Todos los Eventos del Día (NUEVO) -->
+  <div class="modal-overlay" *ngIf="mostrarModalEventosDia" (click)="cerrarModalEventosDia()">
+    <div class="modal-detalles" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-titulo">Eventos del Día ({{ eventosDiaSeleccionado.length }})</h3>
+        <button class="btn-cerrar" (click)="cerrarModalEventosDia()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="lista-eventos-dia">
+          <div
+            class="evento-dia-item"
+            *ngFor="let evento of eventosDiaSeleccionado"
+            [ngClass]="obtenerClaseEvento(evento)"
+            (click)="seleccionarEvento(evento); cerrarModalEventosDia()"
+          >
+            <span class="evento-icono">{{ obtenerIconoEvento(evento.tipo) }}</span>
+            <div class="evento-info">
+              <div class="evento-titulo">{{ evento.titulo }}</div>
+              <div class="evento-hora" *ngIf="evento.hora">{{ evento.hora }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Grilla del Calendario -->
   <div class="calendario-wrapper">
     <!-- Encabezados de días de la semana -->

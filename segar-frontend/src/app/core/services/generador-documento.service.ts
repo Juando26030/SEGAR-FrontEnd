@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
   TipoDocumentoInvimaDTO,
   DocumentoGeneradoDTO,
@@ -13,7 +14,7 @@ import {
   providedIn: 'root'
 })
 export class DocumentGeneratorService {
-  private readonly API_URL = 'http://35.238.19.224:8090/api';
+  private readonly API_URL = `${environment.apiUrl}/api`;
 
   // Estado del componente
   private documentosDisponiblesSubject = new BehaviorSubject<TipoDocumentoInvimaDTO[]>([]);
