@@ -3,6 +3,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { List } from 'postcss/lib/list';
+import { DocumentoDto } from '../DTOs/documento.dto';
 
 export interface DocumentoDisponible {
   id: number;
@@ -58,5 +60,12 @@ export class DocumentoService {
     }
 
     return throwError(() => new Error(errorMessage));
+  }
+
+  getDocumentoPorTramite(tramiteId: number): Observable<DocumentoDto[]> {
+    return this.http.get<DocumentoDto[]>(`${this.baseUrl}/documentos/tramite/${tramiteId}`)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 }
