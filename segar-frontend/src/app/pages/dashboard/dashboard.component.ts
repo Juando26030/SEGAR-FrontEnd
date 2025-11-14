@@ -9,6 +9,7 @@ import { Chart, registerables } from 'chart.js';
 import {FormsModule} from '@angular/forms';
 import { EventoDTO} from '../../core/DTOs/calendario.dto';
 import { AuthService } from '../../auth/services/auth.service'; // Agregar esta importación
+import { Token } from '@angular/compiler';
 
 // Registrar todos los componentes de Chart.js
 Chart.register(...registerables);
@@ -46,6 +47,7 @@ interface EventoReciente {
   estadoEvento: string;
 }
 
+var token: string | undefined = undefined;
 
 @Component({
   selector: 'app-dashboard',
@@ -120,6 +122,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     // Obtener el usuarioId antes de cargar datos
+    token = this.authService.getToken();
     this.authService.getUsuarioId().subscribe(id => {
       this.usuarioId = id;
       this.cargarDatosDashboard();
@@ -428,10 +431,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cargando = true;
 
       const requests = forkJoin({
-        resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
-        tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined), // Pasar usuarioId
-        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
-        eventosProximos: this.calendarioService.obtenerEventosProximos()
+        resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined, token), // Pasar usuarioId
+        tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined, token), // Pasar usuarioId
+        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado, undefined, this.usuarioId ?? undefined, token), // Pasar usuarioId
+        eventosProximos: this.calendarioService.obtenerEventosProximos(token)
       });
 
       requests.subscribe({

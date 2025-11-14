@@ -16,6 +16,8 @@ interface CalendarDay {
   eventos: EventoDTO[];
 }
 
+var token: string | undefined = undefined;
+
 @Component({
   selector: 'app-calendario',
   standalone: true,

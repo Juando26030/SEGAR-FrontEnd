@@ -1,8 +1,8 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8090', //url del despliegue: http://35.238.19.224:8090
+  apiUrl: 'https://segar-solutions.duckdns.org/api',
   keycloak: {
-    url: 'http://localhost:8080', //url del despliegue: http://35.238.19.224:8080
+    url: 'https://segar-solutions.duckdns.org/auth',
     realm: 'segar',
     clientId: 'segar-frontend'
   }

@@ -10,11 +10,14 @@ import { map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class UsuarioService {
   private baseUrl = `${environment.apiUrl}/api/usuarios`;
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient
+  ) {}
 
   // ========== CONSULTAS ==========
 
@@ -36,36 +39,51 @@ export class UsuarioService {
   }
 
   // Obtener todos los usuarios locales (completos)
-  getUsuariosLocales(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.baseUrl}/local`).pipe(
+  getUsuariosLocales( token?: string): Observable<Usuario[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<Usuario[]>(`${this.baseUrl}/local`, { headers }).pipe(
       tap(users => console.log('✅ Usuarios obtenidos del backend:', users))
     );
   }
 
   // Sincronizar con Keycloak (solo datos básicos)
-  sincronizarConKeycloak(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(this.baseUrl).pipe(
+  sincronizarConKeycloak( token?: string): Observable<Usuario[]> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<Usuario[]>(this.baseUrl, { headers }).pipe(
       tap(users => console.log('✅ Usuarios sincronizados de Keycloak:', users))
     );
   }
 
   // Obtener usuario por username (datos completos de H2)
-  getUsuarioByUsername(username: string): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.baseUrl}/username/${username}`).pipe(
+  getUsuarioByUsername(username: string, token?: string): Observable<Usuario> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<Usuario>(`${this.baseUrl}/username/${username}`, { headers }).pipe(
       tap(user => console.log('✅ Usuario obtenido del backend:', user))
     );
   }
 
   // Obtener usuario por Keycloak ID (datos completos de H2)
-  getUsuarioByKeycloakId(keycloakId: string): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.baseUrl}/keycloak/${keycloakId}`).pipe(
+  getUsuarioByKeycloakId(keycloakId: string, token?: string): Observable<Usuario> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<Usuario>(`${this.baseUrl}/keycloak/${keycloakId}`, { headers }).pipe(
       tap(user => console.log('✅ Usuario obtenido por Keycloak ID:', user))
     );
   }
 
   // Obtener usuario por ID local (datos completos de H2)
-  getUsuarioById(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.baseUrl}/${id}`).pipe(
+  getUsuarioById(id: number, token?: string): Observable<Usuario> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<Usuario>(`${this.baseUrl}/${id}`, { headers }).pipe(
       tap(user => console.log('✅ Usuario obtenido por ID:', user))
     );
   }
@@ -73,29 +91,41 @@ export class UsuarioService {
   // ========== OPERACIONES CRUD ==========
 
   // Crear nuevo usuario (ADMIN) - Sincroniza con Keycloak
-  crearUsuario(usuario: Partial<Usuario> & { password: string }): Observable<Usuario> {
-    return this.http.post<Usuario>(this.baseUrl, usuario).pipe(
+  crearUsuario(usuario: Partial<Usuario> & { password: string }, token?: string): Observable<Usuario> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.post<Usuario>(this.baseUrl, usuario, { headers }).pipe(
       tap(user => console.log('✅ Usuario creado exitosamente:', user))
     );
   }
 
   // Actualizar usuario existente (ADMIN) - Sincroniza con Keycloak
-  actualizarUsuario(id: number, usuario: Partial<Usuario>): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.baseUrl}/${id}`, usuario).pipe(
+  actualizarUsuario(id: number, usuario: Partial<Usuario>, token?: string): Observable<Usuario> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.put<Usuario>(`${this.baseUrl}/${id}`, usuario, { headers }).pipe(
       tap(user => console.log('✅ Usuario actualizado exitosamente:', user))
     );
   }
 
   // Eliminar usuario (ADMIN) - Elimina de Keycloak y base de datos local
-  eliminarUsuario(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
+  eliminarUsuario(id: number, token?: string): Observable<void> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers }).pipe(
       tap(() => console.log('✅ Usuario eliminado exitosamente, ID:', id))
     );
   }
 
   // Activar/Desactivar usuario (toggle) - Sincroniza con Keycloak
-  toggleActivoUsuario(id: number): Observable<Usuario> {
-    return this.http.patch<Usuario>(`${this.baseUrl}/${id}/toggle-active`, {}).pipe(
+  toggleActivoUsuario(id: number, token?: string): Observable<Usuario> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.patch<Usuario>(`${this.baseUrl}/${id}/toggle-active`, { headers }).pipe(
       tap(user => console.log('✅ Estado de usuario actualizado:', user))
     );
   }

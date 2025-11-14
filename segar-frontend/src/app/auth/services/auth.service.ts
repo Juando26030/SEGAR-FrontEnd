@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Observable, of, map, catchError } from 'rxjs';
 import { UsuarioService } from '../../core/services/usuario.service'; // Ajusta la ruta si es necesario
 import { environment } from '../../../environments/environment';
+import { HttpHeaders } from '@angular/common/http';
 
 
 export interface UserInfo {
@@ -669,10 +670,11 @@ export class AuthService {
 
     // Buscar directamente por username (más confiable que keycloakId)
     const username = this.keycloak?.tokenParsed?.['preferred_username'];
+    const token = this.getToken() || '';
 
     if (username) {
       console.log('🔍 Obteniendo ID de usuario por username:', username);
-      return this.usuarioService.getUsuarioByUsername(username).pipe(
+      return this.usuarioService.getUsuarioByUsername(username, token).pipe(
         map(user => {
           console.log('✅ ID de usuario obtenido:', user.id);
           return user.id;
