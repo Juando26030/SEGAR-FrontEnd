@@ -12,6 +12,8 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { ProductoService } from '../../../core/services/producto.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
+import { DocumentoService } from '../../../core/services/documento.service';
+import { catchError, switchMap } from 'rxjs';
 
 
 interface OptionItem {
@@ -109,6 +111,7 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
 
   productos: any[] = [];
   productoSeleccionado: any = '';
+  documentosTramite: any[] = [];
 
   // Propiedades para el autocompletado de clasificación
   cargandoClasificacion = false;
@@ -118,6 +121,7 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
   constructor(
     private tramiteService: TramiteInvimaService,
     private clasificacionProductoService: ClasificacionProductoService,
+    private documentoService: DocumentoService,
     private http: HttpClient,
     private authService: AuthService,
     private router: Router,
@@ -224,17 +228,34 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
     this.errorClasificacion = '';
     this.clasificacionCargada = false;
 
-    this.clasificacionProductoService.obtenerClasificacion(productoId).subscribe({
-      next: (clasificacion) => {
+    this.clasificacionProductoService.obtenerClasificacion(productoId).pipe(
+      // Si la clasificación llega correctamente:
+      switchMap((clasificacion) => {
         console.log('✅ Clasificación cargada desde el backend:', clasificacion);
         this.autoLlenarFormularioDesdeClasificacion(clasificacion);
         this.clasificacionCargada = true;
+
+        // Después de actualizar la UI, llamar al segundo servicio
+        return this.documentoService.getDocumentoPorTramite(productoId);
+      }),
+
+      // Si la clasificación NO existe:
+      catchError((error) => {
+        console.warn('⚠️ No se encontró clasificación previa para este producto:', error);
+        this.autoLlenarFormularioDesdeProducto();
+
+        // Igual llamamos al segundo servicio
+        return this.documentoService.getDocumentoPorTramite(productoId);
+      })
+
+    ).subscribe({
+      next: (documentos) => {
+        console.log('📄 Documentos cargados:', documentos);
+        this.documentosTramite = documentos;
         this.cargandoClasificacion = false;
       },
-      error: (error) => {
-        console.warn('⚠️ No se encontró clasificación previa para este producto:', error);
-        // Si no existe clasificación, intentar inferir desde los datos del producto
-        this.autoLlenarFormularioDesdeProducto();
+      error: (err) => {
+        console.error('❌ Error obteniendo documentos:', err);
         this.cargandoClasificacion = false;
       }
     });

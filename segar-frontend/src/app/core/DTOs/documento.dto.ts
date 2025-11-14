@@ -2,6 +2,10 @@ export interface DocumentoDto {
   id: number;
   bucketName: string;
   objectName: string;
+  nombreEmpresa: string;
+  nombreProducto: string;
+  idDocumento: string;
+  nombreArchivo: string;
   contentType: string;
   uploadedAt: Date;
 }

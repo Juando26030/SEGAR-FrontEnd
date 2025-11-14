@@ -1,10 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { DocumentoRequerido, ResultadoClasificacion } from '../../core/services/tramite-invima.service';
 import { AuthService } from '../../auth/services/auth.service';
 import { Producto } from '../../core/DTOs/solicitud.dto';
+import { DocumentoDto } from '../../core/DTOs/documento.dto';
 
 @Component({
   selector: 'app-documentos-dinamicos',
@@ -19,6 +20,7 @@ export class DocumentosDinamicosComponent implements OnInit {
   @Input() modoRenovacion: boolean = false;
   @Input() documentosOriginales: any[] = [];
   @Input() reglasBloqueo: string[] = [];
+  @Input() documentosCargados: DocumentoDto[] = [];
   @Input() soloLectura: boolean = false; // Modo solo lectura - bloquea todo
   @Output() documentoCompletado = new EventEmitter<{ documentoId: string; datos: any }>();
   @Output() todosCompletados = new EventEmitter<boolean>();
@@ -63,6 +65,33 @@ export class DocumentosDinamicosComponent implements OnInit {
       this.archivosSubidos[doc.id] = null;
     });
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['documentosCargados'] && this.documentosCargados) {
+      this.preCargarDocumentos();
+    }
+  }
+
+  preCargarDocumentos() {
+    for (const doc of this.documentosCargados) {
+
+      const id = doc.idDocumento; // String como "FICHA_TECNICA_BASICA"
+
+      // 1️⃣ Marcar como archivo subido
+      this.archivosSubidos[id] = null;
+
+      // 2️⃣ Rellenar los datos para que aparezca la tarjeta visual
+      this.datosDocumentos[id] = {
+        nombreArchivo: doc.nombreArchivo,
+        tamanioArchivo: 0, // No viene en tu payload
+        tipoArchivo: doc.contentType,
+        fechaCarga: new Date(doc.uploadedAt)
+      };
+
+    }
+  }
+
+
 
   cargarDocumentosRenovacion(): void {
     this.resultado.documentos.forEach(doc => {
