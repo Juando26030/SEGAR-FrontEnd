@@ -21,12 +21,15 @@ export class UserProfileCardComponent implements OnInit {
     initials: ''
   };
 
+  token = '';
+
   constructor(
     private authService: AuthService,
     private usuarioService: UsuarioService
   ) {}
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     this.loadUserProfile();
   }
 
@@ -39,7 +42,7 @@ export class UserProfileCardComponent implements OnInit {
     }
 
     // Cargar datos completos del backend
-    this.usuarioService.getUsuarioByUsername(userInfo.username).subscribe({
+    this.usuarioService.getUsuarioByUsername(userInfo.username, this.token).subscribe({
       next: (usuario: Usuario) => {
         this.user.name = usuario.fullName;
         this.user.email = usuario.email;

@@ -59,7 +59,7 @@ export class TramiteInvimaService {
    * Clasifica el producto y determina el tipo de trámite requerido
    * AHORA USA EL BACKEND PARA OBTENER DOCUMENTOS
    */
-  clasificarProducto(clasificacion: ClasificacionProducto): Observable<ResultadoClasificacion> {
+  clasificarProducto(clasificacion: ClasificacionProducto, token: string): Observable<ResultadoClasificacion> {
     const tramite = this.determinarTipoTramite(clasificacion);
     const tipoTramiteBackend = this.mapTramiteToBackend(tramite);
 
@@ -70,7 +70,7 @@ export class TramiteInvimaService {
 
     // Obtener documentos desde el BACKEND
     return this.documentTemplateService
-      .getTemplatesByTramiteAndRiesgo(tipoTramiteBackend, categoriaRiesgoBackend)
+      .getTemplatesByTramiteAndRiesgo(tipoTramiteBackend, categoriaRiesgoBackend, token)
       .pipe(
         map(templates => {
           console.log(`📋 Templates recibidos del backend: ${templates.length}`);

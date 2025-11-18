@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -16,22 +16,31 @@ export class TramiteService {
   /**
    * Obtiene todos los tramites disponibles
    */
-  getAllTramites(): Observable<TramiteDto[]> {
-    return this.http.get<TramiteDto[]>(`${this.baseUrl}/all`)
+  getAllTramites(token: string): Observable<TramiteDto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<TramiteDto[]>(`${this.baseUrl}/all`, { headers })
       .pipe(
         catchError(this.handleError)
       );
   }
 
   // obtiene trámites por empresa
-  getTramitesByEmpresaId(empresaId: number): Observable<TramiteDto[]> {
-    return this.http.get<TramiteDto[]>(`${this.baseUrl}/empresa/${empresaId}`)
+  getTramitesByEmpresaId(empresaId: number, token: string): Observable<TramiteDto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<TramiteDto[]>(`${this.baseUrl}/empresa/${empresaId}`, { headers })
       .pipe(catchError(this.handleError));
   }
 
   //obtiene trámites por usuario
-  getTramitesByUsuarioId(usuarioId: number): Observable<TramiteDto[]> {
-    return this.http.get<TramiteDto[]>(`${this.baseUrl}/usuario/${usuarioId}`)
+  getTramitesByUsuarioId(usuarioId: number, token: string): Observable<TramiteDto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<TramiteDto[]>(`${this.baseUrl}/usuario/${usuarioId}`, { headers })
       .pipe(catchError(this.handleError));
   }
 

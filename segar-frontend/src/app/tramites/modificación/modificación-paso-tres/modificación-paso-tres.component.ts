@@ -115,6 +115,8 @@ export class ModificacionPasoTresComponent implements OnInit, OnDestroy {
   errorClasificacion = '';
   clasificacionCargada = false;
 
+  token = '';
+
   constructor(
     private tramiteService: TramiteInvimaService,
     private clasificacionProductoService: ClasificacionProductoService,
@@ -127,6 +129,7 @@ export class ModificacionPasoTresComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.token = this.authService.getToken()!;
     this.obtenerProductos();
 
     // Configurar el state para la navegación hacia atrás
@@ -171,11 +174,11 @@ export class ModificacionPasoTresComponent implements OnInit, OnDestroy {
     this.authService.getUsuarioId().subscribe({
       next: (usuarioId) => {
         if (usuarioId !== null) {
-          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId, this.token).subscribe({
             next: (empresa) => {
               const empresaId = empresa.id;
               // ✅ CAMBIO: Usar el endpoint de productos con registro vigente
-              this.productoService.getProductosConRegistroVigente(empresaId).subscribe({
+              this.productoService.getProductosConRegistroVigente(empresaId, this.token).subscribe({
                 next: (productos) => {
                   this.productos = productos;
                   console.log('📦 Productos con registro vigente:', productos);
@@ -1052,7 +1055,7 @@ export class ModificacionPasoTresComponent implements OnInit, OnDestroy {
     };
 
     // ✅ AHORA USA EL BACKEND - Obtener los documentos requeridos dinámicamente
-    this.tramiteService.clasificarProducto(clasificacion).subscribe({
+    this.tramiteService.clasificarProducto(clasificacion, this.token).subscribe({
       next: (resultado) => {
         this.resultadoClasificacion = resultado;
         this.clasificacionCompleta = true;

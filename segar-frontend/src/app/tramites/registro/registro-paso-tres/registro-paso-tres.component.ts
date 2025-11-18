@@ -115,6 +115,8 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   productos: any[] = [];
   productoSeleccionado: any = '';
 
+  token = '';
+
   constructor(
     private tramiteService: TramiteInvimaService,
     private http: HttpClient,
@@ -128,6 +130,7 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.token = this.authService.getToken()!;
     this.obtenerProductos();
 
     // Configurar el state para la navegación hacia atrás
@@ -171,10 +174,10 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     this.authService.getUsuarioId().subscribe({
       next: (usuarioId) => {
         if (usuarioId !== null) {
-          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId, this.token).subscribe({
             next: (empresa) => {
               const empresaId = empresa.id;
-              this.productoService.getProductosSinTramites(empresaId).subscribe({
+              this.productoService.getProductosSinTramites(empresaId, this.token).subscribe({
                 next: (productos) => {
                   this.productos = productos;
                 },
@@ -576,7 +579,7 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
     };
 
     // ✅ AHORA USA EL BACKEND - Obtener los documentos requeridos dinámicamente
-    this.tramiteService.clasificarProducto(clasificacion).subscribe({
+    this.tramiteService.clasificarProducto(clasificacion, this.token).subscribe({
       next: (resultado) => {
         this.resultadoClasificacion = resultado;
         this.clasificacionCompleta = true;
@@ -694,8 +697,8 @@ export class RegistroPasoTresComponent implements OnInit, OnDestroy {
               console.log('📧 Preparando solicitud formal al INVIMA...');
               try {
                 // Obtener datos de la empresa
-                const empresa = await this.usuarioService.getEmpresaByUsuarioId(usuarioId).toPromise();
-                const usuario = await this.usuarioService.getUsuarioById(usuarioId).toPromise();
+                const empresa = await this.usuarioService.getEmpresaByUsuarioId(usuarioId, this.token).toPromise();
+                const usuario = await this.usuarioService.getUsuarioById(usuarioId, this.token).toPromise();
 
                 if (!empresa || !usuario) {
                   throw new Error('No se pudieron obtener los datos de la empresa o usuario');

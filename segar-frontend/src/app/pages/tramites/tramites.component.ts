@@ -27,6 +27,8 @@ export class TramitesComponent implements OnInit {
   tramiteDetalle: TramiteDetalleDTO | null = null; // Detalle completo del trámite desde dashboard
   tabActiva: 'informacion' | 'documentos' = 'informacion'; // Pestaña activa del modal
 
+  token = '';
+
   constructor(
     private tramiteService: TramiteService,
     private router: Router,
@@ -36,6 +38,7 @@ export class TramitesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     this.obtenerTramites();
   }
 
@@ -73,7 +76,7 @@ export class TramitesComponent implements OnInit {
       next: (usuarioId) => {
         if (usuarioId) {
           // Ahora obtenemos los trámites del usuario
-          this.tramiteService.getTramitesByUsuarioId(usuarioId).subscribe({
+          this.tramiteService.getTramitesByUsuarioId(usuarioId, this.token).subscribe({
             next: (data) => {
               this.tramites = data;
               this.cargando = false;
@@ -123,7 +126,7 @@ export class TramitesComponent implements OnInit {
     // Cargar detalle completo del trámite desde dashboard service
     if (tramite.id) {
       this.cargando = true;
-      this.dashboardService.getTramiteDetalle(tramite.id).subscribe({
+      this.dashboardService.getTramiteDetalle(this.token, tramite.id).subscribe({
         next: (detalle: TramiteDetalleDTO) => {
           console.log('Detalle del trámite desde dashboard:', detalle);
           this.tramiteDetalle = detalle;

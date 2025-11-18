@@ -63,6 +63,8 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
 
   private usuarioId: number | null = null;
 
+  token = '';
+
   constructor(
     private router: Router,
     private dashboardService: DashboardService,
@@ -71,6 +73,7 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
 ) {}
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     // Verificar autenticación antes de cualquier cosa
     if (!this.authService.isAuthenticated()) {
       console.warn('⚠️ Usuario no autenticado, redirigiendo al login');
@@ -101,9 +104,9 @@ export class PanelPrincipalComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     forkJoin({
-      resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined),
-      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined),
-      tramitesRecientes: this.dashboardService.getTramitesRecientes(5, undefined, this.usuarioId ?? undefined)
+      resumen: this.dashboardService.getResumen(this.token, undefined, undefined, this.usuarioId ?? undefined),
+      tramitesPorEstado: this.dashboardService.getTramitesPorEstado(this.token, undefined, this.usuarioId ?? undefined),
+      tramitesRecientes: this.dashboardService.getTramitesRecientes(this.token, 5, undefined, this.usuarioId ?? undefined)
     }).subscribe({
       next: (data: any) => {
         console.log('Datos recibidos del backend:', data);

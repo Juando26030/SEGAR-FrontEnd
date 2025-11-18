@@ -95,14 +95,17 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
   // Propiedad para almacenar usuarios
   usuarios: Usuario[] = [];
 
+  token = '';
+
   constructor(private dashboardService: DashboardService, private authService: AuthService, private usuarioService: UsuarioService,  private router: Router) {}
 
   ngOnInit(): void {
     // Cargar datos iniciales al inicializar el componente
+    this.token = this.authService.getToken()!;
     this.authService.getUsuarioId().subscribe(id => {
       this.usuarioId = id;
       if (id) {
-        this.usuarioService.getEmpresaByUsuarioId(id).subscribe(empresa => {
+        this.usuarioService.getEmpresaByUsuarioId(id, this.token).subscribe(empresa => {
           this.empresaId = empresa.id;
           this.cargarDatosIniciales();
         });
@@ -118,7 +121,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
       switchMap((query: string) => {
         if (query.trim().length >= 2) {
           this.isLoading = true;
-          return this.dashboardService.busquedaGlobal(query, 10, 10, this.empresaId ?? undefined);
+          return this.dashboardService.busquedaGlobal(this.token, query, 10, 10, this.empresaId ?? undefined);
         } else {
           this.isLoading = false;
           this.hasSearched = false;
@@ -168,8 +171,8 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     this.paginaActual = 1;
 
     const requests = forkJoin({
-      busqueda: this.dashboardService.busquedaGlobal('', this.itemsPorPagina, this.itemsPorPagina, this.empresaId ?? undefined),
-      usuarios: this.empresaId ? this.usuarioService.getUsuariosByEmpresaId(this.empresaId) : of([])
+      busqueda: this.dashboardService.busquedaGlobal(this.token, '', this.itemsPorPagina, this.itemsPorPagina, this.empresaId ?? undefined),
+      usuarios: this.empresaId ? this.usuarioService.getUsuariosByEmpresaId(this.empresaId, this.token) : of([])
     });
 
     requests.subscribe({
@@ -685,6 +688,7 @@ export class BusquedaGlobalComponent implements OnInit, OnDestroy {
     const query = this.searchQuery.trim() || '';
 
     this.dashboardService.busquedaGlobal(
+      this.token,
       query,
       this.itemsPorPagina,
       this.itemsPorPagina,

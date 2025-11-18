@@ -23,6 +23,8 @@ export class ProductosComponent implements OnInit {
   modalVisible: boolean = false;
   productoSeleccionadoId: number | null = null;
 
+  token = '';
+
   constructor(
     private productoService: ProductoService,
     private router: Router,
@@ -31,6 +33,7 @@ export class ProductosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     this.cargarProductosDeEmpresa();
   }
 
@@ -41,7 +44,7 @@ export class ProductosComponent implements OnInit {
     this.authService.getUsuarioId().subscribe({
       next: (usuarioId) => {
         if (usuarioId) {
-          this.usuarioService.getEmpresaByUsuarioId(usuarioId).subscribe({
+          this.usuarioService.getEmpresaByUsuarioId(usuarioId, this.token).subscribe({
             next: (empresa) => {
               this.empresaId = empresa.id;
               this.obtenerProductos();
@@ -72,7 +75,7 @@ export class ProductosComponent implements OnInit {
       return;
     }
 
-    this.productoService.getProductosByEmpresaId(this.empresaId).subscribe({
+    this.productoService.getProductosByEmpresaId(this.empresaId, this.token).subscribe({
       next: (data) => {
         this.productos = data;
         this.cargando = false;
@@ -109,7 +112,7 @@ export class ProductosComponent implements OnInit {
 
     if (confirmacion) {
       this.cargando = true;
-      this.productoService.deleteProducto(producto.id).subscribe({
+      this.productoService.deleteProducto(producto.id, this.token).subscribe({
         next: () => {
           this.productos = this.productos.filter(p => p.id !== producto.id);
           this.cargando = false;

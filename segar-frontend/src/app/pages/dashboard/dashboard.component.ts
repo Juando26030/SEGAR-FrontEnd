@@ -110,6 +110,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private usuarioId: number | null = null; // Agregar esta propiedad
 
+  token = '';
+
   constructor(
     private calendarioService: CalendarioService,
     private notificationService: NotificationService,
@@ -119,6 +121,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    this.token = this.authService.getToken()!;
     // Obtener el usuarioId antes de cargar datos
     this.authService.getUsuarioId().subscribe(id => {
       this.usuarioId = id;
@@ -428,10 +431,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cargando = true;
 
       const requests = forkJoin({
-        resumen: this.dashboardService.getResumen(undefined, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
-        tramitesPorEstado: this.dashboardService.getTramitesPorEstado(undefined, this.usuarioId ?? undefined), // Pasar usuarioId
-        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.anoSeleccionado, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
-        eventosProximos: this.calendarioService.obtenerEventosProximos()
+        resumen: this.dashboardService.getResumen(this.token, undefined, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
+        tramitesPorEstado: this.dashboardService.getTramitesPorEstado(this.token, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
+        tramitesPorMes: this.dashboardService.getTramitesPorMes(this.token, this.anoSeleccionado, undefined, this.usuarioId ?? undefined), // Pasar usuarioId
+        eventosProximos: this.calendarioService.obtenerEventosProximos(this.token)
       });
 
       requests.subscribe({
@@ -703,7 +706,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   private cargarTramitesPorMes() {
-    this.dashboardService.getTramitesPorMes(this.anoSeleccionado, undefined, this.usuarioId ?? undefined) // Pasar usuarioId
+    this.dashboardService.getTramitesPorMes(this.token, this.anoSeleccionado, undefined, this.usuarioId ?? undefined) // Pasar usuarioId
       .subscribe({
         next: (data) => {
           this.procesarTramitesPorMes(data);

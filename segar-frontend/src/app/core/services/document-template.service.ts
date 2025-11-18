@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -83,15 +83,19 @@ export class DocumentTemplateService {
    * @param tipoTramite REGISTRO, RENOVACION, MODIFICACION
    * @param categoriaRiesgo I, IIA, III (Enums del backend)
    */
-  getTemplatesByTramiteAndRiesgo(tipoTramite: string, categoriaRiesgo: string): Observable<DocumentTemplateDTO[]> {
+  getTemplatesByTramiteAndRiesgo(tipoTramite: string, categoriaRiesgo: string, token: string): Observable<DocumentTemplateDTO[]> {
     const params = new HttpParams()
       .set('tipoTramite', tipoTramite)
       .set('categoriaRiesgo', categoriaRiesgo);
 
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
     const url = `${this.baseUrl}/by-tramite-riesgo`;
     console.log(`🌐 Llamando al backend: ${url}?tipoTramite=${tipoTramite}&categoriaRiesgo=${categoriaRiesgo}`);
 
-    return this.http.get<DocumentTemplateDTO[]>(url, { params }).pipe(
+    return this.http.get<DocumentTemplateDTO[]>(url, { params , headers }).pipe(
       tap(response => {
         console.log(`✅ Respuesta del backend: ${response.length} plantillas recibidas`, response);
       }),

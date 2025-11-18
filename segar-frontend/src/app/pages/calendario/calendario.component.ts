@@ -46,6 +46,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   editandoEvento: boolean = false;
   eventoSeleccionado: EventoDTO | null = null;
   eventosDiaSeleccionado: EventoDTO[] = [];
+  token = '';
 
   // ========== FORMULARIO DE NUEVO EVENTO ==========
   nuevoEvento: CrearEventoDTO = this.inicializarNuevoEvento();
@@ -62,6 +63,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     console.log('🔄 Inicializando CalendarioComponent...');
     this.actualizarNombreMes();
 
@@ -100,16 +102,16 @@ export class CalendarioComponent implements OnInit, OnDestroy {
           return of({ eventos: [], estadisticas: null, esAdmin: false });
         }
 
-        return this.usuarioService.esAdmin(usuarioId).pipe(
+        return this.usuarioService.esAdmin(usuarioId, this.token).pipe(
           switchMap(esAdmin => {
             this.esAdmin = esAdmin;
             const eventosObs = esAdmin
-              ? this.calendarioService.obtenerEventosPorMes(this.mes + 1, this.anio)
-              : this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio);
+              ? this.calendarioService.obtenerEventosPorMes(this.mes + 1, this.anio, this.token)
+              : this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio, this.token);
 
             const estadisticasObs = esAdmin
-              ? this.calendarioService.obtenerEstadisticas()
-              : this.calendarioService.obtenerEstadisticasUsuario(usuarioId);
+              ? this.calendarioService.obtenerEstadisticas(this.token)
+              : this.calendarioService.obtenerEstadisticasUsuario(usuarioId, this.token);
 
             return eventosObs.pipe(
               switchMap(eventos =>
@@ -177,20 +179,20 @@ export class CalendarioComponent implements OnInit, OnDestroy {
         }
 
         // Verificar si es admin
-        return this.usuarioService.esAdmin(usuarioId).pipe(
+        return this.usuarioService.esAdmin(usuarioId, this.token).pipe(
           switchMap(esAdmin => {
             this.esAdmin = esAdmin;
             console.log('🔑 Usuario es admin:', esAdmin);
 
             // Cargar eventos según el rol
             const eventosObs = esAdmin
-              ? this.calendarioService.obtenerEventosPorMes(this.mes + 1, this.anio)
-              : this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio);
+              ? this.calendarioService.obtenerEventosPorMes(this.mes + 1, this.anio, this.token)
+              : this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio, this.token);
 
             // Cargar estadísticas según el rol
             const estadisticasObs = esAdmin
-              ? this.calendarioService.obtenerEstadisticas()
-              : this.calendarioService.obtenerEstadisticasUsuario(usuarioId);
+              ? this.calendarioService.obtenerEstadisticas(this.token)
+              : this.calendarioService.obtenerEstadisticasUsuario(usuarioId, this.token);
 
             // Combinar ambas peticiones
             return eventosObs.pipe(
@@ -206,9 +208,9 @@ export class CalendarioComponent implements OnInit, OnDestroy {
           catchError(error => {
             console.error('❌ Error al verificar rol de admin:', error);
             // Si falla la verificación de admin, intentar cargar solo los eventos del usuario
-            return this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio).pipe(
+            return this.calendarioService.obtenerEventosPorMesUsuario(usuarioId, this.mes + 1, this.anio, this.token).pipe(
               switchMap(eventos =>
-                this.calendarioService.obtenerEstadisticasUsuario(usuarioId).pipe(
+                this.calendarioService.obtenerEstadisticasUsuario(usuarioId, this.token).pipe(
                   switchMap(estadisticas =>
                     of({ eventos, estadisticas, esAdmin: false })
                   )
@@ -411,8 +413,8 @@ export class CalendarioComponent implements OnInit, OnDestroy {
 
     this.cargando = true;
     const operacion = this.editandoEvento && this.eventoSeleccionado
-      ? this.calendarioService.actualizarEvento(this.eventoSeleccionado.id, this.nuevoEvento)
-      : this.calendarioService.crearEvento(this.nuevoEvento);
+      ? this.calendarioService.actualizarEvento(this.eventoSeleccionado.id, this.nuevoEvento, this.token)
+      : this.calendarioService.crearEvento(this.nuevoEvento, this.token);
 
     const sub = operacion.pipe(
       finalize(() => this.cargando = false)
@@ -437,7 +439,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     }
 
     this.cargando = true;
-    const sub = this.calendarioService.eliminarEvento(evento.id).pipe(
+    const sub = this.calendarioService.eliminarEvento(evento.id, this.token).pipe(
       finalize(() => this.cargando = false)
     ).subscribe({
       next: () => {
@@ -456,7 +458,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
 
   marcarComoCompletado(evento: EventoDTO): void {
     this.cargando = true;
-    const sub = this.calendarioService.marcarComoCompletado(evento.id).pipe(
+    const sub = this.calendarioService.marcarComoCompletado(evento.id, this.token).pipe(
       finalize(() => this.cargando = false)
     ).subscribe({
       next: () => {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
@@ -54,49 +54,79 @@ export class RegistroPasoCuatroService {
 
   constructor(private http: HttpClient) {}
 
-  getTracking(id: number): Observable<TrackingDTO> {
-    return this.http.get<TrackingDTO>(`${this.base}/${id}/tracking`);
+  getTracking(id: number, token: string): Observable<TrackingDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<TrackingDTO>(`${this.base}/${id}/tracking`, { headers });
   }
 
-  getTimeline(id: number): Observable<TimelineEventDTO[]> {
-    return this.http.get<TimelineEventDTO[]>(`${this.base}/${id}/timeline`);
+  getTimeline(id: number, token: string): Observable<TimelineEventDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<TimelineEventDTO[]>(`${this.base}/${id}/timeline`, { headers });
   }
 
-  refreshStatus(id: number): Observable<TrackingDTO> {
-    return this.http.post<TrackingDTO>(`${this.base}/${id}/refresh-status`, {});
+  refreshStatus(id: number, token: string): Observable<TrackingDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<TrackingDTO>(`${this.base}/${id}/refresh-status`, {}, { headers });
   }
 
-  getRequirements(id: number, estado?: string): Observable<RequirementDTO[]> {
+  getRequirements(id: number, token: string, estado?: string): Observable<RequirementDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     let params = new HttpParams();
     if (estado) params = params.set('estado', estado);
-    return this.http.get<RequirementDTO[]>(`${this.base}/${id}/requerimientos`, { params });
+    return this.http.get<RequirementDTO[]>(`${this.base}/${id}/requerimientos`, { params ,  headers });
   }
 
-  getRequirement(id: number, reqId: number): Observable<RequirementDTO> {
-    return this.http.get<RequirementDTO>(`${this.base}/${id}/requerimientos/${reqId}`);
+  getRequirement(id: number, reqId: number, token: string): Observable<RequirementDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<RequirementDTO>(`${this.base}/${id}/requerimientos/${reqId}`, { headers });
   }
 
-  respondRequirement(id: number, reqId: number, mensaje: string, archivos: File[]): Observable<void> {
+  respondRequirement(id: number, reqId: number, mensaje: string, archivos: File[], token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     const fd = new FormData();
     fd.append('mensaje', mensaje);
     archivos.forEach(f => fd.append('archivos', f));
-    return this.http.post<void>(`${this.base}/${id}/requerimientos/${reqId}/respuesta`, fd);
+    return this.http.post<void>(`${this.base}/${id}/requerimientos/${reqId}/respuesta`, fd, { headers });
   }
 
-  getNotifications(id: number): Observable<NotificationDTO[]> {
-    return this.http.get<NotificationDTO[]>(`${this.base}/${id}/notificaciones`);
+  getNotifications(id: number, token: string): Observable<NotificationDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<NotificationDTO[]>(`${this.base}/${id}/notificaciones`, { headers });
   }
 
-  markAsRead(id: number, notifId: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/notificaciones/${notifId}/read`, {});
+  markAsRead(id: number, notifId: number, token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<void>(`${this.base}/${id}/notificaciones/${notifId}/read`, {}, { headers });
   }
 
-  getNotifSettings(id: number): Observable<NotificationSettingsDTO> {
-    return this.http.get<NotificationSettingsDTO>(`${this.base}/${id}/notificaciones/settings`);
+  getNotifSettings(id: number, token: string): Observable<NotificationSettingsDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<NotificationSettingsDTO>(`${this.base}/${id}/notificaciones/settings`, { headers });
   }
 
-  updateNotifSettings(id: number, settings: NotificationSettingsDTO): Observable<void> {
-    return this.http.put<void>(`${this.base}/${id}/notificaciones/settings`, settings);
+  updateNotifSettings(id: number, settings: NotificationSettingsDTO, token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.put<void>(`${this.base}/${id}/notificaciones/settings`, settings, { headers });
   }
 
   downloadCertificate(id: number): void {

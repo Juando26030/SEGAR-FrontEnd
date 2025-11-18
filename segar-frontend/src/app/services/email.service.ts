@@ -76,7 +76,7 @@ export interface EmailSearchFilters {
   providedIn: 'root'
 })
 export class EmailService {
-  private readonly API_BASE_URL = 'http://localhost:8090/api/notifications/emails';
+  private readonly API_BASE_URL = 'https://segar-solutions.duckdns.org/api/api/notifications/emails';
 
   constructor(
     private http: HttpClient,

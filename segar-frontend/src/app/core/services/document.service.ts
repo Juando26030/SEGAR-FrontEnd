@@ -32,11 +32,14 @@ export class DocumentService {
    * ENDPOINTS DE PLANTILLAS
    */
 
-  getDocumentTemplates(tramiteType?: TramiteType): Observable<DocumentTemplateDto[]> {
+  getDocumentTemplates(token: string, tramiteType?: TramiteType): Observable<DocumentTemplateDto[]> {
     let params = new HttpParams();
     if (tramiteType) {
       params = params.set('tramiteType', tramiteType);
     }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
 
     return this.http.get<DocumentTemplateDto[]>(
       `${this.apiUrl}/document-templates`,
@@ -46,7 +49,10 @@ export class DocumentService {
     );
   }
 
-  getDocumentTemplate(id: number): Observable<DocumentTemplateDto> {
+  getDocumentTemplate(id: number, token: string): Observable<DocumentTemplateDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.get<DocumentTemplateDto>(
       `${this.apiUrl}/document-templates/${id}`
     ).pipe(
@@ -54,7 +60,10 @@ export class DocumentService {
     );
   }
 
-  createDocumentTemplate(template: Partial<DocumentTemplateDto>): Observable<DocumentTemplateDto> {
+  createDocumentTemplate(template: Partial<DocumentTemplateDto>, token: string): Observable<DocumentTemplateDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.post<DocumentTemplateDto>(
       `${this.apiUrl}/document-templates`,
       template
@@ -63,7 +72,10 @@ export class DocumentService {
     );
   }
 
-  updateDocumentTemplate(id: number, template: Partial<DocumentTemplateDto>): Observable<DocumentTemplateDto> {
+  updateDocumentTemplate(id: number, template: Partial<DocumentTemplateDto>, token: string): Observable<DocumentTemplateDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.put<DocumentTemplateDto>(
       `${this.apiUrl}/document-templates/${id}`,
       template
@@ -640,7 +652,10 @@ export class DocumentService {
     */
   }
 
-  getDocumentInstance(tramiteId: number, instanceId: number): Observable<DocumentInstanceDto> {
+  getDocumentInstance(tramiteId: number, instanceId: number, token: string): Observable<DocumentInstanceDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.get<DocumentInstanceDto>(
       `${this.apiUrl}/tramites/${tramiteId}/document-instances/${instanceId}`
     ).pipe(
@@ -648,7 +663,10 @@ export class DocumentService {
     );
   }
 
-  createDocumentInstance(tramiteId: number, instance: CreateDocumentInstanceDto): Observable<DocumentInstanceDto> {
+  createDocumentInstance(tramiteId: number, instance: CreateDocumentInstanceDto, token: string): Observable<DocumentInstanceDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.post<DocumentInstanceDto>(
       `${this.apiUrl}/tramites/${tramiteId}/document-instances`,
       instance
@@ -661,11 +679,16 @@ export class DocumentService {
   updateDocumentInstance(
     tramiteId: number,
     instanceId: number,
-    instance: UpdateDocumentInstanceDto
+    instance: UpdateDocumentInstanceDto,
+    token: string
   ): Observable<DocumentInstanceDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.put<DocumentInstanceDto>(
       `${this.apiUrl}/tramites/${tramiteId}/document-instances/${instanceId}`,
-      instance
+      instance, 
+      { headers }
     ).pipe(
       tap(() => this.refreshDocuments(tramiteId)),
       catchError(this.handleError)
@@ -676,7 +699,10 @@ export class DocumentService {
    * MANEJO DE ARCHIVOS
    */
 
-  uploadFile(tramiteId: number, instanceId: number, fileData: FileUploadDto): Observable<DocumentInstanceDto> {
+  uploadFile(tramiteId: number, instanceId: number, fileData: FileUploadDto, token: string): Observable<DocumentInstanceDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     const formData = new FormData();
     formData.append('file', fileData.file);
     if (fileData.description) {
@@ -685,7 +711,8 @@ export class DocumentService {
 
     return this.http.post<DocumentInstanceDto>(
       `${this.apiUrl}/tramites/${tramiteId}/document-instances/${instanceId}/upload`,
-      formData
+      formData, 
+      { headers }
     ).pipe(
       tap(() => this.refreshDocuments(tramiteId)),
       catchError(this.handleError)
@@ -696,19 +723,26 @@ export class DocumentService {
    * EXPORTACIÓN A PDF
    */
 
-  exportToPdf(tramiteId: number, instanceId: number, options: ExportPdfDto = {}): Observable<ExportPdfResponseDto> {
+  exportToPdf(tramiteId: number, instanceId: number, options: ExportPdfDto = {}, token: string): Observable<ExportPdfResponseDto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.post<ExportPdfResponseDto>(
       `${this.apiUrl}/tramites/${tramiteId}/document-instances/${instanceId}/export-pdf`,
-      options
+      options,
+      { headers }
     ).pipe(
       catchError(this.handleError)
     );
   }
 
-  downloadDocument(tramiteId: number, instanceId: number): Observable<Blob> {
+  downloadDocument(tramiteId: number, instanceId: number, token: string): Observable<Blob> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.get(
       `${this.apiUrl}/tramites/${tramiteId}/document-instances/${instanceId}/download`,
-      { responseType: 'blob' }
+      { responseType: 'blob' , headers }
     ).pipe(
       catchError(this.handleError)
     );
@@ -810,18 +844,25 @@ export class DocumentService {
    * MÉTODOS DE UTILIDAD
    */
 
-  getRequiredDocumentsForTramiteStep(tramiteId: number, step: string): Observable<DocumentTemplateDto[]> {
+  getRequiredDocumentsForTramiteStep(tramiteId: number, step: string, token: string): Observable<DocumentTemplateDto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.get<DocumentTemplateDto[]>(
       `${this.apiUrl}/tramites/${tramiteId}/document-templates`,
-      { params: new HttpParams().set('step', step) }
+      { params: new HttpParams().set('step', step) ,  headers }
     ).pipe(
       catchError(this.handleError)
     );
   }
 
-  checkDocumentCompleteness(tramiteId: number): Observable<{completed: boolean, missing: string[]}> {
+  checkDocumentCompleteness(tramiteId: number, token: string): Observable<{completed: boolean, missing: string[]}> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.get<{completed: boolean, missing: string[]}>(
-      `${this.apiUrl}/tramites/${tramiteId}/document-completeness`
+      `${this.apiUrl}/tramites/${tramiteId}/document-completeness`,
+      { headers }
     ).pipe(
       catchError(this.handleError)
     );

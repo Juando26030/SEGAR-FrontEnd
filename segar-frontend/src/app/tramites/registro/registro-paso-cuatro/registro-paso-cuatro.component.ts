@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute } from '@angular/router'; // Agrega esta importación
 import { RegistroPasoCuatroService } from './registro-paso-cuatro.service';
+import { AuthService } from '../../../auth/services/auth.service';
 
 interface Tab {
   id: string;
@@ -81,7 +82,9 @@ export class RegistroPasoCuatroComponent implements OnInit {
   activeTab = 'seguimiento';
   tramiteId: number = 0; // Inicializa en 0, debe ser público para acceder en el template
 
-  constructor(private paso4: RegistroPasoCuatroService, private route: ActivatedRoute) {} // Inyecta ActivatedRoute
+  constructor(private paso4: RegistroPasoCuatroService, 
+    private route: ActivatedRoute, 
+    private authService: AuthService,) {} // Inyecta ActivatedRoute
 
   readonly tabs: Tab[] = [
     { id: 'seguimiento', label: 'Seguimiento' },
@@ -107,6 +110,8 @@ export class RegistroPasoCuatroComponent implements OnInit {
 
   notifications: Notification[] = [];
 
+  token = '';
+
   notificationSettings: NotificationSettings = {
     email: false,
     sms: false,
@@ -119,6 +124,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
   helpDocuments: HelpDocument[] = [];
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     // Obtener tramiteId desde la ruta
     this.route.params.subscribe(params => {
       this.tramiteId = +params['id']; // Asume que la ruta es /paso-4/:id
@@ -132,7 +138,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
 
   private cargarDatosIniciales(): void {
     // Tracking
-    this.paso4.getTracking(this.tramiteId).subscribe({
+    this.paso4.getTracking(this.tramiteId, this.token).subscribe({
       next: (t) => {
         this.trackingInfo = {
           radicadoNumber: t.radicadoNumber,
@@ -147,7 +153,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
     });
 
     // Timeline
-    this.paso4.getTimeline(this.tramiteId).subscribe({
+    this.paso4.getTimeline(this.tramiteId, this.token).subscribe({
       next: (events) => {
         this.timelineEvents = events.map(e => ({
           id: String(e.id),
@@ -162,7 +168,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
     });
 
     // Requerimientos pendientes
-    this.paso4.getRequirements(this.tramiteId, 'PENDIENTE').subscribe({
+    this.paso4.getRequirements(this.tramiteId, this.token,'PENDIENTE').subscribe({
       next: (reqs) => {
         this.pendingRequirements = reqs.map(r => ({
           id: String(r.id),
@@ -178,7 +184,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
     });
 
     // Historial de requerimientos respondidos
-    this.paso4.getRequirements(this.tramiteId, 'RESPONDIDO').subscribe({
+    this.paso4.getRequirements(this.tramiteId, this.token, 'RESPONDIDO').subscribe({
       next: (reqs) => {
         this.requirementHistory = reqs.map(r => ({
           id: String(r.id),
@@ -194,7 +200,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
     });
 
     // Notificaciones
-    this.paso4.getNotifications(this.tramiteId).subscribe({
+    this.paso4.getNotifications(this.tramiteId, this.token).subscribe({
       next: (notifs) => {
         this.notifications = notifs.map(n => ({
           id: String(n.id),
@@ -209,7 +215,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
     });
 
     // Settings de notificaciones
-    this.paso4.getNotifSettings(this.tramiteId).subscribe({
+    this.paso4.getNotifSettings(this.tramiteId, this.token).subscribe({
       next: (s) => { this.notificationSettings = { ...s }; },
       error: (e) => console.error('Error cargando configuración de notificaciones', e)
     });
@@ -250,7 +256,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
   }
 
   refreshStatus(): void {
-    this.paso4.refreshStatus(this.tramiteId).subscribe({
+    this.paso4.refreshStatus(this.tramiteId, this.token).subscribe({
       next: (t) => {
         this.trackingInfo = {
           radicadoNumber: t.radicadoNumber,
@@ -261,7 +267,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
           daysElapsed: t.daysElapsed
         };
         // refrescar timeline para reflejar cambios de estado
-        this.paso4.getTimeline(this.tramiteId).subscribe({
+        this.paso4.getTimeline(this.tramiteId, this.token).subscribe({
           next: (events) => {
             this.timelineEvents = events.map(e => ({
               id: String(e.id),
@@ -310,7 +316,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
   }
 
   saveNotificationSettings(): void {
-    this.paso4.updateNotifSettings(this.tramiteId, this.notificationSettings).subscribe({
+    this.paso4.updateNotifSettings(this.tramiteId, this.notificationSettings, this.token).subscribe({
       next: () => {
         // Opcional: feedback visual
         console.log('Configuración de notificaciones guardada');
@@ -321,7 +327,7 @@ export class RegistroPasoCuatroComponent implements OnInit {
 
   markAsRead(notificationId: string): void {
     const notifNum = Number(notificationId);
-    this.paso4.markAsRead(this.tramiteId, notifNum).subscribe({
+    this.paso4.markAsRead(this.tramiteId, notifNum, this.token).subscribe({
       next: () => {
         const notification = this.notifications.find(n => n.id === notificationId);
         if (notification) notification.read = true;

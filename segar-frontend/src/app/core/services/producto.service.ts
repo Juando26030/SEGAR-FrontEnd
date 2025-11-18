@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Producto } from '../DTOs/solicitud.dto';
@@ -16,8 +16,11 @@ export class ProductoService {
   /**
    * Obtiene todos los productos disponibles
    */
-  getAllProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.baseUrl}/all`)
+  getAllProductos(token: string): Observable<Producto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<Producto[]>(`${this.baseUrl}/all`, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -26,8 +29,11 @@ export class ProductoService {
   /**
    * Crea un nuevo producto
    */
-  createProducto(producto: Omit<Producto, 'id'>): Observable<Producto> {
-    return this.http.post<Producto>(`${this.baseUrl}/create`, producto)
+  createProducto(producto: Omit<Producto, 'id'>, token: string): Observable<Producto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<Producto>(`${this.baseUrl}/create`, producto, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -36,8 +42,11 @@ export class ProductoService {
   /**
    * Elimina un producto por ID
    */
-  deleteProducto(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`)
+  deleteProducto(id: number, token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -46,8 +55,11 @@ export class ProductoService {
   /**
    * Obtiene un producto por ID
    */
-  getProductoPorId(id: number): Observable<Producto> {
-    return this.http.get<Producto>(`${this.baseUrl}/${id}`)
+  getProductoPorId(id: number, token: string): Observable<Producto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<Producto>(`${this.baseUrl}/${id}`, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -56,8 +68,11 @@ export class ProductoService {
   /**
    * Actualiza un producto por ID
    */
-  updateProducto(id: number, producto: Producto): Observable<Producto> {
-    return this.http.put<Producto>(`${this.baseUrl}/${id}`, producto)
+  updateProducto(id: number, producto: Producto, token: string): Observable<Producto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.put<Producto>(`${this.baseUrl}/${id}`, producto, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -66,8 +81,11 @@ export class ProductoService {
   /**
    * Obtiene productos de una empresa que no están asociados a trámites
    */
-  getProductosSinTramites(empresaId: number): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.baseUrl}/empresa/${empresaId}/sin-tramites`)
+  getProductosSinTramites(empresaId: number, token: string): Observable<Producto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<Producto[]>(`${this.baseUrl}/empresa/${empresaId}/sin-tramites`, { headers })
       .pipe(
         catchError(this.handleError)
       );
@@ -97,9 +115,12 @@ export class ProductoService {
   /**
    * Obtiene los productos de una empresa con registro sanitario vigente
    */
-  getProductosConRegistroVigente(empresaId: number): Observable<any[]> {
+  getProductosConRegistroVigente(empresaId: number, token: string): Observable<any[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     const url = `${this.baseUrl}/empresa/${empresaId}/con-registro-vigente`;
-    return this.http.get<any[]>(url).pipe(
+    return this.http.get<any[]>(url, { headers }).pipe(
       catchError(error => {
         console.error('Error al obtener productos con registro vigente:', error);
         return throwError(() => error);
@@ -107,8 +128,11 @@ export class ProductoService {
     );
   }
 
-  getProductosByEmpresaId(empresaId: number): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.baseUrl}/empresa/${empresaId}`)
+  getProductosByEmpresaId(empresaId: number, token: string): Observable<Producto[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<Producto[]>(`${this.baseUrl}/empresa/${empresaId}`, { headers })
       .pipe(
         catchError(this.handleError)
       );

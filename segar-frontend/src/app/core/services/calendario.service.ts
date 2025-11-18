@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EventoDTO, CrearEventoDTO, EstadisticasCalendarioDTO } from '../DTOs/calendario.dto';
 import { environment } from '../../../environments/environment';
@@ -12,93 +12,159 @@ export class CalendarioService {
 
   constructor(private http: HttpClient) {}
 
-  obtenerTodosLosEventos(): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos`);
+  obtenerTodosLosEventos(token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos`, { headers });
   }
 
-  obtenerEventosPorMes(mes: number, anio: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/${mes}/${anio}`);
+  obtenerEventosPorMes(mes: number, anio: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/${mes}/${anio}`, { headers });
   }
 
-  obtenerEventoPorId(id: number): Observable<EventoDTO> {
-    return this.http.get<EventoDTO>(`${this.apiUrl}/eventos/${id}`);
+  obtenerEventoPorId(id: number, token: string): Observable<EventoDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO>(`${this.apiUrl}/eventos/${id}`, { headers });
   }
 
-  crearEvento(evento: CrearEventoDTO): Observable<EventoDTO> {
-    return this.http.post<EventoDTO>(`${this.apiUrl}/eventos`, evento);
+  crearEvento(evento: CrearEventoDTO, token: string): Observable<EventoDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<EventoDTO>(`${this.apiUrl}/eventos`, evento, { headers });
   }
 
-  actualizarEvento(id: number, evento: CrearEventoDTO): Observable<EventoDTO> {
-    return this.http.put<EventoDTO>(`${this.apiUrl}/eventos/${id}`, evento);
+  actualizarEvento(id: number, evento: CrearEventoDTO, token: string): Observable<EventoDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.put<EventoDTO>(`${this.apiUrl}/eventos/${id}`, evento, { headers });
   }
 
-  eliminarEvento(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/eventos/${id}`);
+  eliminarEvento(id: number, token: string): Observable<void> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.delete<void>(`${this.apiUrl}/eventos/${id}`, { headers });
   }
 
-  marcarComoCompletado(id: number): Observable<EventoDTO> {
-    return this.http.patch<EventoDTO>(`${this.apiUrl}/eventos/${id}/completar`, {});
+  marcarComoCompletado(id: number, token: string): Observable<EventoDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.patch<EventoDTO>(`${this.apiUrl}/eventos/${id}/completar`, {}, { headers });
   }
 
-  obtenerEventosPorEmpresa(empresaId: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos`);
+  obtenerEventosPorEmpresa(empresaId: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos`, { headers });
   }
 
-  obtenerEstadisticas(): Observable<EstadisticasCalendarioDTO> {
-    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/estadisticas`);
+  obtenerEstadisticas(token: string): Observable<EstadisticasCalendarioDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/estadisticas`, { headers });
   }
 
-  obtenerTiposEvento(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/tipos`);
+  obtenerTiposEvento(token: string): Observable<string[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<string[]>(`${this.apiUrl}/tipos`, { headers });
   }
 
-  obtenerCategoriasEvento(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/categorias`);
+  obtenerCategoriasEvento(token: string): Observable<string[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<string[]>(`${this.apiUrl}/categorias`, { headers });
   }
 
-  obtenerPrioridadesEvento(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/prioridades`);
+  obtenerPrioridadesEvento(token: string): Observable<string[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<string[]>(`${this.apiUrl}/prioridades`, { headers });
   }
 
-  obtenerEstadosEvento(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/estados`);
+  obtenerEstadosEvento(token: string): Observable<string[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<string[]>(`${this.apiUrl}/estados`, { headers });
   }
 
-  obtenerEventosProximos(): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/proximos`);
+  obtenerEventosProximos(token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/eventos/proximos`, { headers });
   }
 
   // Endpoints por Empresa
-  obtenerEventosPorMesEmpresa(empresaId: number, mes: number, anio: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos/${mes}/${anio}`);
+  obtenerEventosPorMesEmpresa(empresaId: number, mes: number, anio: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos/${mes}/${anio}`, { headers });
   }
 
-  obtenerTodosLosEventosEmpresa(empresaId: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos`);
+  obtenerTodosLosEventosEmpresa(empresaId: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos`, { headers });
   }
 
-  obtenerEstadisticasEmpresa(empresaId: number): Observable<EstadisticasCalendarioDTO> {
-    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/empresa/${empresaId}/estadisticas`);
+  obtenerEstadisticasEmpresa(empresaId: number, token: string): Observable<EstadisticasCalendarioDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/empresa/${empresaId}/estadisticas`, { headers });
   }
 
-  obtenerEventosProximosEmpresa(empresaId: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos/proximos`);
+  obtenerEventosProximosEmpresa(empresaId: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/empresa/${empresaId}/eventos/proximos`, { headers });
   }
 
   // Endpoints por Usuario
-  obtenerEventosPorMesUsuario(usuarioId: number, mes: number, anio: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos/${mes}/${anio}`);
+  obtenerEventosPorMesUsuario(usuarioId: number, mes: number, anio: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos/${mes}/${anio}`, { headers });
   }
 
-  obtenerTodosLosEventosUsuario(usuarioId: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos`);
+  obtenerTodosLosEventosUsuario(usuarioId: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos`, { headers });
   }
 
-  obtenerEstadisticasUsuario(usuarioId: number): Observable<EstadisticasCalendarioDTO> {
-    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/usuario/${usuarioId}/estadisticas`);
+  obtenerEstadisticasUsuario(usuarioId: number, token: string): Observable<EstadisticasCalendarioDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EstadisticasCalendarioDTO>(`${this.apiUrl}/usuario/${usuarioId}/estadisticas`, { headers });
   }
 
-  obtenerEventosProximosUsuario(usuarioId: number): Observable<EventoDTO[]> {
-    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos/proximos`);
+  obtenerEventosProximosUsuario(usuarioId: number, token: string): Observable<EventoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<EventoDTO[]>(`${this.apiUrl}/usuario/${usuarioId}/eventos/proximos`, { headers });
   }
 }

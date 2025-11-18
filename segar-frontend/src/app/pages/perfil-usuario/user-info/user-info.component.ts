@@ -54,6 +54,7 @@ export class UserInfoComponent implements OnInit {
   ];
 
   loading = true;
+  token = '';
 
   constructor(
     private authService: AuthService,
@@ -73,7 +74,7 @@ export class UserInfoComponent implements OnInit {
       return;
     }
 
-    this.usuarioService.getUsuarioByUsername(userInfo.username).subscribe({
+    this.usuarioService.getUsuarioByUsername(userInfo.username, this.token).subscribe({
       next: (usuario: Usuario) => {
         this.updateUserInfo(usuario);
         this.loading = false;

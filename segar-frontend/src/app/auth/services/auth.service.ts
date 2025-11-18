@@ -672,7 +672,7 @@ export class AuthService {
 
     if (username) {
       console.log('🔍 Obteniendo ID de usuario por username:', username);
-      return this.usuarioService.getUsuarioByUsername(username).pipe(
+      return this.usuarioService.getUsuarioByUsername(username, this.getToken()!).pipe(
         map(user => {
           console.log('✅ ID de usuario obtenido:', user.id);
           return user.id;
@@ -682,7 +682,7 @@ export class AuthService {
 
           // Fallback: intentar con keycloakId solo si username falla
           console.log('🔄 Intentando fallback con Keycloak ID:', keycloakId);
-          return this.usuarioService.getUsuarioByKeycloakId(keycloakId).pipe(
+          return this.usuarioService.getUsuarioByKeycloakId(keycloakId, this.getToken()!).pipe(
             map(user => {
               console.log('✅ ID de usuario obtenido por keycloakId:', user.id);
               return user.id;
@@ -698,7 +698,7 @@ export class AuthService {
 
     // Si no hay username, intentar con keycloakId
     console.log('🔍 No hay username, intentando con Keycloak ID:', keycloakId);
-    return this.usuarioService.getUsuarioByKeycloakId(keycloakId).pipe(
+    return this.usuarioService.getUsuarioByKeycloakId(keycloakId, this.getToken()!).pipe(
       map(user => {
         console.log('✅ ID de usuario obtenido:', user.id);
         return user.id;

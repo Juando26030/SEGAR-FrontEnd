@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardService, TramiteDetalleDTO } from '../../core/services/dashboard.service';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-tramite-detalle-modal',
@@ -19,9 +20,14 @@ export class TramiteDetalleModalComponent implements OnChanges {
   isLoading: boolean = false;
   error: string | null = null;
 
-  constructor(private dashboardService: DashboardService) {}
+  token = '';
+
+  constructor(private dashboardService: DashboardService,
+    private authService: AuthService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
+    this.token = this.authService.getToken()!;
     if (changes['tramiteId'] && this.tramiteId && this.isVisible) {
       this.cargarDetalle();
     }
@@ -39,7 +45,7 @@ export class TramiteDetalleModalComponent implements OnChanges {
 
     console.log('Cargando detalle para trámite ID:', this.tramiteId);
 
-    this.dashboardService.getTramiteDetalle(this.tramiteId).subscribe({
+    this.dashboardService.getTramiteDetalle(this.token, this.tramiteId).subscribe({
       next: (detalle: TramiteDetalleDTO) => {
         console.log('Detalle del trámite recibido:', detalle);
         this.detalle = detalle;

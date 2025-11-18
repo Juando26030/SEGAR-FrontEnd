@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProductoService } from '../../core/services/producto.service';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-nuevo-producto',
@@ -11,7 +12,7 @@ import { ProductoService } from '../../core/services/producto.service';
   templateUrl: './nuevo-producto.component.html',
   styleUrls: ['./nuevo-producto.component.css']
 })
-export class NuevoProductoComponent {
+export class NuevoProductoComponent implements OnInit{
 
   // Estructura del JSON que quieres enviar (sin id, ya que se crea en el backend)
   producto = {
@@ -23,10 +24,15 @@ export class NuevoProductoComponent {
     empresaId: 1
   };
 
-  constructor(private productoService: ProductoService, private router: Router) {}
+  token = '';
+
+  constructor(private productoService: ProductoService, private router: Router, private authService: AuthService) {}
+  ngOnInit(): void {
+    this.token = this.authService.getToken()!;
+  }
 
   guardarProducto() {
-    this.productoService.createProducto(this.producto).subscribe({
+    this.productoService.createProducto(this.producto, this.token).subscribe({
       next: (response) => {
         console.log('✅ Producto creado correctamente:', response);
         this.router.navigate(['/main/productos']);

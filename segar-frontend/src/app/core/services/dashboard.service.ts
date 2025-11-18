@@ -1,6 +1,6 @@
 // dashboard.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -114,62 +114,86 @@ export class DashboardService {
   constructor(private http: HttpClient) {}
 
   // ==================== RESUMEN ====================
-  getResumen(diasVencimiento?: number, empresaId?: number, usuarioId?: number): Observable<DashboardResumenDTO> {
+  getResumen(token: string, diasVencimiento?: number, empresaId?: number, usuarioId?: number): Observable<DashboardResumenDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     let params = new HttpParams();
     if (diasVencimiento && !usuarioId) params = params.set('diasVencimiento', diasVencimiento.toString()); // Solo para global y empresa
     const baseUrl = empresaId ? `${this.basePath}/resumen/empresa/${empresaId}` : usuarioId ? `${this.basePath}/resumen/usuario/${usuarioId}` : `${this.basePath}/resumen`;
-    return this.http.get<DashboardResumenDTO>(baseUrl, { params });
+    return this.http.get<DashboardResumenDTO>(baseUrl, { params , headers });
   }
 
   // ==================== TRÁMITES POR ESTADO ====================
-  getTramitesPorEstado(empresaId?: number, usuarioId?: number): Observable<TramitePorEstadoDTO[]> {
+  getTramitesPorEstado(token: string, empresaId?: number, usuarioId?: number): Observable<TramitePorEstadoDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     const baseUrl = empresaId ? `${this.basePath}/tramites/por-estado/empresa/${empresaId}` : usuarioId ? `${this.basePath}/tramites/por-estado/usuario/${usuarioId}` : `${this.basePath}/tramites/por-estado`;
-    return this.http.get<TramitePorEstadoDTO[]>(baseUrl);
+    return this.http.get<TramitePorEstadoDTO[]>(baseUrl, { headers });
   }
 
   // ==================== TRÁMITES POR MES ====================
-  getTramitesPorMes(year?: number, empresaId?: number, usuarioId?: number): Observable<TramitePorMesDTO[]> {
+  getTramitesPorMes(token: string, year?: number, empresaId?: number, usuarioId?: number): Observable<TramitePorMesDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     let params = new HttpParams();
     if (year) params = params.set('year', year.toString());
     const baseUrl = empresaId ? `${this.basePath}/tramites/por-mes/empresa/${empresaId}` : usuarioId ? `${this.basePath}/tramites/por-mes/usuario/${usuarioId}` : `${this.basePath}/tramites/por-mes`;
-    return this.http.get<TramitePorMesDTO[]>(baseUrl, { params });
+    return this.http.get<TramitePorMesDTO[]>(baseUrl, { params , headers});
   }
 
   // ==================== TRÁMITES RECIENTES ====================
-  getTramitesRecientes(limit?: number, empresaId?: number, usuarioId?: number): Observable<TramiteRecienteDTO[]> {
+  getTramitesRecientes(token: string, limit?: number, empresaId?: number, usuarioId?: number): Observable<TramiteRecienteDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     let params = new HttpParams();
     if (limit) params = params.set('limit', limit.toString());
     const baseUrl = empresaId ? `${this.basePath}/tramites/recientes/empresa/${empresaId}` : usuarioId ? `${this.basePath}/tramites/recientes/usuario/${usuarioId}` : `${this.basePath}/tramites/recientes`;
-    return this.http.get<TramiteRecienteDTO[]>(baseUrl, { params });
+    return this.http.get<TramiteRecienteDTO[]>(baseUrl, { params , headers});
   }
 
   // ==================== REQUERIMIENTOS PENDIENTES ====================
-  getRequerimientosPendientes(limit?: number, empresaId?: number, usuarioId?: number): Observable<RequerimientoPendienteDTO[]> {
+  getRequerimientosPendientes(token: string, limit?: number, empresaId?: number, usuarioId?: number): Observable<RequerimientoPendienteDTO[]> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     let params = new HttpParams();
     if (limit) params = params.set('limit', limit.toString());
     const baseUrl = empresaId ? `${this.basePath}/requerimientos/pendientes/empresa/${empresaId}` : usuarioId ? `${this.basePath}/requerimientos/pendientes/usuario/${usuarioId}` : `${this.basePath}/requerimientos/pendientes`;
-    return this.http.get<RequerimientoPendienteDTO[]>(baseUrl, { params });
+    return this.http.get<RequerimientoPendienteDTO[]>(baseUrl, { params , headers});
   }
 
   // ==================== REGISTROS POR AÑO ====================
-  getRegistrosPorAno(year: number, empresaId?: number): Observable<number> {
+  getRegistrosPorAno(token: string, year: number, empresaId?: number): Observable<number> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     const params = new HttpParams().set('year', year.toString());
     const baseUrl = empresaId ? `${this.basePath}/registros/por-ano/empresa/${empresaId}` : `${this.basePath}/registros/por-ano`;
-    return this.http.get<number>(baseUrl, { params });
+    return this.http.get<number>(baseUrl, { params , headers});
   }
 
   // ==================== DETALLE TRÁMITE ====================
-  getTramiteDetalle(id: number): Observable<any> { // Ajusta el tipo si tienes TramiteDetalleDTO
-    return this.http.get(`${this.basePath}/tramite/${id}`);
+  getTramiteDetalle(token: string, id: number): Observable<any> { // Ajusta el tipo si tienes TramiteDetalleDTO
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get(`${this.basePath}/tramite/${id}`, { headers });
   }
 
   // ==================== BÚSQUEDA GLOBAL ====================
-  busquedaGlobal(query: string, limitTramites?: number, limitRegistros?: number, empresaId?: number, usuarioId?: number): Observable<BusquedaGlobalResponseDTO> {
+  busquedaGlobal(token: string, query: string, limitTramites?: number, limitRegistros?: number, empresaId?: number, usuarioId?: number): Observable<BusquedaGlobalResponseDTO> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     let params = new HttpParams().set('q', query);
     if (limitTramites) params = params.set('limitTramites', limitTramites.toString());
     if (limitRegistros && !usuarioId) params = params.set('limitRegistros', limitRegistros.toString()); // Solo para global y empresa
     const baseUrl = empresaId ? `${this.basePath}/busqueda/empresa/${empresaId}` : usuarioId ? `${this.basePath}/busqueda/usuario/${usuarioId}` : `${this.basePath}/busqueda`;
-    return this.http.get<BusquedaGlobalResponseDTO>(baseUrl, { params });
+    return this.http.get<BusquedaGlobalResponseDTO>(baseUrl, { params , headers});
   }
 
   // ==================== UTILIDADES ====================

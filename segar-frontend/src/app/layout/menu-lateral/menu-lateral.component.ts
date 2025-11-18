@@ -19,12 +19,15 @@ export class MenuLateralComponent implements OnInit {
     initials: ''
   };
 
+  token = '';
+
   constructor(
     private authService: AuthService,
     private usuarioService: UsuarioService
   ) {}
 
   ngOnInit(): void {
+    this.token = this.authService.getToken()!;
     this.loadUserProfile();
   }
 
@@ -46,7 +49,7 @@ export class MenuLateralComponent implements OnInit {
     console.log('✅ Perfil cargado desde token:', this.userProfile);
 
     // Intentar obtener datos completos del backend (opcional, solo para enriquecer)
-    this.usuarioService.getUsuarioByUsername(userInfo.username).subscribe({
+    this.usuarioService.getUsuarioByUsername(userInfo.username, this.token).subscribe({
       next: (usuario: Usuario) => {
         console.log('✅ Datos adicionales del backend obtenidos:', usuario);
         // Solo actualizar si hay datos más completos
