@@ -46,12 +46,13 @@ export class ClasificacionProductoService {
    */
   guardarClasificacion(
     productoId: number,
-    clasificacion: ClasificacionProductoDTO
+    clasificacion: ClasificacionProductoDTO,
+    token: string
   ): Observable<ClasificacionProducto> {
     return this.http.post<ClasificacionProducto>(
       `${this.API_URL}/${productoId}`,
       clasificacion,
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders(token) }
     ).pipe(
       catchError(this.handleError)
     );
@@ -60,10 +61,10 @@ export class ClasificacionProductoService {
   /**
    * Obtiene la clasificación de un producto específico
    */
-  obtenerClasificacion(productoId: number): Observable<ClasificacionProducto> {
+  obtenerClasificacion(productoId: number, token: string): Observable<ClasificacionProducto> {
     return this.http.get<ClasificacionProducto>(
       `${this.API_URL}/${productoId}`,
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders(token) }
     ).pipe(
       catchError(this.handleError)
     );
@@ -74,12 +75,13 @@ export class ClasificacionProductoService {
    */
   actualizarClasificacion(
     productoId: number,
-    clasificacion: ClasificacionProductoDTO
+    clasificacion: ClasificacionProductoDTO,
+    token: string
   ): Observable<ClasificacionProducto> {
     return this.http.put<ClasificacionProducto>(
       `${this.API_URL}/${productoId}`,
       clasificacion,
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders(token) }
     ).pipe(
       catchError(this.handleError)
     );
@@ -88,8 +90,8 @@ export class ClasificacionProductoService {
   /**
    * Verifica si un producto tiene clasificación
    */
-  tieneClasificacion(productoId: number): Observable<boolean> {
-    return this.obtenerClasificacion(productoId).pipe(
+  tieneClasificacion(productoId: number, token: string): Observable<boolean> {
+    return this.obtenerClasificacion(productoId, token).pipe(
       map(() => true),
       catchError(() => [false])
     );
@@ -119,10 +121,11 @@ export class ClasificacionProductoService {
   /**
    * Headers comunes para las peticiones
    */
-  private getHeaders(): HttpHeaders {
+  private getHeaders(token: string): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
     });
   }
 

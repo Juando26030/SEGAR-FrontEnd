@@ -46,11 +46,15 @@ export class ClasificacionProductoService {
    */
   guardarClasificacion(
     productoId: number,
-    clasificacion: ClasificacionProductoDTO
+    clasificacion: ClasificacionProductoDTO,
+    token: string
   ): Observable<ClasificacionProducto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.post<ClasificacionProducto>(
       `${this.API_URL}/${productoId}`,
-      clasificacion
+      clasificacion, { headers }
     ).pipe(
       catchError(this.handleError)
     );
@@ -59,9 +63,12 @@ export class ClasificacionProductoService {
   /**
    * Obtiene la clasificación de un producto específico
    */
-  obtenerClasificacion(productoId: number): Observable<ClasificacionProducto> {
+  obtenerClasificacion(productoId: number, token: string): Observable<ClasificacionProducto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.get<ClasificacionProducto>(
-      `${this.API_URL}/${productoId}`
+      `${this.API_URL}/${productoId}`, { headers }
     ).pipe(
       catchError(this.handleError)
     );
@@ -72,11 +79,15 @@ export class ClasificacionProductoService {
    */
   actualizarClasificacion(
     productoId: number,
-    clasificacion: ClasificacionProductoDTO
+    clasificacion: ClasificacionProductoDTO,
+    token: string
   ): Observable<ClasificacionProducto> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     return this.http.put<ClasificacionProducto>(
       `${this.API_URL}/${productoId}`,
-      clasificacion
+      clasificacion, { headers }
     ).pipe(
       catchError(this.handleError)
     );
@@ -85,8 +96,8 @@ export class ClasificacionProductoService {
   /**
    * Verifica si un producto tiene clasificación
    */
-  tieneClasificacion(productoId: number): Observable<boolean> {
-    return this.obtenerClasificacion(productoId).pipe(
+  tieneClasificacion(productoId: number, token: string): Observable<boolean> {
+    return this.obtenerClasificacion(productoId, token).pipe(
       map(() => true),
       catchError(() => [false])
     );

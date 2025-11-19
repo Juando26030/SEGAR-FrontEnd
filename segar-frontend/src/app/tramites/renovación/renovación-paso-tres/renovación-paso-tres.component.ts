@@ -231,7 +231,7 @@ export class RenovaciNPasoTresComponent implements OnInit, OnDestroy {
     this.errorClasificacion = '';
     this.clasificacionCargada = false;
 
-    this.clasificacionProductoService.obtenerClasificacion(productoId).pipe(
+    this.clasificacionProductoService.obtenerClasificacion(productoId, this.token).pipe(
 
     // Si la clasificación llega correctamente:
     tap((clasificacion) => {

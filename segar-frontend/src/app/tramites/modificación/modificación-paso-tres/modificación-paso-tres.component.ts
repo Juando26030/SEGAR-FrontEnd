@@ -227,7 +227,7 @@ export class ModificacionPasoTresComponent implements OnInit, OnDestroy {
     this.errorClasificacion = '';
     this.clasificacionCargada = false;
 
-    this.clasificacionProductoService.obtenerClasificacion(productoId).subscribe({
+    this.clasificacionProductoService.obtenerClasificacion(productoId, this.token).subscribe({
       next: (clasificacion) => {
         console.log('✅ Clasificación cargada desde el backend:', clasificacion);
         this.autoLlenarFormularioDesdeClasificacion(clasificacion);
